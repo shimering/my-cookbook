@@ -9,10 +9,17 @@ import {
   Edit3,
   Printer,
   Zap,
+  Scale,
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { getIngredientIcon } from '../../utils/ingredientIconResolver';
+import {
+  convertIngredient,
+  getStoredUnitSystem,
+  setStoredUnitSystem,
+  type UnitSystem,
+} from '../../utils/unitConverter';
 
 interface RecipeDetailViewProps {
   recipe: Recipe;
@@ -39,6 +46,14 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
 
   // Servings multiplier state (allows adjusting servings live on detail view)
   const [servingsMultiplier, setServingsMultiplier] = useState<number>(1);
+
+  // Measurement unit system preference ('us' = cups & spoons, 'metric' = grams & ml)
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(() => getStoredUnitSystem());
+
+  const handleUnitSystemChange = (system: UnitSystem) => {
+    setUnitSystem(system);
+    setStoredUnitSystem(system);
+  };
 
   const toggleIngredient = (id: string) => {
     const next = new Set(checkedIngredients);
@@ -211,8 +226,59 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
 
           {/* Ingredients Checklist */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-brand text-xl font-bold text-[#3D231D]">Ingredients</h2>
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2.5">
+              <div className="flex items-center space-x-3 flex-wrap gap-2">
+                <h2 className="font-brand text-xl font-bold text-[#3D231D]">Ingredients</h2>
+
+                {/* Unit Switcher: Cups & Spoons vs Grams & Metric */}
+                <div
+                  role="group"
+                  aria-label="Measurement unit system"
+                  className="bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-full p-0.5 inline-flex items-center text-xs shadow-2xs no-print"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleUnitSystemChange('us')}
+                    aria-pressed={unitSystem === 'us'}
+                    className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                      unitSystem === 'us'
+                        ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                        : 'text-[#8C726B] hover:text-[#3D231D] font-medium'
+                    }`}
+                    title="View ingredients in cups and spoons (US Customary)"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5 stroke-[2]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 4h14v11a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V4z" />
+                      <path d="M18 8h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3" />
+                      <line x1="8" y1="8" x2="11" y2="8" />
+                      <line x1="8" y1="12" x2="12" y2="12" />
+                    </svg>
+                    <span>Cups & Spoons</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleUnitSystemChange('metric')}
+                    aria-pressed={unitSystem === 'metric'}
+                    className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full transition-all duration-200 cursor-pointer ${
+                      unitSystem === 'metric'
+                        ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                        : 'text-[#8C726B] hover:text-[#3D231D] font-medium'
+                    }`}
+                    title="View ingredients in grams and milliliters (Metric)"
+                  >
+                    <Scale className="w-3.5 h-3.5 stroke-[2.2]" aria-hidden="true" />
+                    <span>Grams & Metric</span>
+                  </button>
+                </div>
+              </div>
+
               {checkedIngredients.size > 0 && (
                 <button
                   onClick={() => setCheckedIngredients(new Set())}
@@ -236,7 +302,9 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                     {items.map((ing) => {
                       const isChecked = checkedIngredients.has(ing.id);
                       const icon = getIngredientIcon(ing.name);
-                      const displayAmt = ing.displayFraction || (ing.amount ? ing.amount.toString() : '');
+                      const converted = convertIngredient(ing, unitSystem, servingsMultiplier);
+                      const displayAmt = converted.displayQuantity;
+                      const displayUnit = converted.unit;
 
                       return (
                         <div
@@ -283,7 +351,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                               }`}
                             >
                               <span className="font-bold mr-1.5">
-                                {displayAmt} {ing.unit}
+                                {displayAmt} {displayUnit}
                               </span>
                               <span>{ing.name}</span>
                             </span>

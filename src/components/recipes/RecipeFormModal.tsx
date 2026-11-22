@@ -448,12 +448,13 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       className="w-14 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
                     />
 
-                    {/* Unit (Butter Peach) */}
+                    {/* Unit (Butter Peach) with Metric and US suggestions */}
                     <input
                       type="text"
+                      list="common-ingredient-units"
                       value={ing.unit || ''}
                       onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                      placeholder="Unit (cup, tbsp...)"
+                      placeholder="Unit (g, ml, cup...)"
                       className="w-24 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
                     />
 
@@ -480,6 +481,24 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                   </div>
                 ))}
               </div>
+
+              {/* Datalist for common metric & US units */}
+              <datalist id="common-ingredient-units">
+                <option value="g">grams (g)</option>
+                <option value="kg">kilograms (kg)</option>
+                <option value="ml">milliliters (ml)</option>
+                <option value="l">liters (l)</option>
+                <option value="cup">cup</option>
+                <option value="tbsp">tablespoon (tbsp)</option>
+                <option value="tsp">teaspoon (tsp)</option>
+                <option value="oz">ounce (oz)</option>
+                <option value="lb">pound (lb)</option>
+                <option value="pinch">pinch</option>
+                <option value="piece">piece</option>
+                <option value="clove">clove</option>
+                <option value="slice">slice</option>
+                <option value="can">can</option>
+              </datalist>
             </div>
 
             {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}
