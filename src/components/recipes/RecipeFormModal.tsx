@@ -15,6 +15,9 @@ import {
   getStoredUnitSystem,
   type UnitSystem,
 } from '../../utils/unitConverter';
+import { parseQuantity } from '../../utils/fractionParser';
+import { getStoredCatalogItems } from '../../data/groceryCatalog';
+import { db } from '../../db/cookbookDb';
 
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
@@ -24,30 +27,132 @@ interface RecipeFormModalProps {
 
 const COMMON_CATEGORIES = ['Breakfast', 'Desserts', 'Quick Meals', 'Dinner', 'Drinks', 'Snacks', 'Baking'];
 
-const STANDARD_UNITS = [
-  '',
-  'cup',
-  'tbsp',
-  'tsp',
-  'oz',
-  'fl oz',
-  'lb',
-  'pt',
-  'qt',
-  'gal',
-  'g',
-  'kg',
-  'ml',
-  'l',
-  'piece',
-  'pinch',
-  'clove',
-  'slice',
-  'can',
-  'sprig',
-  'stalk',
-  'pkg',
+const US_UNITS = [
+  { value: 'cup', label: 'cup (cups)' },
+  { value: 'tbsp', label: 'tbsp (tablespoons)' },
+  { value: 'tsp', label: 'tsp (teaspoons)' },
+  { value: 'oz', label: 'oz (ounces)' },
+  { value: 'fl oz', label: 'fl oz (fluid oz)' },
+  { value: 'lb', label: 'lb (pounds)' },
+  { value: 'pt', label: 'pt (pints)' },
+  { value: 'qt', label: 'qt (quarts)' },
+  { value: 'gal', label: 'gal (gallons)' },
 ];
+
+const METRIC_UNITS = [
+  { value: 'g', label: 'g (grams)' },
+  { value: 'kg', label: 'kg (kilograms)' },
+  { value: 'ml', label: 'ml (milliliters)' },
+  { value: 'l', label: 'l (liters)' },
+];
+
+const COUNT_UNITS = [
+  { value: '', label: '(whole / count)' },
+  { value: 'piece', label: 'piece (pieces)' },
+  { value: 'pinch', label: 'pinch' },
+  { value: 'clove', label: 'clove (cloves)' },
+  { value: 'slice', label: 'slice (slices)' },
+  { value: 'can', label: 'can (cans)' },
+  { value: 'sprig', label: 'sprig (sprigs)' },
+  { value: 'stalk', label: 'stalk (stalks)' },
+  { value: 'pkg', label: 'pkg (package)' },
+];
+
+const STANDARD_UNITS = [
+  ...US_UNITS.map((u) => u.value),
+  ...METRIC_UNITS.map((u) => u.value),
+  ...COUNT_UNITS.map((u) => u.value),
+].filter(Boolean);
+
+const US_QTY_OPTIONS = [
+  '1/8',
+  '1/4',
+  '1/3',
+  '1/2',
+  '2/3',
+  '3/4',
+  '1',
+  '1 1/4',
+  '1 1/3',
+  '1 1/2',
+  '1 3/4',
+  '2',
+  '2 1/2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '8',
+  '10',
+  '12',
+];
+
+const METRIC_WEIGHT_QTY_OPTIONS = [
+  '5',
+  '10',
+  '15',
+  '20',
+  '25',
+  '30',
+  '50',
+  '75',
+  '100',
+  '125',
+  '150',
+  '175',
+  '200',
+  '225',
+  '250',
+  '300',
+  '350',
+  '400',
+  '450',
+  '500',
+  '600',
+  '700',
+  '750',
+  '800',
+  '1000',
+];
+
+const METRIC_VOLUME_LARGE_OPTIONS = [
+  '0.25',
+  '0.5',
+  '0.75',
+  '1',
+  '1.25',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+];
+
+const COUNT_QTY_OPTIONS = [
+  '1/2',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '8',
+  '10',
+  '12',
+];
+
+function getQtyOptions(unitSystem: UnitSystem, unit: string): string[] {
+  if (unitSystem === 'us') {
+    return US_QTY_OPTIONS;
+  }
+  const u = (unit || '').toLowerCase();
+  if (u === 'kg' || u === 'l') {
+    return METRIC_VOLUME_LARGE_OPTIONS;
+  }
+  if (u === 'g' || u === 'ml') {
+    return METRIC_WEIGHT_QTY_OPTIONS;
+  }
+  return COUNT_QTY_OPTIONS;
+}
 
 export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   initialRecipe,
@@ -96,6 +201,33 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
           { id: '2', name: '', amount: 2, unit: 'tbsp', displayFraction: '2', section: '' },
         ]
   );
+
+  // Grocery item suggestions loaded from catalog and stored items in Dexie
+  const [grocerySuggestions, setGrocerySuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSuggestions = async () => {
+      try {
+        const catalogItems = getStoredCatalogItems();
+        const catalogNames = catalogItems.map((c) => c.name);
+        const dbItems = await db.groceryItems.toArray();
+        const dbNames = dbItems.map((d) => d.name);
+        const uniqueNames = Array.from(new Set([...catalogNames, ...dbNames]))
+          .filter((n) => typeof n === 'string' && n.trim().length > 0)
+          .sort((a, b) => a.localeCompare(b));
+        if (isMounted) {
+          setGrocerySuggestions(uniqueNames);
+        }
+      } catch (err) {
+        console.error('Failed to load grocery suggestions:', err);
+      }
+    };
+    loadSuggestions();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Numbered steps
   const [steps, setSteps] = useState<RecipeStep[]>(
@@ -164,6 +296,22 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       };
     });
     setIngredients(converted);
+  };
+
+  // Quantity dropdown select handler
+  const handleQuantitySelect = (index: number, val: string) => {
+    if (val === '__custom__') {
+      const custom = prompt('Enter custom quantity (e.g. 1 1/2, 250, 0.5):');
+      if (custom && custom.trim()) {
+        const parsedNum = parseQuantity(custom.trim()).valueOf();
+        handleIngredientChange(index, 'displayFraction', custom.trim());
+        handleIngredientChange(index, 'amount', parsedNum > 0 ? parsedNum : 1);
+      }
+    } else {
+      const parsedNum = parseQuantity(val).valueOf();
+      handleIngredientChange(index, 'displayFraction', val);
+      handleIngredientChange(index, 'amount', parsedNum > 0 ? parsedNum : 1);
+    }
   };
 
   // Unit dropdown select handler
@@ -614,113 +762,107 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               </div>
 
               <div className="space-y-2">
-                {ingredients.map((ing, index) => (
-                  <div
-                    key={ing.id}
-                    className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
-                  >
-                    {/* Amount / Fraction (Butter Peach) */}
-                    <input
-                      type="text"
-                      value={ing.displayFraction || ing.amount || ''}
-                      onChange={(e) => {
-                        handleIngredientChange(index, 'displayFraction', e.target.value);
-                        const parsed = parseFloat(e.target.value);
-                        if (!isNaN(parsed)) handleIngredientChange(index, 'amount', parsed);
-                      }}
-                      placeholder="Qty"
-                      className="w-14 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
-                    />
+                {ingredients.map((ing, index) => {
+                  const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
+                  const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
+                  const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
 
-                    {/* Unit Dropdown Menu with List of Measurements */}
-                    <select
-                      value={ing.unit || ''}
-                      onChange={(e) => handleUnitSelect(index, e.target.value)}
-                      className="w-24 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] cursor-pointer shrink-0 truncate"
-                      aria-label="Measurement unit"
+                  return (
+                    <div
+                      key={ing.id}
+                      className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
                     >
-                      {/* Preserve custom unit if already set */}
-                      {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
-                        <option value={ing.unit}>{ing.unit} (custom)</option>
-                      )}
+                      {/* Quantity Dropdown Menu (Butter Peach background, rounded) */}
+                      <select
+                        value={currentQtyVal}
+                        onChange={(e) => handleQuantitySelect(index, e.target.value)}
+                        aria-label="Ingredient quantity"
+                        className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                      >
+                        {hasCustomQty && (
+                          <option value={currentQtyVal}>{currentQtyVal}</option>
+                        )}
+                        {qtyOptions.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                        <option value="__custom__">+ Custom Qty...</option>
+                      </select>
 
-                      {formUnitSystem === 'metric' ? (
-                        <>
-                          <optgroup label="Metric (g, ml, kg)">
-                            <option value="g">g (grams)</option>
-                            <option value="kg">kg (kilograms)</option>
-                            <option value="ml">ml (milliliters)</option>
-                            <option value="l">l (liters)</option>
-                          </optgroup>
-                          <optgroup label="US Customary">
-                            <option value="cup">cup (cups)</option>
-                            <option value="tbsp">tbsp (tablespoons)</option>
-                            <option value="tsp">tsp (teaspoons)</option>
-                            <option value="oz">oz (ounces)</option>
-                            <option value="fl oz">fl oz (fluid oz)</option>
-                            <option value="lb">lb (pounds)</option>
-                            <option value="pt">pt (pints)</option>
-                            <option value="qt">qt (quarts)</option>
-                          </optgroup>
-                        </>
-                      ) : (
-                        <>
-                          <optgroup label="US Customary">
-                            <option value="cup">cup (cups)</option>
-                            <option value="tbsp">tbsp (tablespoons)</option>
-                            <option value="tsp">tsp (teaspoons)</option>
-                            <option value="oz">oz (ounces)</option>
-                            <option value="fl oz">fl oz (fluid oz)</option>
-                            <option value="lb">lb (pounds)</option>
-                            <option value="pt">pt (pints)</option>
-                            <option value="qt">qt (quarts)</option>
-                          </optgroup>
-                          <optgroup label="Metric (g, ml, kg)">
-                            <option value="g">g (grams)</option>
-                            <option value="kg">kg (kilograms)</option>
-                            <option value="ml">ml (milliliters)</option>
-                            <option value="l">l (liters)</option>
-                          </optgroup>
-                        </>
-                      )}
+                      {/* Unit Dropdown Menu with List of Measurements (scoped strictly to US or Metric) */}
+                      <select
+                        value={ing.unit || ''}
+                        onChange={(e) => handleUnitSelect(index, e.target.value)}
+                        className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                        aria-label="Measurement unit"
+                      >
+                        {/* Preserve custom unit if already set */}
+                        {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
+                          <option value={ing.unit}>{ing.unit} (custom)</option>
+                        )}
 
-                      <optgroup label="Count & Portions">
-                        <option value="">(whole / count)</option>
-                        <option value="piece">piece (pieces)</option>
-                        <option value="pinch">pinch</option>
-                        <option value="clove">clove (cloves)</option>
-                        <option value="slice">slice (slices)</option>
-                        <option value="can">can (cans)</option>
-                        <option value="sprig">sprig (sprigs)</option>
-                        <option value="stalk">stalk (stalks)</option>
-                        <option value="pkg">pkg (package)</option>
-                      </optgroup>
-                      <option value="__custom__">+ Custom unit...</option>
-                    </select>
+                        {formUnitSystem === 'metric' ? (
+                          <optgroup label="Metric (g, ml, kg, l)">
+                            {METRIC_UNITS.map((u) => (
+                              <option key={u.value} value={u.value}>
+                                {u.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ) : (
+                          <optgroup label="US Customary (cups, spoons, oz)">
+                            {US_UNITS.map((u) => (
+                              <option key={u.value} value={u.value}>
+                                {u.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                    {/* Name */}
-                    <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
-                        value={ing.name}
-                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                        placeholder={ing.section ? `[${ing.section}] Ingredient name` : 'Ingredient name'}
-                        className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75]"
-                      />
+                        <optgroup label="Count & Portions">
+                          {COUNT_UNITS.map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <option value="__custom__">+ Custom unit...</option>
+                      </select>
+
+                      {/* Ingredient Name Box with Grocery List Suggestions (Manual Choice Allowed) */}
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="text"
+                          list="grocery-suggestions-list"
+                          value={ing.name}
+                          onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                          placeholder={ing.section ? `[${ing.section}] Ingredient name` : 'Ingredient name (e.g. Flour)'}
+                          className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
+                          autoComplete="off"
+                        />
+                      </div>
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={() => removeIngredient(index)}
+                        className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
+                        aria-label="Remove Ingredient"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-
-                    {/* Delete button */}
-                    <button
-                      type="button"
-                      onClick={() => removeIngredient(index)}
-                      className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
-                      aria-label="Remove Ingredient"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+
+              {/* Datalist of grocery items for autocomplete suggestions */}
+              <datalist id="grocery-suggestions-list">
+                {grocerySuggestions.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
             </div>
 
             {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}
