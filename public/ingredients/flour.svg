@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Flour sack bag -->
+  <path d="M18 20 C18 16, 46 16, 46 20 L50 52 C50 56, 14 56, 14 52 Z" fill="#FFF9E6" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Folded top tie -->
+  <path d="M22 20 C22 14, 42 14, 42 20 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="2"/>
+  <ellipse cx="32" cy="15" rx="6" ry="3" fill="#FF8FA3" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Wheat sprig on bag -->
+  <path d="M32 28 L32 46" stroke="#4A2C2A" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M32 32 C28 30, 26 27, 28 26 C30 29, 32 30, 32 32 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <path d="M32 32 C36 30, 38 27, 36 26 C34 29, 32 30, 32 32 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <path d="M32 38 C28 36, 26 33, 28 32 C30 35, 32 36, 32 38 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <path d="M32 38 C36 36, 38 33, 36 32 C34 35, 32 36, 32 38 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <!-- Flour dust sparkles -->
+  <circle cx="20" cy="38" r="1.5" fill="#FFE599"/>
+  <circle cx="44" cy="42" r="1.5" fill="#FFE599"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Plump garlic bulb -->
+  <path d="M32 14 C32 14, 20 22, 18 36 C16 48, 26 52, 32 52 C38 52, 48 48, 46 36 C44 22, 32 14, 32 14 Z" fill="#FFF9E6" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Bulb cloves lines -->
+  <path d="M32 14 C27 24, 24 38, 25 51" stroke="#4A2C2A" stroke-width="1.5"/>
+  <path d="M32 14 C37 24, 40 38, 39 51" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Top stem twist -->
+  <path d="M32 14 C30 10, 33 6, 35 6" stroke="#4A2C2A" stroke-width="2" stroke-linecap="round"/>
+  <!-- Gentle blush on cheek -->
+  <ellipse cx="23" cy="38" rx="3" ry="2" fill="#FF8FA3" opacity="0.6"/>
+  <ellipse cx="41" cy="38" rx="3" ry="2" fill="#FF8FA3" opacity="0.6"/>
+</svg>

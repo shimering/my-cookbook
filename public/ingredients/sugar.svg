@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Sugar bowl -->
+  <path d="M14 28 C14 46, 50 46, 50 28 Z" fill="#FFF5F7" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Bowl Rim -->
+  <ellipse cx="32" cy="28" rx="18" ry="5" fill="#FFE599" stroke="#4A2C2A" stroke-width="2"/>
+  <!-- Sugar mound -->
+  <path d="M18 28 C22 20, 42 20, 46 28 Z" fill="#FFFFFF" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Little spoon resting -->
+  <path d="M34 26 L48 12 C50 10, 54 14, 52 16 L38 30 Z" fill="#FF8FA3" stroke="#4A2C2A" stroke-width="1.5"/>
+  <circle cx="51" cy="13" r="2.5" fill="#FFE599"/>
+  <!-- Sugar sparkles -->
+  <path d="M26 23 L28 25 M28 23 L26 25" stroke="#4A2C2A" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M36 21 L38 23 M38 21 L36 23" stroke="#4A2C2A" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

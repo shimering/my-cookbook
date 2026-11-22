@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Salt shaker -->
+  <path d="M22 24 L20 48 C20 52, 44 52, 44 48 L42 24 Z" fill="#FFF5F7" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Metal shaker top -->
+  <path d="M24 24 C24 16, 40 16, 40 24 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="2"/>
+  <!-- Shaker holes -->
+  <circle cx="28" cy="20" r="1" fill="#4A2C2A"/>
+  <circle cx="32" cy="18" r="1" fill="#4A2C2A"/>
+  <circle cx="36" cy="20" r="1" fill="#4A2C2A"/>
+  <!-- "S" monogram or salt heart -->
+  <path d="M32 34 C30 31, 26 33, 28 36 C30 39, 32 41, 32 41 C32 41, 34 39, 36 36 C38 33, 34 31, 32 34 Z" fill="#FF8FA3"/>
+</svg>

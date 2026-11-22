@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Back whole egg -->
+  <ellipse cx="24" cy="34" rx="12" ry="16" transform="rotate(-15 24 34)" fill="#FFEED1" stroke="#4A2C2A" stroke-width="2"/>
+  <!-- Front egg with cracked yolk -->
+  <ellipse cx="40" cy="38" rx="13" ry="15" transform="rotate(20 40 38)" fill="#FFF9E6" stroke="#4A2C2A" stroke-width="2"/>
+  <!-- Cute little yolk -->
+  <circle cx="39" cy="39" r="6" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.5"/>
+  <circle cx="37" cy="37" r="1.5" fill="#FFFFFF"/>
+</svg>

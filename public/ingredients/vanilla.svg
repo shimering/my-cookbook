@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Vanilla Pods -->
+  <path d="M16 48 C20 40, 36 24, 46 16 C48 14, 51 17, 49 19 C39 27, 23 43, 19 50 Z" fill="#6D4C41" stroke="#4A2C2A" stroke-width="1.8"/>
+  <path d="M22 48 C26 42, 40 28, 48 22" stroke="#4A2C2A" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Vanilla Blossom Flower -->
+  <circle cx="34" cy="34" r="5" fill="#FFF9E6" stroke="#4A2C2A" stroke-width="1.5"/>
+  <path d="M34 29 C34 25, 38 25, 38 29 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <path d="M34 39 C34 43, 38 43, 38 39 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="1.2"/>
+  <circle cx="34" cy="34" r="2" fill="#FF8FA3"/>
+</svg>

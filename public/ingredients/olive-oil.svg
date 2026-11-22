@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Bottle shape -->
+  <path d="M27 16 L27 21 C22 25, 20 31, 20 46 C20 51, 44 51, 44 46 C44 31, 42 25, 37 21 L37 16 Z" fill="#F4F8E8" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Cork stopper -->
+  <rect x="28" y="11" width="8" height="5" rx="1.2" fill="#C48858" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Golden-olive oil fill -->
+  <path d="M21 34 Q 32 32, 43 34 L43 47 C43 50, 21 50, 21 47 Z" fill="#DCE775"/>
+  <!-- Olive twig on bottle -->
+  <circle cx="32" cy="40" r="3" fill="#689F38" stroke="#4A2C2A" stroke-width="1"/>
+  <path d="M32 37 C34 35, 36 36, 36 38" stroke="#4A2C2A" stroke-width="1" stroke-linecap="round"/>
+</svg>

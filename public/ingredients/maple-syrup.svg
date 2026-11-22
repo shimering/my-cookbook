@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Maple syrup jug/bottle -->
+  <path d="M28 16 L28 20 C22 24, 20 32, 20 44 C20 50, 44 50, 44 44 C44 32, 42 24, 36 20 L36 16 Z" fill="#FFE599" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Jug side handle -->
+  <path d="M21 26 C15 27, 15 36, 21 38" stroke="#4A2C2A" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bottle cap -->
+  <rect x="26" y="11" width="12" height="5" rx="1.5" fill="#C48858" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Amber syrup level -->
+  <path d="M21 32 C26 30, 38 34, 43 32 L43 45 C43 49, 21 49, 21 45 Z" fill="#E89B58"/>
+  <!-- Maple leaf badge on bottle -->
+  <path d="M32 34 L30 38 L32 37 L34 38 Z" fill="#FF8FA3" stroke="#4A2C2A" stroke-width="1"/>
+  <path d="M32 37 L32 41" stroke="#4A2C2A" stroke-width="1" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Chocolate bar partially wrapped -->
+  <!-- Top unwrapped chocolate blocks -->
+  <rect x="18" y="16" width="28" height="20" rx="2" fill="#5D4037" stroke="#4A2C2A" stroke-width="2"/>
+  <!-- Chocolate grid lines -->
+  <line x1="32" y1="16" x2="32" y2="36" stroke="#4A2C2A" stroke-width="1.5"/>
+  <line x1="18" y1="26" x2="46" y2="26" stroke="#4A2C2A" stroke-width="1.5"/>
+  <!-- Pink foil wrap -->
+  <path d="M16 32 L48 30 L46 50 C46 53, 18 53, 18 50 Z" fill="#FF8FA3" stroke="#4A2C2A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Inner gold foil corner -->
+  <polygon points="18,32 26,31 22,36" fill="#FFE599" stroke="#4A2C2A" stroke-width="1"/>
+</svg>

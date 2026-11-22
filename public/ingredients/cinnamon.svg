@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Cinnamon sticks crossed -->
+  <g transform="rotate(25 32 32)">
+    <rect x="18" y="26" width="28" height="8" rx="3" fill="#D7A174" stroke="#4A2C2A" stroke-width="2"/>
+    <ellipse cx="18" cy="30" rx="2" ry="4" fill="#C48858" stroke="#4A2C2A" stroke-width="1.5"/>
+    <path d="M22 28 C26 29, 38 29, 44 28" stroke="#4A2C2A" stroke-width="1" stroke-linecap="round"/>
+  </g>
+  <g transform="rotate(-20 32 32)">
+    <rect x="18" y="30" width="28" height="8" rx="3" fill="#C48858" stroke="#4A2C2A" stroke-width="2"/>
+    <ellipse cx="46" cy="34" rx="2" ry="4" fill="#A86E42" stroke="#4A2C2A" stroke-width="1.5"/>
+    <path d="M20 32 C26 33, 38 33, 44 32" stroke="#4A2C2A" stroke-width="1" stroke-linecap="round"/>
+  </g>
+  <!-- Little spice star sparkle -->
+  <circle cx="48" cy="18" r="2" fill="#FFE599"/>
+  <circle cx="16" cy="46" r="1.5" fill="#FF8FA3"/>
+</svg>
