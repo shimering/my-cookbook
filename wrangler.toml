@@ -1,0 +1,13 @@
+name = "my-cookbook"
+compatibility_date = "2026-11-22"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "my-cookbook-db"
+database_id = "af2eb04c-b6b7-4e88-abfe-5f1a0d77be41"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "my-cookbook-assets"
