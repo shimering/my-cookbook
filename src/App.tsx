@@ -163,6 +163,13 @@ export function App() {
     await db.groceryItems.add({ ...item, id, checked: false });
   };
 
+  const handleUpdateGroceryItem = async (
+    id: string,
+    updates: Partial<Omit<GroceryItem, 'id'>>
+  ) => {
+    await db.groceryItems.update(id, updates);
+  };
+
   const handleDeleteGroceryItem = async (id: string) => {
     await db.groceryItems.delete(id);
   };
@@ -235,6 +242,7 @@ export function App() {
                 groceryItems={groceryItems}
                 onToggleItem={handleToggleGroceryItem}
                 onAddItem={handleAddManualGroceryItem}
+                onUpdateItem={handleUpdateGroceryItem}
                 onDeleteItem={handleDeleteGroceryItem}
                 onClearChecked={handleClearCheckedGroceries}
                 onClearAll={handleClearAllGroceries}

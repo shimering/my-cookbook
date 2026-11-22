@@ -43,14 +43,27 @@ export interface PlannedMeal {
   servingsMultiplier: number; // e.g. 1.0, 1.5, 2.0
 }
 
-export type GroceryCategory =
+export type DefaultGroceryCategory =
   | 'Produce'
   | 'Dairy & Eggs'
   | 'Pantry'
   | 'Spices & Seasonings'
   | 'Bakery'
   | 'Meat & Seafood'
+  | 'Beverages'
+  | 'Frozen'
   | 'Household & Other';
+
+export type GroceryCategory = DefaultGroceryCategory | string;
+
+export interface CatalogItem {
+  id: string;
+  name: string;
+  category: string;
+  defaultUnit?: string;
+  notes?: string;
+  isCustom?: boolean;
+}
 
 export interface GroceryItem {
   id: string;
@@ -61,6 +74,7 @@ export interface GroceryItem {
   category: GroceryCategory;
   checked: boolean;
   isManual: boolean;          // true if added directly by user (e.g. coffee, paper towels)
+  notes?: string;             // Custom notes (e.g. "Extra ripe", "Organic", "Brand X")
   recipeSources?: string[];   // Recipe titles that contributed this ingredient
 }
 

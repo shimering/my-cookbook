@@ -73,240 +73,249 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
   const currentServings = Math.round(recipe.servings * servingsMultiplier);
 
   return (
-    <div className="min-h-screen bg-[#FFF5F7] pb-28">
-      {/* Hero Image Container with Deep Rounded Bowl Mask */}
-      <div className="relative w-full aspect-4/3 max-h-[400px] bg-[#FFE599]/30 rounded-b-[64px] sm:rounded-b-[84px] overflow-hidden shadow-cozy-lg no-print">
-        <img
-          src={recipe.heroImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80'}
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-        />
+    <div className="min-h-screen bg-[#FFF5F7] pb-28 px-4 sm:px-6">
+      {/* Centered Desktop Container (max-width: 760px) */}
+      <div className="max-w-[760px] mx-auto pt-3 sm:pt-5">
+        {/* Hero Image Container with Downward Curved Mask (50% 36px) */}
+        <div
+          style={{
+            borderBottomLeftRadius: '50% 36px',
+            borderBottomRightRadius: '50% 36px',
+          }}
+          className="relative w-full aspect-16/10 sm:aspect-16/9 max-h-[420px] bg-[#FFE599]/30 rounded-t-[24px] overflow-hidden shadow-cozy-lg border border-[#F3D5DC] no-print"
+        >
+          <img
+            src={recipe.heroImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80'}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
 
-        {/* Top Floating Action Bar */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-          <button
-            onClick={onBack}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all"
-            aria-label="Back to Cookbook"
-          >
-            <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
-          </button>
-
-          <div className="flex items-center space-x-2">
-            {/* Print button */}
+          {/* Top Floating Action Bar */}
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
             <button
-              onClick={() => onPrint(recipe)}
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all"
-              title="Print Recipe"
+              onClick={onBack}
+              className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+              aria-label="Back to Cookbook"
             >
-              <Printer className="w-4 h-4 stroke-[2]" />
+              <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
             </button>
 
-            {/* Edit button */}
-            <button
-              onClick={() => onEdit(recipe)}
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all"
-              title="Edit Recipe"
-            >
-              <Edit3 className="w-4 h-4 stroke-[2]" />
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Print button */}
+              <button
+                onClick={() => onPrint(recipe)}
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                title="Print Recipe"
+              >
+                <Printer className="w-4 h-4 stroke-[2]" />
+              </button>
 
-            {/* Favorite button */}
-            <button
-              onClick={(e) => onToggleFavorite(recipe.id, e)}
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all"
-              title={recipe.isFavorite ? 'Remove favorite' : 'Add favorite'}
-            >
-              <Heart
-                className={`w-5 h-5 transition-transform active:scale-125 ${
-                  recipe.isFavorite
-                    ? 'fill-[#FF8FA3] text-[#FF8FA3]'
-                    : 'text-[#8A6866] hover:text-[#FF8FA3]'
-                }`}
-              />
-            </button>
+              {/* Edit button */}
+              <button
+                onClick={() => onEdit(recipe)}
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                title="Edit Recipe"
+              >
+                <Edit3 className="w-4 h-4 stroke-[2]" />
+              </button>
+
+              {/* Favorite button */}
+              <button
+                onClick={(e) => onToggleFavorite(recipe.id, e)}
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                title={recipe.isFavorite ? 'Remove favorite' : 'Add favorite'}
+              >
+                <Heart
+                  className={`w-5 h-5 transition-transform active:scale-125 ${
+                    recipe.isFavorite
+                      ? 'fill-[#FF8FA3] text-[#FF8FA3]'
+                      : 'text-[#8A6866] hover:text-[#FF8FA3]'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Recipe Content */}
-      <div className="max-w-lg mx-auto px-5 pt-6 relative">
-        {/* Title */}
-        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4A2C2A] tracking-tight mb-2">
-          {recipe.title}
-        </h1>
+        {/* Main Recipe Content */}
+        <div className="pt-6 relative px-1">
+          {/* Title */}
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4A2C2A] tracking-tight mb-2">
+            {recipe.title}
+          </h1>
 
-        {recipe.description && (
-          <p className="text-xs sm:text-sm text-[#8A6866] leading-relaxed mb-4">
-            {recipe.description}
-          </p>
-        )}
-
-        {/* Metadata Chips Row */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#FFF9E6] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
-            <Clock className="w-3.5 h-3.5 text-[#8A6866]" />
-            <span>{recipe.prepTimeMinutes + (recipe.cookTimeMinutes || 0)} mins total</span>
-          </div>
-
-          {/* Servings Chip with Live Scaling */}
-          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-[#FFF9E6] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
-            <div className="flex items-center space-x-1">
-              <Users className="w-3.5 h-3.5 text-[#8A6866]" />
-              <span>{currentServings} servings</span>
-            </div>
-            <div className="flex items-center space-x-1 border-l border-[#F5E6BF] pl-1.5 no-print">
-              <button
-                type="button"
-                onClick={() => setServingsMultiplier((prev) => Math.max(0.5, prev - 0.5))}
-                className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#8A6866] hover:bg-[#FFE599] active:scale-95 text-xs font-bold"
-              >
-                -
-              </button>
-              <button
-                type="button"
-                onClick={() => setServingsMultiplier((prev) => prev + 0.5)}
-                className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#8A6866] hover:bg-[#FFE599] active:scale-95 text-xs font-bold"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Wake Lock Indicator Pill */}
-          {isWakeLockSupported && (
-            <div
-              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                isWakeLockActive
-                  ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9]'
-                  : 'bg-[#FFF0F3] text-[#FF8FA3]'
-              }`}
-              title="Screen Wake-Lock is active while viewing this recipe"
-            >
-              <Zap className="w-3 h-3 fill-current" />
-              <span>{isWakeLockActive ? 'Screen Awake' : 'Wake Lock'}</span>
-            </div>
+          {recipe.description && (
+            <p className="text-xs sm:text-sm text-[#8A6866] leading-relaxed mb-4">
+              {recipe.description}
+            </p>
           )}
-        </div>
 
-        {/* Action Button: Add to Meal Plan */}
-        <div className="mb-6 flex gap-2 no-print">
-          <button
-            onClick={() => onAddToMealPlan(recipe)}
-            className="flex-1 py-2.5 px-4 bg-[#FFE4E9] hover:bg-[#FFD2DC] active:scale-98 text-[#4A2C2A] text-xs font-bold rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-xs"
-          >
-            <CalendarPlus className="w-4 h-4 text-[#FF8FA3]" />
-            <span>Add to Meal Plan</span>
-          </button>
-        </div>
+          {/* Metadata Chips Row - Butter Yellow Badges with Full Pill Rounding */}
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            {/* Prep Time Metadata Pill */}
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#FFE599] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
+              <Clock className="w-3.5 h-3.5 text-[#4A2C2A]" />
+              <span>{recipe.prepTimeMinutes + (recipe.cookTimeMinutes || 0)} mins total</span>
+            </div>
 
-        {/* Ingredients Checklist */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-serif text-lg font-bold text-[#4A2C2A]">Ingredients</h2>
-            {checkedIngredients.size > 0 && (
-              <button
-                onClick={() => setCheckedIngredients(new Set())}
-                className="text-[11px] text-[#FF8FA3] hover:underline font-semibold no-print"
+            {/* Servings Chip with Live Scaling */}
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#FFE599] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
+              <div className="flex items-center space-x-1">
+                <Users className="w-3.5 h-3.5 text-[#4A2C2A]" />
+                <span>{currentServings} servings</span>
+              </div>
+              <div className="flex items-center space-x-1 border-l border-[#F5E6BF] pl-1.5 no-print">
+                <button
+                  type="button"
+                  onClick={() => setServingsMultiplier((prev) => Math.max(0.5, prev - 0.5))}
+                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFF3CC] active:scale-95 text-xs font-bold border border-[#F5E6BF] cursor-pointer"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setServingsMultiplier((prev) => prev + 0.5)}
+                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFF3CC] active:scale-95 text-xs font-bold border border-[#F5E6BF] cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Wake Lock Indicator Pill */}
+            {isWakeLockSupported && (
+              <div
+                className={`inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-[#F5E6BF] ${
+                  isWakeLockActive
+                    ? 'bg-[#FFE599] text-[#4A2C2A] shadow-xs'
+                    : 'bg-white text-[#8A6866]'
+                }`}
+                title="Screen Wake-Lock is active while viewing this recipe"
               >
-                Reset checks
-              </button>
+                <Zap className={`w-3.5 h-3.5 ${isWakeLockActive ? 'fill-[#4A2C2A] text-[#4A2C2A]' : 'text-[#8A6866]'}`} />
+                <span>{isWakeLockActive ? 'Screen Awake' : 'Wake Lock'}</span>
+              </div>
             )}
           </div>
 
-          <div className="space-y-4">
-            {ingredientSections.map(({ sectionName, items }) => (
-              <div key={sectionName} className="space-y-2">
-                {sectionName !== 'General' && (
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] pt-1">
-                    {sectionName}
-                  </h3>
-                )}
+          {/* Action Button: Add to Meal Plan (Full Pill Rounding) */}
+          <div className="mb-6 flex gap-2 no-print">
+            <button
+              onClick={() => onAddToMealPlan(recipe)}
+              className="flex-1 py-3 px-5 bg-[#FFE599] hover:bg-[#FFD966] active:scale-98 text-[#4A2C2A] text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-xs border border-[#F5E6BF] cursor-pointer"
+            >
+              <CalendarPlus className="w-4 h-4 text-[#FF8FA3]" />
+              <span>Add to Meal Plan</span>
+            </button>
+          </div>
 
-                <div className="space-y-1.5">
-                  {items.map((ing) => {
-                    const isChecked = checkedIngredients.has(ing.id);
-                    const icon = getIngredientIcon(ing.name);
-                    // Compute scaled amount if multiplier changed
-                    const displayAmt = ing.displayFraction || (ing.amount ? ing.amount.toString() : '');
+          {/* Ingredients Checklist */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-serif text-xl font-bold text-[#4A2C2A]">Ingredients</h2>
+              {checkedIngredients.size > 0 && (
+                <button
+                  onClick={() => setCheckedIngredients(new Set())}
+                  className="text-xs text-[#FF8FA3] hover:underline font-semibold no-print cursor-pointer"
+                >
+                  Reset checks
+                </button>
+              )}
+            </div>
 
-                    return (
-                      <div
-                        key={ing.id}
-                        onClick={() => toggleIngredient(ing.id)}
-                        className={`flex items-center space-x-3 p-2.5 rounded-2xl transition-all duration-200 cursor-pointer select-none ${
-                          isChecked
-                            ? 'bg-[#FFF0F3]/80 border border-[#F3D5DC]'
-                            : 'bg-white hover:bg-[#FFF9E6] border border-[#F3D5DC]/60 shadow-xs'
-                        }`}
-                      >
-                        {/* Rounded Checkbox */}
+            <div className="space-y-4">
+              {ingredientSections.map(({ sectionName, items }) => (
+                <div key={sectionName} className="space-y-2">
+                  {sectionName !== 'General' && (
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] pt-1">
+                      {sectionName}
+                    </h3>
+                  )}
+
+                  <div className="space-y-2">
+                    {items.map((ing) => {
+                      const isChecked = checkedIngredients.has(ing.id);
+                      const icon = getIngredientIcon(ing.name);
+                      const displayAmt = ing.displayFraction || (ing.amount ? ing.amount.toString() : '');
+
+                      return (
                         <div
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 ${
+                          key={ing.id}
+                          onClick={() => toggleIngredient(ing.id)}
+                          className={`flex items-center space-x-3 p-3 rounded-[16px] transition-all duration-200 cursor-pointer select-none border ${
                             isChecked
-                              ? 'bg-[#FF8FA3] text-white shadow-xs'
-                              : 'bg-[#FFF9E6] border border-[#F5E6BF]'
+                              ? 'bg-[#FFF0F3]/80 border-[#F3D5DC]'
+                              : 'bg-white hover:bg-[#FFF3CC]/30 border-[#F3D5DC] shadow-cozy'
                           }`}
                         >
-                          {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
-                        </div>
-
-                        {/* Stylized Ingredient Thumbnail */}
-                        {icon && (
-                          <div className="w-7 h-7 rounded-lg bg-[#FFF9E6] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
-                            <img
-                              src={icon.url}
-                              alt={icon.label}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = icon.fallbackUrl;
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Strikethrough Text */}
-                        <div className="flex-1 text-sm font-medium leading-tight">
-                          <span
-                            className={`strikethrough-transition ${
+                          {/* Checkbox with border-radius: 6px */}
+                          <div
+                            className={`w-6 h-6 rounded-[6px] flex items-center justify-center transition-all duration-200 shrink-0 ${
                               isChecked
-                                ? 'line-through text-[#B89D9B] decoration-[#FF8FA3] decoration-2'
-                                : 'text-[#4A2C2A]'
+                                ? 'bg-[#FF8FA3] text-white shadow-xs'
+                                : 'bg-[#FFE599] border border-[#F5E6BF]'
                             }`}
                           >
-                            <span className="font-bold mr-1">
-                              {displayAmt} {ing.unit}
+                            {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
+                          </div>
+
+                          {/* Stylized Ingredient Thumbnail */}
+                          {icon && (
+                            <div className="w-7 h-7 rounded-[8px] bg-[#FFF3CC] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
+                              <img
+                                src={icon.url}
+                                alt={icon.label}
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = icon.fallbackUrl;
+                                }}
+                              />
+                            </div>
+                          )}
+
+                          {/* Strikethrough Text */}
+                          <div className="flex-1 text-sm font-medium leading-tight">
+                            <span
+                              className={`strikethrough-transition ${
+                                isChecked
+                                  ? 'line-through text-[#8A6866]/60 decoration-[#FF8FA3] decoration-2'
+                                  : 'text-[#4A2C2A]'
+                              }`}
+                            >
+                              <span className="font-bold mr-1.5">
+                                {displayAmt} {ing.unit}
+                              </span>
+                              <span>{ing.name}</span>
                             </span>
-                            <span>{ing.name}</span>
-                          </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Steps Section */}
-        <div className="mb-8">
-          <h2 className="font-serif text-lg font-bold text-[#4A2C2A] mb-3">Steps</h2>
+          {/* Steps Section - Step cards with generous border-radius: 24px and Butter Yellow */}
+          <div className="mb-8">
+            <h2 className="font-serif text-xl font-bold text-[#4A2C2A] mb-3">Steps</h2>
 
-          <div className="space-y-3">
-            {recipe.steps.map((step) => (
-              <div
-                key={step.id}
-                className="bg-[#FFF9E6] border border-[#F5E6BF] rounded-2xl p-4 shadow-xs flex items-start space-x-3.5 hover:bg-[#FFF6D9] transition-colors"
-              >
-                <div className="w-7 h-7 rounded-full bg-[#FFE599] text-[#4A2C2A] font-serif font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
-                  {step.stepNumber}
+            <div className="space-y-3">
+              {recipe.steps.map((step) => (
+                <div
+                  key={step.id}
+                  className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-[24px] p-4 shadow-cozy flex items-start space-x-3.5 hover:bg-[#FFEAA8] transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-full bg-[#FFE599] text-[#4A2C2A] font-serif font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-[#F5E6BF]">
+                    {step.stepNumber}
+                  </div>
+                  <div className="flex-1 text-xs sm:text-sm text-[#4A2C2A] leading-relaxed pt-0.5 font-medium">
+                    {step.instruction}
+                  </div>
                 </div>
-                <div className="flex-1 text-xs sm:text-sm text-[#4A2C2A] leading-relaxed pt-0.5 font-medium">
-                  {step.instruction}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

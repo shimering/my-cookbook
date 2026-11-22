@@ -20,7 +20,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Recipes Tab */}
         <button
           onClick={() => onTabChange('recipes')}
-          className={`flex flex-col items-center py-1 px-4 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center py-1 px-4 rounded-full transition-all duration-200 cursor-pointer ${
             activeTab === 'recipes'
               ? 'text-[#FF8FA3] font-semibold scale-105'
               : 'text-[#8A6866] hover:text-[#4A2C2A]'
@@ -36,7 +36,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Meal Plan Tab */}
         <button
           onClick={() => onTabChange('planner')}
-          className={`flex flex-col items-center py-1 px-4 rounded-2xl transition-all duration-200 ${
+          className={`flex flex-col items-center py-1 px-4 rounded-full transition-all duration-200 cursor-pointer ${
             activeTab === 'planner'
               ? 'text-[#FF8FA3] font-semibold scale-105'
               : 'text-[#8A6866] hover:text-[#4A2C2A]'
@@ -52,7 +52,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Groceries Tab */}
         <button
           onClick={() => onTabChange('groceries')}
-          className={`flex flex-col items-center py-1 px-4 rounded-2xl transition-all duration-200 relative ${
+          className={`flex flex-col items-center py-1 px-4 rounded-full transition-all duration-200 relative cursor-pointer ${
             activeTab === 'groceries'
               ? 'text-[#FF8FA3] font-semibold scale-105'
               : 'text-[#8A6866] hover:text-[#4A2C2A]'
@@ -64,7 +64,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </div>
           <span className="text-xs mt-0.5">Groceries</span>
           {groceryBadgeCount > 0 && (
-            <span className="absolute top-1 right-3 bg-[#FF8FA3] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-sm">
+            <span className="absolute top-1 right-3 bg-[#FF8FA3] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs">
               {groceryBadgeCount}
             </span>
           )}

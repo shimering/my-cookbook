@@ -21,10 +21,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   return (
     <div
       onClick={() => onSelect(recipe)}
-      className="group relative bg-[#FFF9E6] border border-[#F5E6BF] rounded-2xl p-2.5 shadow-cozy hover:shadow-cozy-lg transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:-translate-y-0.5"
+      className="group relative bg-[#FFF3CC] border border-[#F5E6BF] rounded-[24px] p-2.5 sm:p-3 shadow-cozy hover:shadow-cozy-lg transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden hover:-translate-y-1"
     >
       {/* Recipe Photo */}
-      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#FFE599]/30 mb-2.5">
+      <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-[#FFE599]/40 mb-2.5">
         <img
           src={imgSrc}
           alt={recipe.title}
@@ -38,14 +38,14 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         />
         {/* Category Pill Tag */}
         {recipe.categories && recipe.categories.length > 0 && (
-          <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-xs text-[#8A6866] text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-xs">
+          <span className="absolute top-2 left-2 bg-white/95 backdrop-blur-xs text-[#4A2C2A] text-[10px] font-semibold px-2.5 py-0.5 rounded-full shadow-xs border border-[#F5E6BF]">
             {recipe.categories[0]}
           </span>
         )}
       </div>
 
       {/* Recipe Title */}
-      <h3 className="font-serif text-[15px] font-bold text-[#4A2C2A] leading-snug line-clamp-1 mb-1.5 px-0.5">
+      <h3 className="font-serif text-[15px] sm:text-base font-bold text-[#4A2C2A] leading-snug line-clamp-1 mb-1.5 px-0.5">
         {recipe.title}
       </h3>
 
@@ -60,7 +60,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         <button
           type="button"
           onClick={(e) => onToggleFavorite(recipe.id, e)}
-          className="p-1 rounded-full hover:bg-white/60 transition-colors"
+          className="p-1.5 rounded-full hover:bg-white/80 transition-colors"
           title={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-label={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
@@ -68,7 +68,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
             className={`w-4 h-4 transition-transform active:scale-125 ${
               recipe.isFavorite
                 ? 'fill-[#FF8FA3] text-[#FF8FA3]'
-                : 'text-[#B89D9B] hover:text-[#FF8FA3]'
+                : 'text-[#8A6866] hover:text-[#FF8FA3]'
             }`}
           />
         </button>

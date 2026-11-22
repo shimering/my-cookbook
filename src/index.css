@@ -5,7 +5,7 @@
     --color-blush: #FFF5F7;
     --color-cream: #FFFFFF;
     --color-butter: #FFE599;
-    --color-butter-light: #FFF9E6;
+    --color-butter-light: #FFF3CC;
     --color-strawberry: #FF8FA3;
     --color-strawberry-hover: #FF758F;
     --color-berry: #4A2C2A;
@@ -36,7 +36,11 @@
 }
 
 .shadow-pink-glow {
-  box-shadow: 0 4px 16px rgba(255, 143, 163, 0.4);
+  box-shadow: 0 4px 14px -2px rgba(255, 143, 163, 0.4), 0 2px 5px -1px rgba(74, 44, 42, 0.08);
+}
+
+.shadow-butter {
+  box-shadow: 0 4px 16px rgba(255, 229, 153, 0.4);
 }
 
 /* Custom smooth transitions for checkboxes and strikethrough */
