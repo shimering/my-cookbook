@@ -174,7 +174,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
         <div className="text-center">
           <div className="flex items-center justify-center space-x-1.5 text-xs font-bold text-[#8A6866]">
-            <CalendarIcon className="w-3.5 h-3.5 text-[#FF8FA3]" />
+            <CalendarIcon className="w-3.5 h-3.5 text-[#8B5CF6]" />
             <span>Weekly Meal Plan</span>
           </div>
           <span className="font-serif text-sm sm:text-base font-bold text-[#4A2C2A]">
@@ -204,7 +204,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               onClick={() => setActiveDayIndex(idx)}
               className={`flex flex-col items-center py-2.5 px-1 rounded-[16px] transition-all duration-200 border cursor-pointer ${
                 isSelected
-                  ? 'bg-[#FF8FA3] text-white border-[#FF8FA3] shadow-pink-glow scale-102 font-bold'
+                  ? 'bg-[#8B5CF6] text-white border-[#7C3AED] shadow-sm font-bold'
                   : 'bg-white hover:bg-[#FFF3CC]/50 text-[#4A2C2A] border-[#F3D5DC] shadow-xs'
               }`}
             >
@@ -219,7 +219,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                 {hasMeals && (
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      isSelected ? 'bg-white' : 'bg-[#FF8FA3]'
+                      isSelected ? 'bg-white' : 'bg-[#8B5CF6]'
                     }`}
                   />
                 )}
@@ -233,7 +233,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       <div className="bg-[#FFE599] border border-[#F5E6BF] rounded-[24px] p-4 mb-5 shadow-cozy flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold text-[#4A2C2A] flex items-center space-x-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#FF8FA3]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
             <span>Generate Groceries</span>
           </h4>
           <p className="text-[11px] text-[#8A6866] mt-0.5">
@@ -248,7 +248,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               endDate: weekDays[6].dateStr,
             })
           }
-          className="px-4 py-2 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-95 text-white text-xs font-bold rounded-full shadow-pink-glow flex items-center space-x-1.5 transition-all cursor-pointer"
+          className="px-4 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
         >
           <ShoppingBag className="w-3.5 h-3.5" />
           <span>Build List</span>
@@ -464,13 +464,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     value={customNoteInput}
                     onChange={(e) => setCustomNoteInput(e.target.value)}
                     placeholder="e.g. Leftover Curry"
-                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3D5DC] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#FF8FA3]"
+                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3D5DC] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#8B5CF6]"
                   />
                   <button
                     type="button"
                     disabled={!customNoteInput.trim()}
                     onClick={() => handleConfirmAddMeal()}
-                    className="px-4 py-2 bg-[#FF8FA3] hover:bg-[#FF758F] disabled:opacity-40 text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
+                    className="px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-40 text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
                   >
                     Add
                   </button>

@@ -33,38 +33,38 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           <span className="text-xs mt-0.5">Recipes</span>
         </button>
 
-        {/* Meal Plan Tab */}
+        {/* Meal Plan Tab (Purple) */}
         <button
           onClick={() => onTabChange('planner')}
           className={`flex flex-col items-center py-1 px-4 rounded-full transition-all duration-200 cursor-pointer ${
             activeTab === 'planner'
-              ? 'text-[#FF8FA3] font-semibold scale-105'
+              ? 'text-[#8B5CF6] font-semibold scale-105'
               : 'text-[#8A6866] hover:text-[#4A2C2A]'
           }`}
           aria-label="Weekly Meal Planner"
         >
-          <div className={`p-1.5 rounded-full ${activeTab === 'planner' ? 'bg-[#FFF0F3]' : ''}`}>
+          <div className={`p-1.5 rounded-full ${activeTab === 'planner' ? 'bg-[#F3E8FF]' : ''}`}>
             <Calendar className="w-5 h-5 stroke-[2.2]" />
           </div>
           <span className="text-xs mt-0.5">Meal Plan</span>
         </button>
 
-        {/* Groceries Tab */}
+        {/* Groceries Tab (Green) */}
         <button
           onClick={() => onTabChange('groceries')}
           className={`flex flex-col items-center py-1 px-4 rounded-full transition-all duration-200 relative cursor-pointer ${
             activeTab === 'groceries'
-              ? 'text-[#FF8FA3] font-semibold scale-105'
+              ? 'text-[#16A34A] font-semibold scale-105'
               : 'text-[#8A6866] hover:text-[#4A2C2A]'
           }`}
           aria-label="Grocery Shopping List"
         >
-          <div className={`p-1.5 rounded-full ${activeTab === 'groceries' ? 'bg-[#FFF0F3]' : ''}`}>
+          <div className={`p-1.5 rounded-full ${activeTab === 'groceries' ? 'bg-[#ECFDF5]' : ''}`}>
             <ShoppingBasket className="w-5 h-5 stroke-[2.2]" />
           </div>
           <span className="text-xs mt-0.5">Groceries</span>
           {groceryBadgeCount > 0 && (
-            <span className="absolute top-1 right-3 bg-[#FF8FA3] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs">
+            <span className="absolute top-1 right-3 bg-[#16A34A] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs">
               {groceryBadgeCount}
             </span>
           )}

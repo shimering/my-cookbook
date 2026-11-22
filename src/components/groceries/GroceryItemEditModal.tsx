@@ -119,7 +119,7 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
         </button>
         <button
           type="submit"
-          className="px-5 py-2 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs flex items-center space-x-1.5 cursor-pointer"
+          className="px-5 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs flex items-center space-x-1.5 cursor-pointer"
         >
           <Save className="w-3.5 h-3.5" />
           <span>Save Changes</span>
@@ -168,7 +168,7 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3D5DC] bg-[#FFF5F7]">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-[#FFF0F3] text-[#FF8FA3] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
               <Edit3 className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div>

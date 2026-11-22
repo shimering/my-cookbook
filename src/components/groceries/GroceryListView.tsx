@@ -129,7 +129,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       <div className="bg-white border border-[#F3D5DC] rounded-[24px] p-4 sm:p-5 shadow-cozy mb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center space-x-2.5">
-            <div className="w-10 h-10 rounded-full bg-[#FFF0F3] text-[#FF8FA3] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
@@ -141,11 +141,11 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap">
-            {/* Choose from Available Items button */}
+            {/* Choose from Available Items button (Green) */}
             <button
               type="button"
               onClick={() => setIsCatalogModalOpen(true)}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-95 text-white text-xs font-bold rounded-full shadow-pink-glow transition-all cursor-pointer"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer"
             >
               <BookOpen className="w-3.5 h-3.5 stroke-[2.2]" />
               <span>Browse Available Items</span>
@@ -155,7 +155,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               <button
                 type="button"
                 onClick={onClearChecked}
-                className="text-xs font-semibold text-[#8A6866] hover:text-[#FF8FA3] px-3 py-1 bg-[#FFF5F7] hover:bg-[#FFF0F3] rounded-full transition-colors border border-[#F3D5DC] cursor-pointer"
+                className="text-xs font-semibold text-[#8A6866] hover:text-[#16A34A] px-3 py-1 bg-[#FFF5F7] hover:bg-[#ECFDF5] rounded-full transition-colors border border-[#F3D5DC] cursor-pointer"
                 title="Clear Completed"
               >
                 Clear checked
@@ -184,7 +184,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               value={manualName}
               onChange={(e) => setManualName(e.target.value)}
               placeholder="Add item (e.g. Honeycrisp Apples, Oat Milk...)"
-              className="flex-1 px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+              className="flex-1 px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
               required
             />
 
@@ -195,7 +195,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 value={manualAmount}
                 onChange={(e) => setManualAmount(e.target.value)}
                 placeholder="Qty"
-                className="w-14 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-center font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+                className="w-14 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-center font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 title="Quantity"
               />
 
@@ -205,7 +205,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 value={manualUnit}
                 onChange={(e) => setManualUnit(e.target.value)}
                 placeholder="unit"
-                className="w-16 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+                className="w-16 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 title="Unit (e.g. lbs, cup, pack, pcs)"
               />
 
@@ -225,7 +225,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               {/* Submit Button */}
               <button
                 type="submit"
-                className="p-2.5 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-95 text-white rounded-full shadow-xs transition-transform cursor-pointer shrink-0"
+                className="p-2.5 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white rounded-full shadow-xs transition-transform cursor-pointer shrink-0"
                 title="Add to grocery list"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -238,7 +238,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
             <button
               type="button"
               onClick={() => setShowNotesInput(!showNotesInput)}
-              className="text-[#8A6866] hover:text-[#FF8FA3] font-medium flex items-center space-x-1 cursor-pointer"
+              className="text-[#8A6866] hover:text-[#16A34A] font-medium flex items-center space-x-1 cursor-pointer"
             >
               <span>{showNotesInput ? '- Hide note' : '+ Add custom note (e.g. organic, brand preference)'}</span>
             </button>
@@ -250,7 +250,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               value={manualNotes}
               onChange={(e) => setManualNotes(e.target.value)}
               placeholder="Custom note for this item (e.g. Get ripe ones, organic pasture-raised, low sodium)"
-              className="w-full px-3.5 py-2 bg-[#FFF5F7] border border-[#F3D5DC] rounded-[12px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#FF8FA3]"
+              className="w-full px-3.5 py-2 bg-[#FFF5F7] border border-[#F3D5DC] rounded-[12px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
             />
           )}
         </form>
@@ -269,7 +269,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 className="bg-white border border-[#F3D5DC] rounded-[24px] p-4 shadow-cozy space-y-2.5"
               >
                 <div className="flex items-center justify-between pb-1.5 border-b border-[#F3D5DC]">
-                  <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#FF8FA3]">
+                  <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#16A34A]">
                     {aisle}
                   </h3>
                   <span className="text-[10px] font-semibold text-[#8A6866]">
@@ -292,7 +292,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                       >
                         <div className="flex items-start space-x-2.5 flex-1 min-w-0">
                           {/* Rounded Tap-Friendly Checkbox (border-radius: 6px) */}
-                          <div className="w-6 h-6 rounded-[6px] bg-[#FFE599] border border-[#F5E6BF] group-hover:border-[#FF8FA3] flex items-center justify-center shrink-0 transition-colors mt-0.5">
+                          <div className="w-6 h-6 rounded-[6px] bg-[#FFE599] border border-[#F5E6BF] group-hover:border-[#16A34A] flex items-center justify-center shrink-0 transition-colors mt-0.5">
                             {/* Unchecked */}
                           </div>
 
@@ -322,7 +322,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
                             {/* Custom Note */}
                             {item.notes && (
-                              <div className="text-[11px] text-[#FF8FA3] font-medium italic mt-0.5 flex items-center space-x-1">
+                              <div className="text-[11px] text-[#16A34A] font-medium italic mt-0.5 flex items-center space-x-1">
                                 <span>Note: {item.notes}</span>
                               </div>
                             )}
@@ -373,7 +373,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       ) : (
         /* Empty State */
         <div className="bg-white border border-[#F3D5DC] rounded-[24px] p-8 text-center my-4 shadow-cozy max-w-md mx-auto">
-          <div className="w-12 h-12 bg-[#FFF0F3] rounded-full flex items-center justify-center mx-auto mb-2.5 text-[#FF8FA3]">
+          <div className="w-12 h-12 bg-[#ECFDF5] rounded-full flex items-center justify-center mx-auto mb-2.5 text-[#16A34A]">
             <Sparkles className="w-6 h-6" />
           </div>
           <h4 className="font-serif text-base font-bold text-[#4A2C2A] mb-1">
@@ -387,7 +387,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
           <button
             type="button"
             onClick={() => setIsCatalogModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#FF8FA3] hover:bg-[#FF758F] text-white text-xs font-bold rounded-full shadow-pink-glow transition-all cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer"
           >
             <BookOpen className="w-4 h-4 stroke-[2.2]" />
             <span>Browse Available Food Items</span>
@@ -430,7 +430,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                     className="flex items-center justify-between p-2 rounded-[16px] bg-white hover:bg-[#FFF3CC]/30 cursor-pointer transition-colors group select-none border border-[#F3D5DC]/50"
                   >
                     <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-                      <div className="w-6 h-6 rounded-[6px] bg-[#FF8FA3] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-6 h-6 rounded-[6px] bg-[#16A34A] text-white flex items-center justify-center shrink-0 shadow-xs">
                         <Check className="w-4 h-4 stroke-[3]" />
                       </div>
                       {icon && (
@@ -446,7 +446,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                         </div>
                       )}
                       <div className="min-w-0 flex-1 flex items-center space-x-2">
-                        <span className="text-xs font-medium text-[#8A6866]/70 line-through decoration-[#FF8FA3] truncate">
+                        <span className="text-xs font-medium text-[#8A6866]/70 line-through decoration-[#16A34A] truncate">
                           {qtyDisplay ? `${qtyDisplay} ` : ''}
                           {item.name}
                         </span>
