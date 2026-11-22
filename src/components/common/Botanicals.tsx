@@ -6,114 +6,101 @@ interface BotanicalProps {
 }
 
 /**
- * Hand-drawn botanical branch with elegant pointed leaves, delicate leaf veins,
- * and subtle pastel berry accents.
- * Designed to faithfully capture the cozy bakery & stationery aesthetic from the mockup.
+ * Hand-drawn botanical branch with elegant almond leaves and delicate leaf veins.
+ * Faithfully captures the cozy bakery & stationery aesthetic from the original mockup.
  */
 export const BotanicalBranchLeft: React.FC<BotanicalProps> = ({
   className = "w-16 h-16",
   color = "#4A2C2A"
 }) => (
   <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    {/* Main Stem with natural organic curve */}
+    {/* Main Gentle Curved Stem */}
     <path
-      d="M 8 8 C 22 28, 42 60, 82 88"
+      d="M 6 4 C 18 20, 34 46, 76 76"
       stroke={color}
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    {/* Secondary arching stem */}
-    <path
-      d="M 40 48 C 52 56, 68 64, 86 68"
-      stroke={color}
-      strokeWidth="1.3"
+      strokeWidth="1.7"
       strokeLinecap="round"
     />
 
-    {/* Leaf 1 (Top Left) - elegant pointed leaf with midrib */}
+    {/* Leaf 1 (Top Left) - elegant almond leaf with midrib */}
     <path
-      d="M 18 22 C 10 20, 5 15, 4 12 C 7 18, 13 25, 18 22 Z"
-      fill="#FCE8EC"
+      d="M 16 15 C 8 11, 2 11, 1 14 C 4 19, 11 23, 16 15 Z"
+      fill="#FCE4EC"
       stroke={color}
-      strokeWidth="1.4"
+      strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 18 22 L 7 14" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+    <path d="M 16 15 L 4 14" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
     {/* Leaf 2 (Top Right) */}
     <path
-      d="M 23 28 C 30 22, 38 20, 42 21 C 39 27, 31 32, 23 28 Z"
-      fill="#FFF2F4"
+      d="M 22 22 C 30 16, 38 16, 40 19 C 37 25, 29 28, 22 22 Z"
+      fill="#FFF0F3"
       stroke={color}
-      strokeWidth="1.4"
+      strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 23 28 L 38 22" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+    <path d="M 22 22 L 36 19" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
     {/* Leaf 3 (Mid-low Left) */}
     <path
-      d="M 32 40 C 22 35, 14 34, 12 37 C 16 43, 25 46, 32 40 Z"
-      fill="#FCE8EC"
+      d="M 30 33 C 20 27, 13 27, 11 30 C 14 36, 22 39, 30 33 Z"
+      fill="#FCE4EC"
       stroke={color}
-      strokeWidth="1.4"
+      strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 32 40 L 15 37" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+    <path d="M 30 33 L 14 30" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
     {/* Leaf 4 (Mid-high Right) */}
     <path
-      d="M 38 46 C 47 39, 56 38, 60 40 C 56 47, 47 52, 38 46 Z"
-      fill="#FFF2F4"
+      d="M 38 41 C 48 34, 56 34, 58 37 C 54 44, 45 47, 38 41 Z"
+      fill="#FFF0F3"
       stroke={color}
-      strokeWidth="1.4"
+      strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 38 46 L 56 41" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+    <path d="M 38 41 L 54 37" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
     {/* Leaf 5 (Lower Left) */}
     <path
-      d="M 49 59 C 39 57, 31 60, 29 63 C 35 69, 44 67, 49 59 Z"
-      fill="#FCE8EC"
-      stroke={color}
-      strokeWidth="1.4"
-      strokeLinejoin="round"
-    />
-    <path d="M 49 59 L 32 62" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-    {/* Sub-branch Leaf 1 */}
-    <path
-      d="M 58 58 C 65 52, 73 51, 76 53 C 73 59, 66 62, 58 58 Z"
-      fill="#FFF2F4"
+      d="M 48 51 C 38 46, 31 47, 30 51 C 33 57, 41 58, 48 51 Z"
+      fill="#FCE4EC"
       stroke={color}
       strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 58 58 L 73 53" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+    <path d="M 48 51 L 33 51" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-    {/* Sub-branch Leaf 2 */}
+    {/* Leaf 6 (Lower Right) */}
     <path
-      d="M 72 65 C 79 61, 86 61, 88 63 C 86 68, 80 70, 72 65 Z"
-      fill="#FCE8EC"
+      d="M 58 60 C 68 53, 76 54, 78 57 C 74 64, 65 67, 58 60 Z"
+      fill="#FFF0F3"
       stroke={color}
       strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 72 65 L 85 63" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+    <path d="M 58 60 L 74 57" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-    {/* Main Stem Tip Leaf */}
+    {/* Leaf 7 (Near Tip Left) */}
     <path
-      d="M 78 84 C 83 91, 91 94, 96 95 C 94 88, 87 83, 78 84 Z"
-      fill="#FCE8EC"
+      d="M 66 68 C 58 64, 52 66, 52 70 C 56 75, 62 74, 66 68 Z"
+      fill="#FCE4EC"
       stroke={color}
-      strokeWidth="1.4"
+      strokeWidth="1.3"
       strokeLinejoin="round"
     />
-    <path d="M 78 84 L 92 92" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+    <path d="M 66 68 L 54 69" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-    {/* Tiny delicate pastel berry accents */}
-    <circle cx="28" cy="34" r="2" fill="#FF8FA3" stroke={color} strokeWidth="0.8" />
-    <circle cx="46" cy="54" r="2" fill="#FF8FA3" stroke={color} strokeWidth="0.8" />
-    <circle cx="66" cy="72" r="1.8" fill="#FFE599" stroke={color} strokeWidth="0.8" />
+    {/* Terminal Leaf (Tip) */}
+    <path
+      d="M 76 76 C 83 76, 91 81, 92 87 C 87 91, 80 88, 76 76 Z"
+      fill="#FCE4EC"
+      stroke={color}
+      strokeWidth="1.3"
+      strokeLinejoin="round"
+    />
+    <path d="M 76 76 L 89 85" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
   </svg>
 );
 
@@ -123,104 +110,93 @@ export const BotanicalBranchRight: React.FC<BotanicalProps> = ({
 }) => (
   <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <g transform="translate(100, 0) scale(-1, 1)">
-      {/* Main Stem */}
+      {/* Main Gentle Curved Stem */}
       <path
-        d="M 8 8 C 22 28, 42 60, 82 88"
+        d="M 6 4 C 18 20, 34 46, 76 76"
         stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M 40 48 C 52 56, 68 64, 86 68"
-        stroke={color}
-        strokeWidth="1.3"
+        strokeWidth="1.7"
         strokeLinecap="round"
       />
 
-      {/* Leaf 1 */}
+      {/* Leaf 1 (Top Left) */}
       <path
-        d="M 18 22 C 10 20, 5 15, 4 12 C 7 18, 13 25, 18 22 Z"
-        fill="#FCE8EC"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M 18 22 L 7 14" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-      {/* Leaf 2 */}
-      <path
-        d="M 23 28 C 30 22, 38 20, 42 21 C 39 27, 31 32, 23 28 Z"
-        fill="#FFF2F4"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M 23 28 L 38 22" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-      {/* Leaf 3 */}
-      <path
-        d="M 32 40 C 22 35, 14 34, 12 37 C 16 43, 25 46, 32 40 Z"
-        fill="#FCE8EC"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M 32 40 L 15 37" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-      {/* Leaf 4 */}
-      <path
-        d="M 38 46 C 47 39, 56 38, 60 40 C 56 47, 47 52, 38 46 Z"
-        fill="#FFF2F4"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M 38 46 L 56 41" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-      {/* Leaf 5 */}
-      <path
-        d="M 49 59 C 39 57, 31 60, 29 63 C 35 69, 44 67, 49 59 Z"
-        fill="#FCE8EC"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M 49 59 L 32 62" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
-
-      {/* Sub-branch Leaf 1 */}
-      <path
-        d="M 58 58 C 65 52, 73 51, 76 53 C 73 59, 66 62, 58 58 Z"
-        fill="#FFF2F4"
+        d="M 16 15 C 8 11, 2 11, 1 14 C 4 19, 11 23, 16 15 Z"
+        fill="#FCE4EC"
         stroke={color}
         strokeWidth="1.3"
         strokeLinejoin="round"
       />
-      <path d="M 58 58 L 73 53" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M 16 15 L 4 14" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-      {/* Sub-branch Leaf 2 */}
+      {/* Leaf 2 (Top Right) */}
       <path
-        d="M 72 65 C 79 61, 86 61, 88 63 C 86 68, 80 70, 72 65 Z"
-        fill="#FCE8EC"
+        d="M 22 22 C 30 16, 38 16, 40 19 C 37 25, 29 28, 22 22 Z"
+        fill="#FFF0F3"
         stroke={color}
         strokeWidth="1.3"
         strokeLinejoin="round"
       />
-      <path d="M 72 65 L 85 63" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M 22 22 L 36 19" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-      {/* Main Stem Tip Leaf */}
+      {/* Leaf 3 (Mid-low Left) */}
       <path
-        d="M 78 84 C 83 91, 91 94, 96 95 C 94 88, 87 83, 78 84 Z"
-        fill="#FCE8EC"
+        d="M 30 33 C 20 27, 13 27, 11 30 C 14 36, 22 39, 30 33 Z"
+        fill="#FCE4EC"
         stroke={color}
-        strokeWidth="1.4"
+        strokeWidth="1.3"
         strokeLinejoin="round"
       />
-      <path d="M 78 84 L 92 92" stroke={color} strokeWidth="0.9" strokeLinecap="round" />
+      <path d="M 30 33 L 14 30" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
 
-      {/* Berries */}
-      <circle cx="28" cy="34" r="2" fill="#FF8FA3" stroke={color} strokeWidth="0.8" />
-      <circle cx="46" cy="54" r="2" fill="#FF8FA3" stroke={color} strokeWidth="0.8" />
-      <circle cx="66" cy="72" r="1.8" fill="#FFE599" stroke={color} strokeWidth="0.8" />
+      {/* Leaf 4 (Mid-high Right) */}
+      <path
+        d="M 38 41 C 48 34, 56 34, 58 37 C 54 44, 45 47, 38 41 Z"
+        fill="#FFF0F3"
+        stroke={color}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M 38 41 L 54 37" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+
+      {/* Leaf 5 (Lower Left) */}
+      <path
+        d="M 48 51 C 38 46, 31 47, 30 51 C 33 57, 41 58, 48 51 Z"
+        fill="#FCE4EC"
+        stroke={color}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M 48 51 L 33 51" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+
+      {/* Leaf 6 (Lower Right) */}
+      <path
+        d="M 58 60 C 68 53, 76 54, 78 57 C 74 64, 65 67, 58 60 Z"
+        fill="#FFF0F3"
+        stroke={color}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M 58 60 L 74 57" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+
+      {/* Leaf 7 (Near Tip Left) */}
+      <path
+        d="M 66 68 C 58 64, 52 66, 52 70 C 56 75, 62 74, 66 68 Z"
+        fill="#FCE4EC"
+        stroke={color}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M 66 68 L 54 69" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
+
+      {/* Terminal Leaf */}
+      <path
+        d="M 76 76 C 83 76, 91 81, 92 87 C 87 91, 80 88, 76 76 Z"
+        fill="#FCE4EC"
+        stroke={color}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      <path d="M 76 76 L 89 85" stroke={color} strokeWidth="0.8" strokeLinecap="round" />
     </g>
   </svg>
 );

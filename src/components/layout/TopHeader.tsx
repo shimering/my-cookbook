@@ -22,8 +22,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <BotanicalBranchLeft className="w-16 h-16 sm:w-20 sm:h-20" color="#4A2C2A" />
       </div>
 
-      <div className="absolute top-0 right-10 pointer-events-none opacity-85">
-        <BotanicalBranchRight className="w-16 h-16 sm:w-20 sm:h-20" color="#4A2C2A" />
+      <div className="absolute top-9 -right-1 pointer-events-none opacity-85">
+        <BotanicalBranchRight className="w-13 h-13 sm:w-16 sm:h-16 rotate-6" color="#4A2C2A" />
       </div>
 
       {/* Top action buttons (Sync & Settings) */}
