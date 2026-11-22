@@ -11,9 +11,10 @@ import {
   BookOpen,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { GroceryItem } from '../../types';
+import type { GroceryItem, CatalogItem } from '../../types';
 import { getIngredientIcon } from '../../utils/ingredientIconResolver';
-import { getStoredCategories } from '../../data/groceryCatalog';
+import { getStoredCategories, getStoredCatalogItems } from '../../data/groceryCatalog';
+import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
 import { GroceryCatalogModal } from './GroceryCatalogModal';
 import { GroceryItemEditModal } from './GroceryItemEditModal';
 
@@ -38,6 +39,33 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 }) => {
   // Dynamic categories initialized from persistent storage
   const [categories, setCategories] = useState<string[]>(() => getStoredCategories());
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(() => getStoredCatalogItems());
+
+  // Suggestions pool from catalog and active/recent grocery items
+  const allSuggestions: SuggestionItem[] = React.useMemo(() => {
+    const map = new Map<string, SuggestionItem>();
+    for (const item of catalogItems) {
+      map.set(item.name.toLowerCase(), {
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        defaultUnit: item.defaultUnit,
+        notes: item.notes,
+      });
+    }
+    for (const item of groceryItems) {
+      if (!map.has(item.name.toLowerCase())) {
+        map.set(item.name.toLowerCase(), {
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          defaultUnit: item.unit,
+          notes: item.notes,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [catalogItems, groceryItems]);
 
   // Quick manual add form fields
   const [manualName, setManualName] = useState('');
@@ -178,15 +206,24 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
         {/* Quick Add Form with Quantity, Unit, Category & Notes */}
         <form onSubmit={handleAddManual} className="mt-3 space-y-2 pt-2 border-t border-[#F3E5D8]/60">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            {/* Item Name */}
-            <input
-              type="text"
-              value={manualName}
-              onChange={(e) => setManualName(e.target.value)}
-              placeholder="Add item (e.g. Honeycrisp Apples, Oat Milk...)"
-              className="flex-1 px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
-              required
-            />
+            {/* Item Name with Suggestions appearing right after the box */}
+            <div className="flex-1 min-w-0">
+              <AutocompleteInput
+                value={manualName}
+                onChange={setManualName}
+                onSelect={(item) => {
+                  setManualName(item.name);
+                  if (item.category) setManualCategory(item.category);
+                  if (item.defaultUnit && !manualUnit) setManualUnit(item.defaultUnit);
+                  if (item.notes && !manualNotes) setManualNotes(item.notes);
+                }}
+                items={allSuggestions}
+                placeholder="Add item (e.g. Honeycrisp Apples, Oat Milk...)"
+                className="w-full px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
+                required
+                ariaLabel="Add grocery item name"
+              />
+            </div>
 
             <div className="flex items-center space-x-1.5">
               {/* Quantity */}
@@ -493,9 +530,16 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       {/* Available Food Catalog Modal */}
       <GroceryCatalogModal
         isOpen={isCatalogModalOpen}
-        onClose={() => setIsCatalogModalOpen(false)}
+        onClose={() => {
+          setIsCatalogModalOpen(false);
+          setCatalogItems(getStoredCatalogItems());
+          setCategories(getStoredCategories());
+        }}
         onAddGroceryItem={onAddItem}
-        onCategoriesUpdated={(newCats) => setCategories(newCats)}
+        onCategoriesUpdated={(newCats) => {
+          setCategories(newCats);
+          setCatalogItems(getStoredCatalogItems());
+        }}
       />
 
       {/* Edit Grocery Item Modal */}

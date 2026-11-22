@@ -18,6 +18,7 @@ import {
 import { parseQuantity } from '../../utils/fractionParser';
 import { getStoredCatalogItems } from '../../data/groceryCatalog';
 import { db } from '../../db/cookbookDb';
+import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
 
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
@@ -203,21 +204,43 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   );
 
   // Grocery item suggestions loaded from catalog and stored items in Dexie
-  const [grocerySuggestions, setGrocerySuggestions] = useState<string[]>([]);
+  const [grocerySuggestions, setGrocerySuggestions] = useState<SuggestionItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
     const loadSuggestions = async () => {
       try {
         const catalogItems = getStoredCatalogItems();
-        const catalogNames = catalogItems.map((c) => c.name);
+        const map = new Map<string, SuggestionItem>();
+        for (const item of catalogItems) {
+          map.set(item.name.toLowerCase(), {
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            defaultUnit: item.defaultUnit,
+            notes: item.notes,
+          });
+        }
+
         const dbItems = await db.groceryItems.toArray();
-        const dbNames = dbItems.map((d) => d.name);
-        const uniqueNames = Array.from(new Set([...catalogNames, ...dbNames]))
-          .filter((n) => typeof n === 'string' && n.trim().length > 0)
-          .sort((a, b) => a.localeCompare(b));
+        for (const item of dbItems) {
+          if (!map.has(item.name.toLowerCase())) {
+            map.set(item.name.toLowerCase(), {
+              id: item.id,
+              name: item.name,
+              category: item.category,
+              defaultUnit: item.unit,
+              notes: item.notes,
+            });
+          }
+        }
+
+        const itemsList = Array.from(map.values()).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+
         if (isMounted) {
-          setGrocerySuggestions(uniqueNames);
+          setGrocerySuggestions(itemsList);
         }
       } catch (err) {
         console.error('Failed to load grocery suggestions:', err);
@@ -830,16 +853,18 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         <option value="__custom__">+ Custom unit...</option>
                       </select>
 
-                      {/* Ingredient Name Box with Grocery List Suggestions (Manual Choice Allowed) */}
+                      {/* Ingredient Name Box with Suggestions appearing right after the box */}
                       <div className="flex-1 min-w-0">
-                        <input
-                          type="text"
-                          list="grocery-suggestions-list"
+                        <AutocompleteInput
                           value={ing.name}
-                          onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                          onChange={(val) => handleIngredientChange(index, 'name', val)}
+                          onSelect={(item) => {
+                            handleIngredientChange(index, 'name', item.name);
+                          }}
+                          items={grocerySuggestions}
                           placeholder={ing.section ? `[${ing.section}] Ingredient name` : 'Ingredient name (e.g. Flour)'}
                           className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
-                          autoComplete="off"
+                          ariaLabel="Ingredient name"
                         />
                       </div>
 
@@ -856,13 +881,6 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                   );
                 })}
               </div>
-
-              {/* Datalist of grocery items for autocomplete suggestions */}
-              <datalist id="grocery-suggestions-list">
-                {grocerySuggestions.map((item) => (
-                  <option key={item} value={item} />
-                ))}
-              </datalist>
             </div>
 
             {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}

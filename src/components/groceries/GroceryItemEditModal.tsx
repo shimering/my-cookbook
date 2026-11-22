@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Edit3 } from 'lucide-react';
 import type { GroceryItem } from '../../types';
+import { getStoredCatalogItems } from '../../data/groceryCatalog';
+import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
 
 interface GroceryItemEditModalProps {
   item: GroceryItem | null;
@@ -25,6 +27,7 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
   const [unit, setUnit] = useState(item.unit || '');
   const [category, setCategory] = useState(item.category || categories[0] || 'Produce');
   const [notes, setNotes] = useState(item.notes || '');
+  const [catalogItems] = useState<SuggestionItem[]>(() => getStoredCatalogItems());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,13 +52,20 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
     <form onSubmit={handleSubmit} className="p-5 space-y-4">
       <div>
         <label className="block text-xs font-bold text-[#3D231D] mb-1">Item Name</label>
-        <input
-          type="text"
+        <AutocompleteInput
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={setName}
+          onSelect={(suggested) => {
+            setName(suggested.name);
+            if (suggested.category) setCategory(suggested.category);
+            if (suggested.defaultUnit && !unit) setUnit(suggested.defaultUnit);
+            if (suggested.notes && !notes) setNotes(suggested.notes);
+          }}
+          items={catalogItems}
           placeholder="e.g. Honeycrisp Apples"
           className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
           required
+          ariaLabel="Item Name"
         />
       </div>
 
