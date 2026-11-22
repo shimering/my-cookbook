@@ -1,7 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, Camera, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  ChevronLeft,
+  Camera,
+  Image as ImageIcon,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
+import {
+  convertIngredient,
+  getStoredUnitSystem,
+  type UnitSystem,
+} from '../../utils/unitConverter';
 
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
@@ -11,13 +24,39 @@ interface RecipeFormModalProps {
 
 const COMMON_CATEGORIES = ['Breakfast', 'Desserts', 'Quick Meals', 'Dinner', 'Drinks', 'Snacks', 'Baking'];
 
+const STANDARD_UNITS = [
+  '',
+  'cup',
+  'tbsp',
+  'tsp',
+  'oz',
+  'fl oz',
+  'lb',
+  'pt',
+  'qt',
+  'gal',
+  'g',
+  'kg',
+  'ml',
+  'l',
+  'piece',
+  'pinch',
+  'clove',
+  'slice',
+  'can',
+  'sprig',
+  'stalk',
+  'pkg',
+];
+
 export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   initialRecipe,
   onSave,
   onClose,
 }) => {
   const isEditing = Boolean(initialRecipe);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll and focus modal dialog on mount
@@ -45,6 +84,9 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const [categories, setCategories] = useState<string[]>(initialRecipe?.categories || ['Breakfast']);
   const [customTag, setCustomTag] = useState('');
 
+  // Unit system for adding/editing measurements: 'us' (cups, tbsp) or 'metric' (grams, ml)
+  const [formUnitSystem, setFormUnitSystem] = useState<UnitSystem>(() => getStoredUnitSystem());
+
   // Structured ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>(
     initialRecipe?.ingredients?.length
@@ -67,7 +109,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
   const [isCompressing, setIsCompressing] = useState(false);
 
-  // Handle Photo Upload
+  // Handle Photo Upload from either Camera or Gallery
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -80,6 +122,8 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       console.error('Failed to compress image:', err);
     } finally {
       setIsCompressing(false);
+      // Reset input value so same photo can be re-selected if desired
+      e.target.value = '';
     }
   };
 
@@ -99,6 +143,41 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     }
   };
 
+  // Unit System change handler (converts existing ingredients to selected system)
+  const handleFormUnitSystemChange = (targetSystem: UnitSystem) => {
+    if (targetSystem === formUnitSystem) return;
+    setFormUnitSystem(targetSystem);
+
+    const converted = ingredients.map((ing) => {
+      if (!ing.name.trim() || !ing.amount) {
+        return {
+          ...ing,
+          unit: targetSystem === 'metric' ? (ing.unit === 'cup' ? 'g' : ing.unit) : (ing.unit === 'g' ? 'cup' : ing.unit),
+        };
+      }
+      const res = convertIngredient(ing, targetSystem, 1);
+      return {
+        ...ing,
+        amount: res.amount,
+        unit: res.unit,
+        displayFraction: res.displayQuantity,
+      };
+    });
+    setIngredients(converted);
+  };
+
+  // Unit dropdown select handler
+  const handleUnitSelect = (index: number, val: string) => {
+    if (val === '__custom__') {
+      const custom = prompt('Enter custom measurement unit (e.g. handful, dash, sheet):');
+      if (custom && custom.trim()) {
+        handleIngredientChange(index, 'unit', custom.trim());
+      }
+    } else {
+      handleIngredientChange(index, 'unit', val);
+    }
+  };
+
   // Ingredients Helpers
   const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
     const updated = [...ingredients];
@@ -110,11 +189,11 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     setIngredients([
       ...ingredients,
       {
-        id: `ing-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        id: `ing-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
         name: '',
-        amount: 1,
-        unit: 'cup',
-        displayFraction: '1',
+        amount: formUnitSystem === 'metric' ? 100 : 1,
+        unit: formUnitSystem === 'metric' ? 'g' : 'cup',
+        displayFraction: formUnitSystem === 'metric' ? '100' : '1',
         section,
       },
     ]);
@@ -223,48 +302,115 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
         <form id="recipe-form" onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable Form Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5 overscroll-contain">
-            {/* Photo Upload Card with border-radius: 24px */}
+            {/* Photo Upload Card with border-radius: 24px (Camera & Gallery Options) */}
             <div className="relative">
+              {/* Camera Input (opens native camera directly on mobile) */}
               <input
                 type="file"
-                ref={fileInputRef}
+                ref={cameraInputRef}
                 accept="image/*"
                 capture="environment"
                 onChange={handlePhotoUpload}
                 className="hidden"
               />
+              {/* Gallery Input (opens photo gallery / files on mobile & desktop) */}
+              <input
+                type="file"
+                ref={galleryInputRef}
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+
               {heroImage ? (
                 <div className="relative w-full aspect-video rounded-[24px] overflow-hidden border border-[#F3E5D8] bg-white shadow-inner group">
                   <img src={heroImage} alt="Recipe Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
+                  {/* Desktop Hover Controls */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-3">
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white text-[#3D231D] text-xs font-semibold rounded-full shadow-md cursor-pointer"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-white text-[#3D231D] text-xs font-bold rounded-full shadow-md hover:bg-[#FDE8EA] transition-colors cursor-pointer"
                     >
-                      Change Photo
+                      <Camera className="w-3.5 h-3.5 text-[#E85D75]" />
+                      <span>Take Photo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-white text-[#3D231D] text-xs font-bold rounded-full shadow-md hover:bg-[#FDECC8] transition-colors cursor-pointer"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-[#3D231D]" />
+                      <span>From Gallery</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setHeroImage('')}
-                      className="px-4 py-2 bg-red-500 text-white text-xs font-semibold rounded-full shadow-md cursor-pointer"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-full shadow-md transition-colors cursor-pointer"
                     >
-                      Remove
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove</span>
+                    </button>
+                  </div>
+
+                  {/* Always-visible mobile action strip at bottom-right */}
+                  <div className="absolute bottom-2.5 right-2.5 flex sm:hidden items-center space-x-1.5 bg-white/90 backdrop-blur-md p-1 rounded-full shadow-sm border border-[#F3E5D8]">
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="p-1.5 rounded-full bg-[#FDE8EA] text-[#E85D75] active:scale-90 transition-transform"
+                      title="Take new photo with camera"
+                    >
+                      <Camera className="w-3.5 h-3.5 stroke-[2.2]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="p-1.5 rounded-full bg-[#FDECC8] text-[#3D231D] active:scale-90 transition-transform"
+                      title="Choose from photo gallery"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 stroke-[2.2]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHeroImage('')}
+                      className="p-1.5 rounded-full bg-red-100 text-red-600 active:scale-90 transition-transform"
+                      title="Remove photo"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-8 border-2 border-dashed border-[#F3E5D8] bg-white rounded-[24px] flex flex-col items-center justify-center cursor-pointer hover:bg-[#FDE8EA]/30 transition-all duration-200 group"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FDE8EA] flex items-center justify-center text-[#E85D75] shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                    <Camera className="w-6 h-6" />
+                <div className="w-full py-6 px-4 border-2 border-dashed border-[#F3E5D8] bg-white rounded-[24px] flex flex-col items-center justify-center space-y-3.5 shadow-2xs">
+                  <div className="text-center">
+                    <span className="text-xs font-bold text-[#3D231D] uppercase tracking-wider block">
+                      {isCompressing ? 'Compressing photo...' : 'Recipe Photo'}
+                    </span>
+                    <span className="text-[11px] text-[#8C726B] mt-0.5 block">
+                      Take a photo with your camera or select from your gallery
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-[#8C726B]">
-                    {isCompressing ? 'Compressing photo...' : 'Tap to upload photo'}
-                  </span>
-                  <span className="text-[11px] text-[#8C726B]/70 mt-0.5">Camera or Photo Gallery</span>
+
+                  <div className="flex items-center space-x-2.5 w-full max-w-xs justify-center">
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="flex-1 inline-flex items-center justify-center space-x-2 py-2 px-3 bg-[#FDE8EA] hover:bg-[#FCD2D8] active:scale-95 text-[#E85D75] text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs border border-[#F3E5D8]"
+                    >
+                      <Camera className="w-4 h-4 stroke-[2.2]" />
+                      <span>Take Photo</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="flex-1 inline-flex items-center justify-center space-x-2 py-2 px-3 bg-[#FDECC8] hover:bg-[#FCE3B0] active:scale-95 text-[#3D231D] text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs border border-[#F3E5D8]"
+                    >
+                      <ImageIcon className="w-4 h-4 stroke-[2.2]" />
+                      <span>Photo Gallery</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -405,8 +551,46 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
             {/* Structured Ingredients Section */}
             <div className="pt-2">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-brand text-base font-bold text-[#3D231D]">Ingredients</h3>
+              <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+                <div className="flex items-center space-x-2.5 flex-wrap gap-1.5">
+                  <h3 className="font-brand text-base font-bold text-[#3D231D]">Ingredients</h3>
+
+                  {/* Two options to add measurements: US vs Metric */}
+                  <div
+                    role="group"
+                    aria-label="Measurement system for adding ingredients"
+                    className="bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-full p-0.5 inline-flex items-center text-[11px] shadow-2xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleFormUnitSystemChange('us')}
+                      aria-pressed={formUnitSystem === 'us'}
+                      className={`px-2.5 py-0.5 rounded-full transition-all duration-200 cursor-pointer ${
+                        formUnitSystem === 'us'
+                          ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                          : 'text-[#8C726B] hover:text-[#3D231D] font-medium'
+                      }`}
+                      title="Add ingredients in US Customary units (cups, spoons, oz)"
+                    >
+                      <span>US (Cups)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleFormUnitSystemChange('metric')}
+                      aria-pressed={formUnitSystem === 'metric'}
+                      className={`px-2.5 py-0.5 rounded-full transition-all duration-200 cursor-pointer ${
+                        formUnitSystem === 'metric'
+                          ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                          : 'text-[#8C726B] hover:text-[#3D231D] font-medium'
+                      }`}
+                      title="Add ingredients in Metric units (grams, milliliters)"
+                    >
+                      <span>Metric (Grams)</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex space-x-1.5">
                   <button
                     type="button"
@@ -448,18 +632,74 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       className="w-14 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
                     />
 
-                    {/* Unit (Butter Peach) with Metric and US suggestions */}
-                    <input
-                      type="text"
-                      list="common-ingredient-units"
+                    {/* Unit Dropdown Menu with List of Measurements */}
+                    <select
                       value={ing.unit || ''}
-                      onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                      placeholder="Unit (g, ml, cup...)"
-                      className="w-24 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
-                    />
+                      onChange={(e) => handleUnitSelect(index, e.target.value)}
+                      className="w-24 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] cursor-pointer shrink-0 truncate"
+                      aria-label="Measurement unit"
+                    >
+                      {/* Preserve custom unit if already set */}
+                      {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
+                        <option value={ing.unit}>{ing.unit} (custom)</option>
+                      )}
+
+                      {formUnitSystem === 'metric' ? (
+                        <>
+                          <optgroup label="Metric (g, ml, kg)">
+                            <option value="g">g (grams)</option>
+                            <option value="kg">kg (kilograms)</option>
+                            <option value="ml">ml (milliliters)</option>
+                            <option value="l">l (liters)</option>
+                          </optgroup>
+                          <optgroup label="US Customary">
+                            <option value="cup">cup (cups)</option>
+                            <option value="tbsp">tbsp (tablespoons)</option>
+                            <option value="tsp">tsp (teaspoons)</option>
+                            <option value="oz">oz (ounces)</option>
+                            <option value="fl oz">fl oz (fluid oz)</option>
+                            <option value="lb">lb (pounds)</option>
+                            <option value="pt">pt (pints)</option>
+                            <option value="qt">qt (quarts)</option>
+                          </optgroup>
+                        </>
+                      ) : (
+                        <>
+                          <optgroup label="US Customary">
+                            <option value="cup">cup (cups)</option>
+                            <option value="tbsp">tbsp (tablespoons)</option>
+                            <option value="tsp">tsp (teaspoons)</option>
+                            <option value="oz">oz (ounces)</option>
+                            <option value="fl oz">fl oz (fluid oz)</option>
+                            <option value="lb">lb (pounds)</option>
+                            <option value="pt">pt (pints)</option>
+                            <option value="qt">qt (quarts)</option>
+                          </optgroup>
+                          <optgroup label="Metric (g, ml, kg)">
+                            <option value="g">g (grams)</option>
+                            <option value="kg">kg (kilograms)</option>
+                            <option value="ml">ml (milliliters)</option>
+                            <option value="l">l (liters)</option>
+                          </optgroup>
+                        </>
+                      )}
+
+                      <optgroup label="Count & Portions">
+                        <option value="">(whole / count)</option>
+                        <option value="piece">piece (pieces)</option>
+                        <option value="pinch">pinch</option>
+                        <option value="clove">clove (cloves)</option>
+                        <option value="slice">slice (slices)</option>
+                        <option value="can">can (cans)</option>
+                        <option value="sprig">sprig (sprigs)</option>
+                        <option value="stalk">stalk (stalks)</option>
+                        <option value="pkg">pkg (package)</option>
+                      </optgroup>
+                      <option value="__custom__">+ Custom unit...</option>
+                    </select>
 
                     {/* Name */}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <input
                         type="text"
                         value={ing.name}
@@ -473,7 +713,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     <button
                       type="button"
                       onClick={() => removeIngredient(index)}
-                      className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer"
+                      className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
                       aria-label="Remove Ingredient"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -481,24 +721,6 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                   </div>
                 ))}
               </div>
-
-              {/* Datalist for common metric & US units */}
-              <datalist id="common-ingredient-units">
-                <option value="g">grams (g)</option>
-                <option value="kg">kilograms (kg)</option>
-                <option value="ml">milliliters (ml)</option>
-                <option value="l">liters (l)</option>
-                <option value="cup">cup</option>
-                <option value="tbsp">tablespoon (tbsp)</option>
-                <option value="tsp">teaspoon (tsp)</option>
-                <option value="oz">ounce (oz)</option>
-                <option value="lb">pound (lb)</option>
-                <option value="pinch">pinch</option>
-                <option value="piece">piece</option>
-                <option value="clove">clove</option>
-                <option value="slice">slice</option>
-                <option value="can">can</option>
-              </datalist>
             </div>
 
             {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}
