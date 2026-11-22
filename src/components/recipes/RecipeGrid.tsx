@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Heart, Utensils, X } from 'lucide-react';
+import { Search, Heart, Plus, X } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { RecipeCard } from './RecipeCard';
 
@@ -117,7 +117,7 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({
         /* Empty State */
         <div className="bg-white border border-[#F3E5D8] rounded-[24px] p-8 text-center my-8 shadow-cozy max-w-md mx-auto">
           <div className="w-14 h-14 bg-[#FFF0F3] rounded-full flex items-center justify-center mx-auto mb-3 text-[#E85D75]">
-            <Utensils className="w-7 h-7 stroke-[1.8]" />
+            <Plus className="w-7 h-7 stroke-[2]" />
           </div>
           <h4 className="font-brand text-lg font-bold text-[#3D231D] mb-1">
             No recipes found
@@ -131,20 +131,20 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({
             onClick={onAddNewRecipe}
             className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#E85D75] hover:bg-[#D44760] text-white text-xs font-bold rounded-full shadow-strawberry transition-all cursor-pointer"
           >
-            <Utensils className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4 text-white stroke-[2.5]" />
             <span>Create New Recipe</span>
           </button>
         </div>
       )}
 
-      {/* Floating Action Button (FAB) - Fork and Spoon Icon */}
+      {/* Floating Action Button (FAB) - Plus Sign Icon */}
       <button
         onClick={onAddNewRecipe}
         className="fixed bottom-24 right-5 sm:bottom-28 sm:right-8 z-50 w-14 h-14 bg-[#E85D75] hover:bg-[#D44760] active:scale-95 text-white rounded-full shadow-cozy-lg flex items-center justify-center transition-all duration-200 border-2 border-white focus:outline-none focus:ring-4 focus:ring-[#E85D75]/30 no-print cursor-pointer"
         title="Add New Recipe"
         aria-label="Add New Recipe"
       >
-        <Utensils className="w-6 h-6 text-white stroke-[2.2]" />
+        <Plus className="w-7 h-7 text-white stroke-[2.6]" />
       </button>
     </div>
   );

@@ -9,33 +9,44 @@ interface BottomNavProps {
   groceryBadgeCount?: number;
 }
 
-// Cute tiny strawberry icon for Recipes tab
-const StrawberryIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => (
-  <svg
-    viewBox="0 0 24 24"
-    className="w-5 h-5 transition-transform"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* Leaves */}
-    <path
-      d="M12 2.5C11.2 3.8 9.5 4.3 7.8 3.8C8.3 5.1 9.6 5.9 11 5.9C9.7 6.8 8.3 7.2 7 6.7C8.4 8 10.2 8 11.5 7.5C11.1 8.8 11.6 10.1 12.5 10.1C13.4 10.1 13.9 8.8 13.5 7.5C14.8 8 16.6 8 18 6.7C16.7 7.2 15.3 6.8 14 5.9C15.4 5.9 16.7 5.1 17.2 3.8C15.5 4.3 13.8 3.8 13 2.5H12Z"
-      fill="#2E7D32"
-    />
-    {/* Strawberry berry */}
-    <path
-      d="M12 6.8C8.2 6.8 5.8 9.7 5.8 13.2C5.8 17.2 9.7 20.8 12 21.8C14.3 20.8 18.2 17.2 18.2 13.2C18.2 9.7 15.8 6.8 12 6.8Z"
-      fill={isActive ? '#E85D75' : '#8C726B'}
-    />
-    {/* Seeds */}
-    <circle cx="9.5" cy="11.5" r="0.7" fill="#FFE599" />
-    <circle cx="14.5" cy="11.5" r="0.7" fill="#FFE599" />
-    <circle cx="12" cy="14" r="0.7" fill="#FFE599" />
-    <circle cx="9.2" cy="16" r="0.7" fill="#FFE599" />
-    <circle cx="14.8" cy="16" r="0.7" fill="#FFE599" />
-    <circle cx="12" cy="18.2" r="0.7" fill="#FFE599" />
-  </svg>
-);
+// Cute illustrated Recipe Book icon matching the user's reference mockup
+const RecipeBookIcon: React.FC<{ isActive: boolean }> = ({ isActive }) => {
+  const color = isActive ? '#E85D75' : '#8C726B';
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-5 h-5 transition-transform"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      stroke={color}
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Book cover & spine */}
+      <path d="M 4.5 17.5 V 4.5 A 1 1 0 0 1 5.5 3.5 H 18.5 A 1 1 0 0 1 19.5 4.5 V 17.5" />
+      {/* Spine crease line */}
+      <line x1="7" y1="3.5" x2="7" y2="17.5" />
+      {/* Pages block at bottom */}
+      <path d="M 7 17.5 H 18.5 A 0.8 0.8 0 0 1 19.3 18.3 V 18.7 A 0.8 0.8 0 0 1 18.5 19.5 H 6 A 1.5 1.5 0 0 1 4.5 18" />
+      {/* Bottom cover edge */}
+      <path d="M 4.5 18 A 2 2 0 0 0 6.5 20.5 H 19.5" />
+      {/* Chef Hat outline on front cover */}
+      <path
+        d="M 11.2 13.2 C 10.3 13.1 9.7 11.8 10.3 10.7 C 10.6 10.1 11.2 9.7 11.8 9.8 C 12.1 8.6 13.3 7.8 14.2 8.1 C 15.1 8.4 15.8 9.4 15.6 10.4 C 16.5 10.7 17.1 11.9 16.6 12.8 C 16.4 13.2 15.8 13.3 15.4 13.2"
+        strokeWidth="1.3"
+      />
+      <rect x="11.2" y="13.2" width="4.2" height="1.6" rx="0.3" strokeWidth="1.2" />
+      {/* Spoon inside hat */}
+      <ellipse cx="12.3" cy="11.1" rx="0.7" ry="1" fill={color} stroke="none" />
+      <line x1="12.3" y1="12" x2="12.3" y2="13.2" strokeWidth="0.9" />
+      {/* Fork inside hat */}
+      <path d="M 13.7 10.3 V 11.3 C 13.7 11.6 14.1 11.8 14.4 11.8 C 14.7 11.8 15.1 11.6 15.1 11.3 V 10.3" strokeWidth="0.8" />
+      <line x1="14.4" y1="10.3" x2="14.4" y2="11.4" strokeWidth="0.8" />
+      <line x1="14.4" y1="11.8" x2="14.4" y2="13.2" strokeWidth="0.9" />
+    </svg>
+  );
+};
 
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
@@ -56,7 +67,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           aria-label="Cookbook Recipes"
         >
           <div className="p-0.5">
-            <StrawberryIcon isActive={activeTab === 'recipes'} />
+            <RecipeBookIcon isActive={activeTab === 'recipes'} />
           </div>
           <span className="text-xs mt-0.5">Recipes</span>
         </button>
