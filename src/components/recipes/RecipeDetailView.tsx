@@ -11,7 +11,6 @@ import {
   Zap,
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types';
-import { BotanicalBranchRight } from '../common/Botanicals';
 import { useWakeLock } from '../../hooks/useWakeLock';
 
 interface RecipeDetailViewProps {
@@ -131,13 +130,8 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
 
       {/* Main Recipe Content */}
       <div className="max-w-lg mx-auto px-5 pt-6 relative">
-        {/* Botanical Line Art Accent on the right */}
-        <div className="absolute top-10 -right-2 pointer-events-none opacity-85">
-          <BotanicalBranchRight className="w-20 h-20 sm:w-24 sm:h-24" color="#4A2C2A" />
-        </div>
-
         {/* Title */}
-        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4A2C2A] tracking-tight mb-2 pr-12">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4A2C2A] tracking-tight mb-2">
           {recipe.title}
         </h1>
 
