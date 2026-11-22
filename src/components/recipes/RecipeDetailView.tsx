@@ -73,7 +73,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
   const currentServings = Math.round(recipe.servings * servingsMultiplier);
 
   return (
-    <div className="min-h-screen bg-[#FFF5F7] pb-28 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#FFF8F6] pb-28 px-4 sm:px-6">
       {/* Centered Desktop Container (max-width: 760px) */}
       <div className="max-w-[760px] mx-auto pt-3 sm:pt-5">
         {/* Hero Image Container with Downward Curved Mask (50% 36px) */}
@@ -82,7 +82,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
             borderBottomLeftRadius: '50% 36px',
             borderBottomRightRadius: '50% 36px',
           }}
-          className="relative w-full aspect-16/10 sm:aspect-16/9 max-h-[420px] bg-[#FFE599]/30 rounded-t-[24px] overflow-hidden shadow-cozy-lg border border-[#F3D5DC] no-print"
+          className="relative w-full aspect-16/10 sm:aspect-16/9 max-h-[420px] bg-[#FDECC8]/30 rounded-t-[24px] overflow-hidden shadow-cozy-lg border border-[#F3E5D8] no-print"
         >
           <img
             src={recipe.heroImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80'}
@@ -94,7 +94,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
               aria-label="Back to Cookbook"
             >
               <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
@@ -104,7 +104,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Print button */}
               <button
                 onClick={() => onPrint(recipe)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title="Print Recipe"
               >
                 <Printer className="w-4 h-4 stroke-[2]" />
@@ -113,7 +113,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Edit button */}
               <button
                 onClick={() => onEdit(recipe)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title="Edit Recipe"
               >
                 <Edit3 className="w-4 h-4 stroke-[2]" />
@@ -122,14 +122,14 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Favorite button */}
               <button
                 onClick={(e) => onToggleFavorite(recipe.id, e)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#4A2C2A] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3D5DC] cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title={recipe.isFavorite ? 'Remove favorite' : 'Add favorite'}
               >
                 <Heart
                   className={`w-5 h-5 transition-transform active:scale-125 ${
                     recipe.isFavorite
-                      ? 'fill-[#FF8FA3] text-[#FF8FA3]'
-                      : 'text-[#8A6866] hover:text-[#FF8FA3]'
+                      ? 'fill-[#E85D75] text-[#E85D75]'
+                      : 'text-[#8C726B] hover:text-[#E85D75]'
                   }`}
                 />
               </button>
@@ -140,42 +140,42 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
         {/* Main Recipe Content */}
         <div className="pt-6 relative px-1">
           {/* Title */}
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4A2C2A] tracking-tight mb-2">
+          <h1 className="font-brand text-2xl sm:text-3xl font-bold text-[#3D231D] tracking-tight mb-2">
             {recipe.title}
           </h1>
 
           {recipe.description && (
-            <p className="text-xs sm:text-sm text-[#8A6866] leading-relaxed mb-4">
+            <p className="text-xs sm:text-sm text-[#8C726B] leading-relaxed mb-4">
               {recipe.description}
             </p>
           )}
 
-          {/* Metadata Chips Row - Butter Yellow Badges with Full Pill Rounding */}
+          {/* Metadata Chips Row - Butter Peach Badges with Full Pill Rounding */}
           <div className="flex flex-wrap items-center gap-2 mb-6">
             {/* Prep Time Metadata Pill */}
-            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#FFE599] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
-              <Clock className="w-3.5 h-3.5 text-[#4A2C2A]" />
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#FDECC8] border border-[#F3E5D8] rounded-full text-xs font-semibold text-[#3D231D] shadow-xs">
+              <Clock className="w-3.5 h-3.5 text-[#3D231D]" />
               <span>{recipe.prepTimeMinutes + (recipe.cookTimeMinutes || 0)} mins total</span>
             </div>
 
             {/* Servings Chip with Live Scaling */}
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#FFE599] border border-[#F5E6BF] rounded-full text-xs font-semibold text-[#4A2C2A] shadow-xs">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#FDECC8] border border-[#F3E5D8] rounded-full text-xs font-semibold text-[#3D231D] shadow-xs">
               <div className="flex items-center space-x-1">
-                <Users className="w-3.5 h-3.5 text-[#4A2C2A]" />
+                <Users className="w-3.5 h-3.5 text-[#3D231D]" />
                 <span>{currentServings} servings</span>
               </div>
-              <div className="flex items-center space-x-1 border-l border-[#F5E6BF] pl-1.5 no-print">
+              <div className="flex items-center space-x-1 border-l border-[#F3E5D8] pl-1.5 no-print">
                 <button
                   type="button"
                   onClick={() => setServingsMultiplier((prev) => Math.max(0.5, prev - 0.5))}
-                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFF3CC] active:scale-95 text-xs font-bold border border-[#F5E6BF] cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer"
                 >
                   -
                 </button>
                 <button
                   type="button"
                   onClick={() => setServingsMultiplier((prev) => prev + 0.5)}
-                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFF3CC] active:scale-95 text-xs font-bold border border-[#F5E6BF] cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer"
                 >
                   +
                 </button>
@@ -185,14 +185,14 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
             {/* Wake Lock Indicator Pill */}
             {isWakeLockSupported && (
               <div
-                className={`inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-[#F5E6BF] ${
+                className={`inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-[#F3E5D8] ${
                   isWakeLockActive
-                    ? 'bg-[#FFE599] text-[#4A2C2A] shadow-xs'
-                    : 'bg-white text-[#8A6866]'
+                    ? 'bg-[#FDECC8] text-[#3D231D] shadow-xs'
+                    : 'bg-white text-[#8C726B]'
                 }`}
                 title="Screen Wake-Lock is active while viewing this recipe"
               >
-                <Zap className={`w-3.5 h-3.5 ${isWakeLockActive ? 'fill-[#4A2C2A] text-[#4A2C2A]' : 'text-[#8A6866]'}`} />
+                <Zap className={`w-3.5 h-3.5 ${isWakeLockActive ? 'fill-[#3D231D] text-[#3D231D]' : 'text-[#8C726B]'}`} />
                 <span>{isWakeLockActive ? 'Screen Awake' : 'Wake Lock'}</span>
               </div>
             )}
@@ -202,9 +202,9 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
           <div className="mb-6 flex gap-2 no-print">
             <button
               onClick={() => onAddToMealPlan(recipe)}
-              className="flex-1 py-3 px-5 bg-[#FFE599] hover:bg-[#FFD966] active:scale-98 text-[#4A2C2A] text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-xs border border-[#F5E6BF] cursor-pointer"
+              className="flex-1 py-3 px-5 bg-[#FDECC8] hover:bg-[#FCE3B0] active:scale-98 text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-xs border border-[#F3E5D8] cursor-pointer"
             >
-              <CalendarPlus className="w-4 h-4 text-[#FF8FA3]" />
+              <CalendarPlus className="w-4 h-4 text-[#E85D75]" />
               <span>Add to Meal Plan</span>
             </button>
           </div>
@@ -212,11 +212,11 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
           {/* Ingredients Checklist */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-serif text-xl font-bold text-[#4A2C2A]">Ingredients</h2>
+              <h2 className="font-brand text-xl font-bold text-[#3D231D]">Ingredients</h2>
               {checkedIngredients.size > 0 && (
                 <button
                   onClick={() => setCheckedIngredients(new Set())}
-                  className="text-xs text-[#FF8FA3] hover:underline font-semibold no-print cursor-pointer"
+                  className="text-xs text-[#E85D75] hover:underline font-semibold no-print cursor-pointer"
                 >
                   Reset checks
                 </button>
@@ -227,7 +227,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {ingredientSections.map(({ sectionName, items }) => (
                 <div key={sectionName} className="space-y-2">
                   {sectionName !== 'General' && (
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] pt-1">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#8C726B] pt-1">
                       {sectionName}
                     </h3>
                   )}
@@ -244,16 +244,16 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                           onClick={() => toggleIngredient(ing.id)}
                           className={`flex items-center space-x-3 p-3 rounded-[16px] transition-all duration-200 cursor-pointer select-none border ${
                             isChecked
-                              ? 'bg-[#FFF0F3]/80 border-[#F3D5DC]'
-                              : 'bg-white hover:bg-[#FFF3CC]/30 border-[#F3D5DC] shadow-cozy'
+                              ? 'bg-[#FDE8EA]/60 border-[#F3E5D8]'
+                              : 'bg-white hover:bg-[#FDECC8]/20 border-[#F3E5D8] shadow-cozy'
                           }`}
                         >
                           {/* Checkbox with border-radius: 6px */}
                           <div
                             className={`w-6 h-6 rounded-[6px] flex items-center justify-center transition-all duration-200 shrink-0 ${
                               isChecked
-                                ? 'bg-[#FF8FA3] text-white shadow-xs'
-                                : 'bg-[#FFE599] border border-[#F5E6BF]'
+                                ? 'bg-[#E85D75] text-white shadow-xs'
+                                : 'bg-[#FDECC8] border border-[#F3E5D8]'
                             }`}
                           >
                             {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
@@ -261,7 +261,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
 
                           {/* Stylized Ingredient Thumbnail */}
                           {icon && (
-                            <div className="w-7 h-7 rounded-[8px] bg-[#FFF3CC] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
+                            <div className="w-7 h-7 rounded-[8px] bg-[#FDECC8]/40 border border-[#F3E5D8] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
                               <img
                                 src={icon.url}
                                 alt={icon.label}
@@ -278,8 +278,8 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                             <span
                               className={`strikethrough-transition ${
                                 isChecked
-                                  ? 'line-through text-[#8A6866]/60 decoration-[#FF8FA3] decoration-2'
-                                  : 'text-[#4A2C2A]'
+                                  ? 'line-through text-[#8C726B]/60 decoration-[#E85D75] decoration-2'
+                                  : 'text-[#3D231D]'
                               }`}
                             >
                               <span className="font-bold mr-1.5">
@@ -297,20 +297,20 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
             </div>
           </div>
 
-          {/* Steps Section - Step cards with generous border-radius: 24px and Butter Yellow */}
+          {/* Steps Section - Step cards with generous border-radius: 24px */}
           <div className="mb-8">
-            <h2 className="font-serif text-xl font-bold text-[#4A2C2A] mb-3">Steps</h2>
+            <h2 className="font-brand text-xl font-bold text-[#3D231D] mb-3">Steps</h2>
 
             <div className="space-y-3">
               {recipe.steps.map((step) => (
                 <div
                   key={step.id}
-                  className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-[24px] p-4 shadow-cozy flex items-start space-x-3.5 hover:bg-[#FFEAA8] transition-colors"
+                  className="bg-white border border-[#F3E5D8] rounded-[24px] p-4 shadow-cozy flex items-start space-x-3.5 hover:bg-[#FFFDF9] transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#FFE599] text-[#4A2C2A] font-serif font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-[#F5E6BF]">
+                  <div className="w-7 h-7 rounded-full bg-[#FDECC8] text-[#3D231D] font-brand font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-[#F3E5D8]">
                     {step.stepNumber}
                   </div>
-                  <div className="flex-1 text-xs sm:text-sm text-[#4A2C2A] leading-relaxed pt-0.5 font-medium">
+                  <div className="flex-1 text-xs sm:text-sm text-[#3D231D] leading-relaxed pt-0.5 font-medium">
                     {step.instruction}
                   </div>
                 </div>

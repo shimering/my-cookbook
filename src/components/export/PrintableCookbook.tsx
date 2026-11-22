@@ -15,12 +15,12 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
   return (
     <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
       {/* Non-printed Floating Action Bar */}
-      <div className="sticky top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-b border-[#F3D5DC] px-6 py-3 flex items-center justify-between no-print shadow-xs">
+      <div className="sticky top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-md border-b border-[#F3E5D8] px-6 py-3 flex items-center justify-between no-print shadow-xs">
         <div>
-          <h2 className="font-serif text-lg font-bold text-[#4A2C2A]">
+          <h2 className="font-serif text-lg font-bold text-[#3D231D]">
             Print Preview ({recipes.length} {recipes.length === 1 ? 'Recipe' : 'Recipes'})
           </h2>
-          <span className="text-xs text-[#8A6866]">
+          <span className="text-xs text-[#8C726B]">
             Use your browser's print dialog to save as PDF or print physically.
           </span>
         </div>
@@ -35,7 +35,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-[#FFF5F7] text-[#4A2C2A] transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-[#FFF5F7] text-[#3D231D] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -47,14 +47,14 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
         {recipes.map((recipe, index) => (
           <div
             key={recipe.id}
-            className={`pb-12 ${index < recipes.length - 1 ? 'page-break mb-12 border-b border-[#F3D5DC]' : ''}`}
+            className={`pb-12 ${index < recipes.length - 1 ? 'page-break mb-12 border-b border-[#F3E5D8]' : ''}`}
           >
             {/* Header */}
-            <div className="text-center pb-6 border-b border-[#F3D5DC]/60 mb-6">
+            <div className="text-center pb-6 border-b border-[#F3E5D8]/60 mb-6">
               <span className="text-xs uppercase tracking-widest text-[#FF8FA3] font-bold">
                 My Cookbook
               </span>
-              <h1 className="font-serif text-3xl font-bold text-[#4A2C2A] mt-1 mb-2">
+              <h1 className="font-serif text-3xl font-bold text-[#3D231D] mt-1 mb-2">
                 {recipe.title}
               </h1>
               {recipe.description && (
@@ -72,7 +72,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
             {/* Photo & Ingredients Side by Side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {recipe.heroImage && (
-                <div className="rounded-[20px] overflow-hidden aspect-4/3 max-h-72 bg-[#FFF5F7] border border-[#F3D5DC]">
+                <div className="rounded-[20px] overflow-hidden aspect-4/3 max-h-72 bg-[#FFF5F7] border border-[#F3E5D8]">
                   <img
                     src={recipe.heroImage}
                     alt={recipe.title}
@@ -83,7 +83,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
 
               {/* Ingredients List */}
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#4A2C2A] mb-3 pb-1 border-b border-[#F3D5DC]">
+                <h3 className="font-serif text-lg font-bold text-[#3D231D] mb-3 pb-1 border-b border-[#F3E5D8]">
                   Ingredients
                 </h3>
                 <ul className="space-y-1.5 text-xs text-gray-800">
@@ -104,13 +104,13 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
 
             {/* Numbered Steps */}
             <div>
-              <h3 className="font-serif text-lg font-bold text-[#4A2C2A] mb-3 pb-1 border-b border-[#F3D5DC]">
+              <h3 className="font-serif text-lg font-bold text-[#3D231D] mb-3 pb-1 border-b border-[#F3E5D8]">
                 Instructions
               </h3>
               <div className="space-y-3 text-xs leading-relaxed text-gray-800">
                 {recipe.steps.map((step) => (
                   <div key={step.id} className="flex items-start space-x-3">
-                    <span className="w-5 h-5 rounded-full bg-[#FFE599] text-[#4A2C2A] font-bold text-center leading-5 shrink-0 text-[11px] border border-[#F5E6BF]">
+                    <span className="w-5 h-5 rounded-full bg-[#FFE599] text-[#3D231D] font-bold text-center leading-5 shrink-0 text-[11px] border border-[#F5E6BF]">
                       {step.stepNumber}
                     </span>
                     <p className="pt-0.5">{step.instruction}</p>

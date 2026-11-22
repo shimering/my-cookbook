@@ -193,7 +193,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex justify-center items-end sm:items-center sm:p-4 overflow-hidden overscroll-none"
+      className="fixed inset-0 z-50 bg-[#3D231D]/40 backdrop-blur-xs flex justify-center items-end sm:items-center sm:p-4 overflow-hidden overscroll-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -201,19 +201,19 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       <div
         ref={modalCardRef}
         tabIndex={-1}
-        className="bg-[#FFF5F7] w-full max-w-lg h-[92vh] sm:h-auto sm:max-h-[90vh] rounded-t-[24px] sm:rounded-[24px] flex flex-col shadow-cozy-lg border border-[#F3D5DC] overflow-hidden overscroll-contain focus:outline-none animate-in slide-in-from-bottom-6 duration-300"
+        className="bg-[#FFF8F6] w-full max-w-lg h-[92vh] sm:h-auto sm:max-h-[90vh] rounded-t-[24px] sm:rounded-[24px] flex flex-col shadow-cozy-lg border border-[#F3E5D8] overflow-hidden overscroll-contain focus:outline-none animate-in slide-in-from-bottom-6 duration-300"
       >
         {/* Top Bar Header */}
-        <div className="relative px-5 py-4 border-b border-[#F3D5DC] bg-white flex items-center justify-between shrink-0 sticky top-0 z-20">
+        <div className="relative px-5 py-4 border-b border-[#F3E5D8] bg-white flex items-center justify-between shrink-0 sticky top-0 z-20">
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 -ml-1.5 rounded-full hover:bg-[#FFF0F3] text-[#4A2C2A] transition-colors cursor-pointer"
+            className="p-1.5 -ml-1.5 rounded-full hover:bg-[#FFF0F3] text-[#3D231D] transition-colors cursor-pointer"
             aria-label="Back"
           >
             <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
           </button>
-          <h2 className="font-serif text-lg font-bold text-[#4A2C2A]">
+          <h2 className="font-brand text-lg font-bold text-[#3D231D]">
             {isEditing ? 'Edit Recipe' : 'New Recipe'}
           </h2>
           <div className="w-8" />
@@ -234,13 +234,13 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 className="hidden"
               />
               {heroImage ? (
-                <div className="relative w-full aspect-video rounded-[24px] overflow-hidden border-2 border-[#F3D5DC] bg-white shadow-inner group">
+                <div className="relative w-full aspect-video rounded-[24px] overflow-hidden border border-[#F3E5D8] bg-white shadow-inner group">
                   <img src={heroImage} alt="Recipe Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white text-[#4A2C2A] text-xs font-semibold rounded-full shadow-md cursor-pointer"
+                      className="px-4 py-2 bg-white text-[#3D231D] text-xs font-semibold rounded-full shadow-md cursor-pointer"
                     >
                       Change Photo
                     </button>
@@ -256,22 +256,22 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-8 border-2 border-dashed border-[#FFB3C1] bg-white rounded-[24px] flex flex-col items-center justify-center cursor-pointer hover:bg-[#FFF0F3] transition-all duration-200 group"
+                  className="w-full py-8 border-2 border-dashed border-[#F3E5D8] bg-white rounded-[24px] flex flex-col items-center justify-center cursor-pointer hover:bg-[#FDE8EA]/30 transition-all duration-200 group"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#FFF0F3] flex items-center justify-center text-[#FF8FA3] shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-full bg-[#FDE8EA] flex items-center justify-center text-[#E85D75] shadow-xs mb-2 group-hover:scale-105 transition-transform">
                     <Camera className="w-6 h-6" />
                   </div>
-                  <span className="text-sm font-semibold text-[#8A6866]">
+                  <span className="text-sm font-semibold text-[#8C726B]">
                     {isCompressing ? 'Compressing photo...' : 'Tap to upload photo'}
                   </span>
-                  <span className="text-[11px] text-[#8A6866]/70 mt-0.5">Camera or Photo Gallery</span>
+                  <span className="text-[11px] text-[#8C726B]/70 mt-0.5">Camera or Photo Gallery</span>
                 </div>
               )}
             </div>
 
             {/* Recipe Title Input (border-radius: 16px) */}
             <div>
-              <label className="block text-xs font-bold text-[#8A6866] mb-1.5">
+              <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
                 Recipe Title
               </label>
               <input
@@ -281,13 +281,13 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Cinnamon Rolls"
-                className="w-full px-4 py-3 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-base font-serif font-bold text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 focus:border-[#FF8FA3] shadow-xs"
+                className="w-full px-4 py-3 bg-white border border-[#F3E5D8] rounded-[16px] text-base font-brand font-bold text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 focus:border-[#E85D75] shadow-cozy"
               />
             </div>
 
             {/* Description (border-radius: 16px) */}
             <div>
-              <label className="block text-xs font-bold text-[#8A6866] mb-1.5">
+              <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
                 Description (Optional)
               </label>
               <textarea
@@ -295,14 +295,14 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="A brief note about this delicious dish..."
-                className="w-full px-4 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 shadow-xs resize-none"
+                className="w-full px-4 py-2.5 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 shadow-cozy resize-none"
               />
             </div>
 
-            {/* Metadata Row: Prep Time, Cook Time, Servings (Butter Yellow, border-radius: 16px) */}
+            {/* Metadata Row: Prep Time, Cook Time, Servings (Butter Peach, border-radius: 16px) */}
             <div className="grid grid-cols-3 gap-2.5">
               <div>
-                <label className="block text-xs font-bold text-[#8A6866] mb-1">
+                <label className="block text-xs font-bold text-[#8C726B] mb-1">
                   Prep Time
                 </label>
                 <div className="relative">
@@ -312,16 +312,16 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     value={prepTimeMinutes}
                     onChange={(e) => setPrepTimeMinutes(e.target.value)}
                     placeholder="15"
-                    className="w-full px-3 py-2.5 bg-[#FFE599] border border-[#F5E6BF] rounded-[16px] text-sm font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 shadow-xs"
+                    className="w-full px-3 py-2.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[16px] text-sm font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 shadow-xs"
                   />
-                  <span className="absolute right-2.5 top-2.5 text-[11px] text-[#8A6866] pointer-events-none">
+                  <span className="absolute right-2.5 top-2.5 text-[11px] text-[#8C726B] pointer-events-none">
                     mins
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#8A6866] mb-1">
+                <label className="block text-xs font-bold text-[#8C726B] mb-1">
                   Cook Time
                 </label>
                 <div className="relative">
@@ -331,16 +331,16 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     value={cookTimeMinutes}
                     onChange={(e) => setCookTimeMinutes(e.target.value)}
                     placeholder="20"
-                    className="w-full px-3 py-2.5 bg-[#FFE599] border border-[#F5E6BF] rounded-[16px] text-sm font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 shadow-xs"
+                    className="w-full px-3 py-2.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[16px] text-sm font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 shadow-xs"
                   />
-                  <span className="absolute right-2.5 top-2.5 text-[11px] text-[#8A6866] pointer-events-none">
+                  <span className="absolute right-2.5 top-2.5 text-[11px] text-[#8C726B] pointer-events-none">
                     mins
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#8A6866] mb-1">
+                <label className="block text-xs font-bold text-[#8C726B] mb-1">
                   Servings
                 </label>
                 <input
@@ -349,14 +349,14 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                   value={servings}
                   onChange={(e) => setServings(e.target.value)}
                   placeholder="4"
-                  className="w-full px-3 py-2.5 bg-[#FFE599] border border-[#F5E6BF] rounded-[16px] text-sm font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 shadow-xs"
+                  className="w-full px-3 py-2.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[16px] text-sm font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 shadow-xs"
                 />
               </div>
             </div>
 
             {/* Categories / Tags (Full Pill Rounding) */}
             <div>
-              <label className="block text-xs font-bold text-[#8A6866] mb-1.5">
+              <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
                 Categories & Tags
               </label>
               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -369,8 +369,8 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       onClick={() => toggleCategory(cat)}
                       className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#FF8FA3] text-white shadow-xs font-bold'
-                          : 'bg-white border border-[#F3D5DC] text-[#4A2C2A] hover:bg-[#FFE599]/40'
+                          ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                          : 'bg-white border border-[#F3E5D8] text-[#3D231D] hover:bg-[#FDECC8]'
                       }`}
                     >
                       {cat}
@@ -391,12 +391,12 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     }
                   }}
                   placeholder="Add custom tag (e.g. Gluten-Free)"
-                  className="flex-1 px-3 py-2 bg-white border border-[#F3D5DC] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#FF8FA3]"
+                  className="flex-1 px-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75]"
                 />
                 <button
                   type="button"
                   onClick={addCustomTag}
-                  className="px-4 py-2 bg-[#FFE599] hover:bg-[#FFD966] text-[#4A2C2A] text-xs font-bold rounded-full border border-[#F5E6BF] cursor-pointer"
+                  className="px-4 py-2 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white text-[#3D231D] text-xs font-bold rounded-full border border-[#F3E5D8] cursor-pointer transition-colors"
                 >
                   Add Tag
                 </button>
@@ -406,12 +406,12 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
             {/* Structured Ingredients Section */}
             <div className="pt-2">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-serif text-base font-bold text-[#4A2C2A]">Ingredients</h3>
+                <h3 className="font-brand text-base font-bold text-[#3D231D]">Ingredients</h3>
                 <div className="flex space-x-1.5">
                   <button
                     type="button"
                     onClick={() => addIngredient()}
-                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-white hover:bg-[#FFF0F3] border border-[#F3D5DC] text-[#FF8FA3] text-xs font-bold rounded-full transition-colors shadow-xs cursor-pointer"
+                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-white hover:bg-[#FDE8EA] border border-[#F3E5D8] text-[#E85D75] text-xs font-bold rounded-full transition-colors shadow-xs cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>Add Line</span>
@@ -422,7 +422,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       const sec = prompt('Enter section header (e.g. "For the Sauce"):');
                       if (sec) addIngredient(sec);
                     }}
-                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FFE599] hover:bg-[#FFD966] text-[#4A2C2A] text-xs font-bold rounded-full transition-colors border border-[#F5E6BF] cursor-pointer"
+                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white text-[#3D231D] text-xs font-bold rounded-full transition-colors border border-[#F3E5D8] cursor-pointer"
                   >
                     <span>+ Section</span>
                   </button>
@@ -433,9 +433,9 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 {ingredients.map((ing, index) => (
                   <div
                     key={ing.id}
-                    className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3D5DC] shadow-xs"
+                    className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
                   >
-                    {/* Amount / Fraction (Butter Yellow) */}
+                    {/* Amount / Fraction (Butter Peach) */}
                     <input
                       type="text"
                       value={ing.displayFraction || ing.amount || ''}
@@ -445,16 +445,16 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         if (!isNaN(parsed)) handleIngredientChange(index, 'amount', parsed);
                       }}
                       placeholder="Qty"
-                      className="w-14 px-2 py-1.5 bg-[#FFE599] border border-[#F5E6BF] rounded-[10px] text-xs font-semibold text-center text-[#4A2C2A] focus:outline-none focus:border-[#FF8FA3]"
+                      className="w-14 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
                     />
 
-                    {/* Unit (Butter Yellow) */}
+                    {/* Unit (Butter Peach) */}
                     <input
                       type="text"
                       value={ing.unit || ''}
                       onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
                       placeholder="Unit (cup, tbsp...)"
-                      className="w-24 px-2 py-1.5 bg-[#FFE599] border border-[#F5E6BF] rounded-[10px] text-xs font-medium text-[#4A2C2A] focus:outline-none focus:border-[#FF8FA3]"
+                      className="w-24 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] focus:outline-none focus:border-[#E85D75]"
                     />
 
                     {/* Name */}
@@ -464,7 +464,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         value={ing.name}
                         onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
                         placeholder={ing.section ? `[${ing.section}] Ingredient name` : 'Ingredient name'}
-                        className="w-full px-2.5 py-1.5 bg-white border border-[#F3D5DC] rounded-[10px] text-xs font-medium text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#FF8FA3]"
+                        className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75]"
                       />
                     </div>
 
@@ -472,7 +472,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     <button
                       type="button"
                       onClick={() => removeIngredient(index)}
-                      className="p-1.5 text-[#8A6866] hover:text-red-500 rounded-lg hover:bg-[#FFF0F3] transition-colors cursor-pointer"
+                      className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer"
                       aria-label="Remove Ingredient"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -482,14 +482,14 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               </div>
             </div>
 
-            {/* Steps Section - Step cards with generous border-radius: 24px and Butter Yellow */}
+            {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}
             <div className="pt-2">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-serif text-base font-bold text-[#4A2C2A]">Steps</h3>
+                <h3 className="font-brand text-base font-bold text-[#3D231D]">Steps</h3>
                 <button
                   type="button"
                   onClick={addStep}
-                  className="inline-flex items-center space-x-1 px-3.5 py-1 bg-white hover:bg-[#FFF0F3] border border-[#F3D5DC] text-[#FF8FA3] text-xs font-bold rounded-full transition-colors shadow-xs cursor-pointer"
+                  className="inline-flex items-center space-x-1 px-3.5 py-1 bg-white hover:bg-[#FDE8EA] border border-[#F3E5D8] text-[#E85D75] text-xs font-bold rounded-full transition-colors shadow-xs cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Add Step</span>
@@ -500,10 +500,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 {steps.map((step, index) => (
                   <div
                     key={step.id}
-                    className="bg-[#FFF3CC] border border-[#F5E6BF] p-3.5 rounded-[24px] shadow-xs space-y-2"
+                    className="bg-[#FDECC8]/40 border border-[#F3E5D8] p-3.5 rounded-[24px] shadow-xs space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#4A2C2A] font-serif">
+                      <span className="text-xs font-bold text-[#3D231D] font-brand">
                         Step {step.stepNumber}
                       </span>
                       <div className="flex items-center space-x-1">
@@ -511,7 +511,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                           type="button"
                           disabled={index === 0}
                           onClick={() => moveStep(index, 'up')}
-                          className="p-1 text-[#8A6866] hover:text-[#4A2C2A] disabled:opacity-30 cursor-pointer"
+                          className="p-1 text-[#8C726B] hover:text-[#3D231D] disabled:opacity-30 cursor-pointer"
                           title="Move Up"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -520,7 +520,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                           type="button"
                           disabled={index === steps.length - 1}
                           onClick={() => moveStep(index, 'down')}
-                          className="p-1 text-[#8A6866] hover:text-[#4A2C2A] disabled:opacity-30 cursor-pointer"
+                          className="p-1 text-[#8C726B] hover:text-[#3D231D] disabled:opacity-30 cursor-pointer"
                           title="Move Down"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
@@ -528,7 +528,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         <button
                           type="button"
                           onClick={() => removeStep(index)}
-                          className="p-1 text-[#8A6866] hover:text-red-500 ml-1 cursor-pointer"
+                          className="p-1 text-[#8C726B] hover:text-red-500 ml-1 cursor-pointer"
                           title="Remove Step"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -541,7 +541,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       value={step.instruction}
                       onChange={(e) => handleStepChange(index, e.target.value)}
                       placeholder="e.g. Warm the milk and whisk in yeast..."
-                      className="w-full px-3 py-2 bg-white border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 resize-none"
+                      className="w-full px-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 resize-none"
                     />
                   </div>
                 ))}
@@ -550,10 +550,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
           </div>
 
           {/* Sticky Footer Bar with Prominent Save Recipe Button (Full Pill Rounding) */}
-          <div className="p-4 border-t border-[#F3D5DC] bg-white shrink-0 z-20 shadow-xs">
+          <div className="p-4 border-t border-[#F3E5D8] bg-white shrink-0 z-20 shadow-xs">
             <button
               type="submit"
-              className="w-full py-3.5 px-6 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-98 text-white font-bold rounded-full shadow-pink-glow text-base transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2"
+              className="w-full py-3.5 px-6 bg-[#E85D75] hover:bg-[#D94C65] active:scale-98 text-white font-bold rounded-full shadow-strawberry text-base transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2"
             >
               <span>Save Recipe</span>
             </button>

@@ -187,7 +187,7 @@ export function App() {
 
   // Dynamic background & selection colors per tab
   const getTabBgColor = () => {
-    if (selectedRecipe) return 'bg-[#FFF5F7]';
+    if (selectedRecipe) return 'bg-[#FFF8F6]';
     switch (activeTab) {
       case 'planner':
         return 'bg-[#FAF5FF]'; // Soft lavender purple
@@ -195,7 +195,7 @@ export function App() {
         return 'bg-[#F0FDF4]'; // Soft fresh mint green
       case 'recipes':
       default:
-        return 'bg-[#FFF5F7]'; // Signature strawberry milk blush pink
+        return 'bg-[#FFF8F6]'; // Warm Almond Cream
     }
   };
 
@@ -207,13 +207,13 @@ export function App() {
         return 'selection:bg-[#16A34A] selection:text-white';
       case 'recipes':
       default:
-        return 'selection:bg-[#FF8FA3] selection:text-white';
+        return 'selection:bg-[#E85D75] selection:text-white';
     }
   };
 
   return (
     <div
-      className={`min-h-screen ${getTabBgColor()} ${getTabSelectionColor()} text-[#4A2C2A] flex flex-col justify-between transition-colors duration-300`}
+      className={`min-h-screen ${getTabBgColor()} ${getTabSelectionColor()} text-[#3D231D] flex flex-col justify-between transition-colors duration-300`}
     >
       {/* Top Header (Visible unless viewing recipe in Cooking Mode or full print view) */}
       {!selectedRecipe && !printRecipes && (

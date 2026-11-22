@@ -2,45 +2,50 @@
 
 @layer base {
   :root {
-    --color-blush: #FFF5F7;
-    --color-cream: #FFFFFF;
-    --color-butter: #FFE599;
-    --color-butter-light: #FFF3CC;
-    --color-strawberry: #FF8FA3;
-    --color-strawberry-hover: #FF758F;
-    --color-berry: #4A2C2A;
-    --color-berry-muted: #8A6866;
+    --color-almond: #FFF8F6;
+    --color-milk-white: #FFFFFF;
+    --color-warm-border: #F3E5D8;
+    --color-strawberry-deep: #E85D75;
+    --color-strawberry-hover: #D44760;
+    --color-butter-peach: #FDECC8;
+    --color-dark-cocoa: #3D231D;
+    --color-warm-taupe: #8C726B;
   }
 
   body {
-    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #FFF5F7;
-    color: #4A2C2A;
+    font-family: 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #FFF8F6;
+    color: #3D231D;
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
   }
 
-  h1, h2, h3, .font-display {
-    font-family: 'Playfair Display', Georgia, serif;
+  h1, h2, h3, .font-display, .font-brand {
+    font-family: 'Cooper Black', 'Fredoka', 'Belgrano', Georgia, serif;
+    letter-spacing: -0.01em;
   }
 }
 
-/* Custom warm shadows matching Strawberry Milk & Butter aesthetic */
+/* Custom warm shadows matching Warm Almond & Floating Milk White aesthetic */
 .shadow-cozy {
-  box-shadow: 0 4px 20px -2px rgba(74, 44, 42, 0.07), 0 2px 6px -1px rgba(74, 44, 42, 0.04);
+  box-shadow: 0 8px 24px -4px rgba(61, 35, 29, 0.07), 0 2px 6px -1px rgba(61, 35, 29, 0.03);
 }
 
 .shadow-cozy-lg {
-  box-shadow: 0 10px 30px -4px rgba(74, 44, 42, 0.1), 0 4px 12px -2px rgba(74, 44, 42, 0.06);
+  box-shadow: 0 14px 36px -6px rgba(61, 35, 29, 0.12), 0 4px 12px -2px rgba(61, 35, 29, 0.05);
+}
+
+.shadow-strawberry {
+  box-shadow: 0 6px 18px -2px rgba(232, 93, 117, 0.38), 0 2px 5px -1px rgba(61, 35, 29, 0.08);
 }
 
 .shadow-pink-glow {
-  box-shadow: 0 4px 14px -2px rgba(255, 143, 163, 0.4), 0 2px 5px -1px rgba(74, 44, 42, 0.08);
+  box-shadow: 0 6px 18px -2px rgba(232, 93, 117, 0.38), 0 2px 5px -1px rgba(61, 35, 29, 0.08);
 }
 
 .shadow-butter {
-  box-shadow: 0 4px 16px rgba(255, 229, 153, 0.4);
+  box-shadow: 0 4px 16px rgba(253, 236, 200, 0.5);
 }
 
 /* Custom smooth transitions for checkboxes and strikethrough */

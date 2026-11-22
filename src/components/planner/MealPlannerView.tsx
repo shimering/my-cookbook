@@ -163,28 +163,28 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   return (
     <div className="pb-28 px-4 sm:px-6 max-w-[1120px] mx-auto">
       {/* Week Header & Navigation - Rounded 24px */}
-      <div className="flex items-center justify-between mb-4 bg-white border border-[#F3D5DC] rounded-[24px] p-3.5 sm:p-4 shadow-cozy">
+      <div className="flex items-center justify-between mb-4 bg-white border border-[#F3E5D8] rounded-[24px] p-3.5 sm:p-4 shadow-cozy">
         <button
           onClick={() => changeWeek('prev')}
-          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#4A2C2A] transition-colors cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] transition-colors cursor-pointer"
           title="Previous Week"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-1.5 text-xs font-bold text-[#8A6866]">
+          <div className="flex items-center justify-center space-x-1.5 text-xs font-bold text-[#8C726B]">
             <CalendarIcon className="w-3.5 h-3.5 text-[#8B5CF6]" />
             <span>Weekly Meal Plan</span>
           </div>
-          <span className="font-serif text-sm sm:text-base font-bold text-[#4A2C2A]">
+          <span className="font-serif text-sm sm:text-base font-bold text-[#3D231D]">
             {weekDays[0].formatted} – {weekDays[6].formatted}
           </span>
         </div>
 
         <button
           onClick={() => changeWeek('next')}
-          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#4A2C2A] transition-colors cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] transition-colors cursor-pointer"
           title="Next Week"
         >
           <ChevronRight className="w-5 h-5" />
@@ -205,10 +205,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               className={`flex flex-col items-center py-2.5 px-1 rounded-[16px] transition-all duration-200 border cursor-pointer ${
                 isSelected
                   ? 'bg-[#8B5CF6] text-white border-[#7C3AED] shadow-sm font-bold'
-                  : 'bg-white hover:bg-[#FFF3CC]/50 text-[#4A2C2A] border-[#F3D5DC] shadow-xs'
+                  : 'bg-white hover:bg-[#FFF3CC]/50 text-[#3D231D] border-[#F3E5D8] shadow-xs'
               }`}
             >
-              <span className={`text-[10px] font-bold ${isSelected ? 'text-white' : 'text-[#8A6866]'}`}>
+              <span className={`text-[10px] font-bold ${isSelected ? 'text-white' : 'text-[#8C726B]'}`}>
                 {day.dayName}
               </span>
               <span className="text-xs font-serif font-bold mt-0.5">
@@ -232,11 +232,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       {/* Generate Grocery List Floating Trigger Banner - Butter Yellow, Rounded 24px */}
       <div className="bg-[#FFE599] border border-[#F5E6BF] rounded-[24px] p-4 mb-5 shadow-cozy flex items-center justify-between">
         <div>
-          <h4 className="text-xs font-bold text-[#4A2C2A] flex items-center space-x-1.5">
+          <h4 className="text-xs font-bold text-[#3D231D] flex items-center space-x-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
             <span>Generate Groceries</span>
           </h4>
-          <p className="text-[11px] text-[#8A6866] mt-0.5">
+          <p className="text-[11px] text-[#8C726B] mt-0.5">
             {weekMealsCount} {weekMealsCount === 1 ? 'meal' : 'meals'} planned for this week
           </p>
         </div>
@@ -263,19 +263,19 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           return (
             <div
               key={slot}
-              className="bg-white border border-[#F3D5DC] rounded-[24px] p-4 shadow-cozy space-y-3"
+              className="bg-white border border-[#F3E5D8] rounded-[24px] p-4 shadow-cozy space-y-3"
             >
               {/* Slot Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-base">{icon}</span>
-                  <h3 className="font-serif text-sm font-bold text-[#4A2C2A]">{label}</h3>
+                  <h3 className="font-serif text-sm font-bold text-[#3D231D]">{label}</h3>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setModalSlot({ date: activeDay.dateStr, slot })}
-                  className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FFE599] hover:bg-[#FFD966] text-[#4A2C2A] text-xs font-bold rounded-full transition-colors border border-[#F5E6BF] cursor-pointer"
+                  className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FFE599] hover:bg-[#FFD966] text-[#3D231D] text-xs font-bold rounded-full transition-colors border border-[#F5E6BF] cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Add</span>
@@ -304,23 +304,23 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                               className="w-10 h-10 rounded-[10px] object-cover shrink-0 border border-[#F5E6BF]"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-[10px] bg-[#FFE599] flex items-center justify-center shrink-0 text-[#4A2C2A]">
+                            <div className="w-10 h-10 rounded-[10px] bg-[#FFE599] flex items-center justify-center shrink-0 text-[#3D231D]">
                               <Utensils className="w-4 h-4" />
                             </div>
                           )}
 
                           <div className="min-w-0">
-                            <span className="text-xs font-bold text-[#4A2C2A] truncate block">
+                            <span className="text-xs font-bold text-[#3D231D] truncate block">
                               {meal.recipeTitle || meal.customNote}
                             </span>
-                            <span className="text-[10px] text-[#8A6866]">
+                            <span className="text-[10px] text-[#8C726B]">
                               {matchedRecipe ? 'From Cookbook' : 'Custom Note'}
                             </span>
                           </div>
                         </div>
 
                         {/* Serving Multiplier Selector */}
-                        <div className="flex items-center space-x-1 text-xs text-[#8A6866] shrink-0">
+                        <div className="flex items-center space-x-1 text-xs text-[#8C726B] shrink-0">
                           <button
                             type="button"
                             onClick={() =>
@@ -329,12 +329,12 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                                 Math.max(0.5, meal.servingsMultiplier - 0.5)
                               )
                             }
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
+                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
                             title="Decrease Servings"
                           >
                             -
                           </button>
-                          <span className="font-bold w-6 text-center text-[#4A2C2A]">
+                          <span className="font-bold w-6 text-center text-[#3D231D]">
                             {meal.servingsMultiplier}x
                           </span>
                           <button
@@ -342,7 +342,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                             onClick={() =>
                               onUpdateServingMultiplier(meal.id, meal.servingsMultiplier + 0.5)
                             }
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#4A2C2A] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
+                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
                             title="Increase Servings"
                           >
                             +
@@ -352,7 +352,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                           <button
                             type="button"
                             onClick={() => onRemoveMeal(meal.id)}
-                            className="p-1.5 text-[#8A6866] hover:text-red-500 rounded-lg transition-colors ml-1 cursor-pointer"
+                            className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg transition-colors ml-1 cursor-pointer"
                             title="Remove from meal plan"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -365,7 +365,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               ) : (
                 <div
                   onClick={() => setModalSlot({ date: activeDay.dateStr, slot })}
-                  className="py-3 px-3 border border-dashed border-[#F3D5DC] rounded-[16px] text-center text-[11px] text-[#8A6866] cursor-pointer hover:bg-[#FFF3CC]/30 transition-colors"
+                  className="py-3 px-3 border border-dashed border-[#F3E5D8] rounded-[16px] text-center text-[11px] text-[#8C726B] cursor-pointer hover:bg-[#FFF3CC]/30 transition-colors"
                 >
                   Empty slot — tap to plan {label.toLowerCase()}
                 </div>
@@ -378,7 +378,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       {/* Add Meal Modal - Rounded 24px */}
       {modalSlot && (
         <div
-          className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 overflow-hidden overscroll-none"
+          className="fixed inset-0 z-50 bg-[#3D231D]/40 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 overflow-hidden overscroll-none"
           onClick={(e) => {
             if (e.target === e.currentTarget) setModalSlot(null);
           }}
@@ -387,14 +387,14 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             {/* Modal Header */}
             <div className="px-5 py-3.5 border-b border-[#E9D5FF] bg-white flex items-center justify-between">
               <div>
-                <h3 className="font-serif text-base font-bold text-[#4A2C2A]">
+                <h3 className="font-serif text-base font-bold text-[#3D231D]">
                   Add to {modalSlot.slot.charAt(0).toUpperCase() + modalSlot.slot.slice(1)}
                 </h3>
-                <span className="text-[11px] text-[#8A6866]">{activeDay.formatted}</span>
+                <span className="text-[11px] text-[#8C726B]">{activeDay.formatted}</span>
               </div>
               <button
                 onClick={() => setModalSlot(null)}
-                className="p-1.5 rounded-full hover:bg-[#F3E8FF] text-[#8A6866] cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[#F3E8FF] text-[#8C726B] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -403,17 +403,17 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* Option A: Pick From Saved Recipes */}
               <div>
-                <label className="block text-xs font-bold text-[#8A6866] mb-1.5">
+                <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
                   Choose from Saved Recipes
                 </label>
                 <div className="relative mb-2">
-                  <Search className="w-3.5 h-3.5 text-[#8A6866] absolute left-3 top-2.5" />
+                  <Search className="w-3.5 h-3.5 text-[#8C726B] absolute left-3 top-2.5" />
                   <input
                     type="text"
                     value={recipeSearch}
                     onChange={(e) => setRecipeSearch(e.target.value)}
                     placeholder="Search cookbook..."
-                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3D5DC] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#FF8FA3]"
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#FF8FA3]"
                   />
                 </div>
 
@@ -422,22 +422,22 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     <div
                       key={recipe.id}
                       onClick={() => handleConfirmAddMeal(recipe)}
-                      className="flex items-center space-x-2.5 p-2 bg-white hover:bg-[#FFF3CC]/40 border border-[#F3D5DC] rounded-[16px] cursor-pointer transition-colors"
+                      className="flex items-center space-x-2.5 p-2 bg-white hover:bg-[#FFF3CC]/40 border border-[#F3E5D8] rounded-[16px] cursor-pointer transition-colors"
                     >
                       <img
                         src={recipe.heroImage}
                         alt={recipe.title}
-                        className="w-9 h-9 rounded-[10px] object-cover shrink-0 border border-[#F3D5DC]"
+                        className="w-9 h-9 rounded-[10px] object-cover shrink-0 border border-[#F3E5D8]"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold text-[#4A2C2A] block truncate">
+                        <span className="text-xs font-bold text-[#3D231D] block truncate">
                           {recipe.title}
                         </span>
-                        <span className="text-[10px] text-[#8A6866]">
+                        <span className="text-[10px] text-[#8C726B]">
                           ⏱ {recipe.prepTimeMinutes} mins
                         </span>
                       </div>
-                      <span className="text-xs font-bold text-[#4A2C2A] px-3 py-1 bg-[#FFE599] rounded-full border border-[#F5E6BF]">
+                      <span className="text-xs font-bold text-[#3D231D] px-3 py-1 bg-[#FFE599] rounded-full border border-[#F5E6BF]">
                         Select
                       </span>
                     </div>
@@ -447,15 +447,15 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
               {/* Divider */}
               <div className="relative flex items-center justify-center">
-                <div className="border-t border-[#F3D5DC] w-full" />
-                <span className="bg-[#FAF5FF] px-2 text-[10px] font-bold text-[#8A6866] uppercase">
+                <div className="border-t border-[#F3E5D8] w-full" />
+                <span className="bg-[#FAF5FF] px-2 text-[10px] font-bold text-[#8C726B] uppercase">
                   or custom note
                 </span>
               </div>
 
               {/* Option B: Custom / Leftover Note */}
               <div>
-                <label className="block text-xs font-bold text-[#8A6866] mb-1.5">
+                <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
                   Custom Entry (e.g. "Eating out", "Leftover Pasta")
                 </label>
                 <div className="flex items-center space-x-2">
@@ -464,7 +464,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     value={customNoteInput}
                     onChange={(e) => setCustomNoteInput(e.target.value)}
                     placeholder="e.g. Leftover Curry"
-                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3D5DC] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:border-[#8B5CF6]"
+                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#8B5CF6]"
                   />
                   <button
                     type="button"

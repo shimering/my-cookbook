@@ -48,46 +48,46 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
   return (
     <form onSubmit={handleSubmit} className="p-5 space-y-4">
       <div>
-        <label className="block text-xs font-bold text-[#4A2C2A] mb-1">Item Name</label>
+        <label className="block text-xs font-bold text-[#3D231D] mb-1">Item Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Honeycrisp Apples"
-          className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+          className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
           required
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-bold text-[#4A2C2A] mb-1">Quantity</label>
+          <label className="block text-xs font-bold text-[#3D231D] mb-1">Quantity</label>
           <input
             type="text"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="e.g. 2, 1/2, 1.5"
-            className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+            className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-[#4A2C2A] mb-1">Unit</label>
+          <label className="block text-xs font-bold text-[#3D231D] mb-1">Unit</label>
           <input
             type="text"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
             placeholder="e.g. lbs, cup, pack, pcs"
-            className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+            className="w-full px-3.5 py-2.5 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-[#4A2C2A] mb-1">Category / Department</label>
+        <label className="block text-xs font-bold text-[#3D231D] mb-1">Category / Department</label>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-3.5 py-2.5 bg-white border border-[#F3D5DC] rounded-[16px] text-xs font-semibold text-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 cursor-pointer"
+          className="w-full px-3.5 py-2.5 bg-white border border-[#F3E5D8] rounded-[16px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40 cursor-pointer"
         >
           {categories.map((c) => (
             <option key={c} value={c}>
@@ -98,22 +98,22 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-[#4A2C2A] mb-1">Custom Notes</label>
+        <label className="block text-xs font-bold text-[#3D231D] mb-1">Custom Notes</label>
         <textarea
           rows={2}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="e.g. Ripe avocados for guacamole, organic pasture-raised"
-          className="w-full px-3.5 py-2 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+          className="w-full px-3.5 py-2 bg-[#FFF3CC]/40 border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
         />
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center justify-end space-x-2.5 pt-2 border-t border-[#F3D5DC]">
+      <div className="flex items-center justify-end space-x-2.5 pt-2 border-t border-[#F3E5D8]">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-xs font-semibold text-[#8A6866] hover:text-[#4A2C2A] cursor-pointer"
+          className="px-4 py-2 text-xs font-semibold text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
         >
           Cancel
         </button>
@@ -158,7 +158,7 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white border border-[#F3D5DC] rounded-[24px] shadow-cozy-lg w-full max-w-md overflow-hidden text-[#4A2C2A] animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white border border-[#F3E5D8] rounded-[24px] shadow-cozy-lg w-full max-w-md overflow-hidden text-[#3D231D] animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -172,15 +172,15 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
               <Edit3 className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div>
-              <h2 id="edit-item-dialog-title" className="font-serif text-base font-bold text-[#4A2C2A]">
+              <h2 id="edit-item-dialog-title" className="font-serif text-base font-bold text-[#3D231D]">
                 Edit Grocery Item
               </h2>
-              <span className="text-[11px] text-[#8A6866]">Update quantity, department, and notes</span>
+              <span className="text-[11px] text-[#8C726B]">Update quantity, department, and notes</span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-[#FFF0F3] text-[#8A6866] hover:text-[#4A2C2A] cursor-pointer"
+            className="p-1 rounded-full hover:bg-[#FFF0F3] text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

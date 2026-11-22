@@ -130,32 +130,32 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-hidden overscroll-none"
+      className="fixed inset-0 z-50 bg-[#3D231D]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-hidden overscroll-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-[#FFF5F7] w-full max-w-md max-h-[90vh] rounded-[24px] border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-[#FFF8F6] w-full max-w-md max-h-[90vh] rounded-[24px] border border-[#F3E5D8] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#F3D5DC] bg-white flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[#F3E5D8] bg-white flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-[#FFF0F3] text-[#FF8FA3] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[#FDE8EA] text-[#E85D75] flex items-center justify-center">
               <Cloud className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <h3 className="font-serif text-base font-bold text-[#4A2C2A]">
+            <h3 className="font-brand text-base font-bold text-[#3D231D]">
               Sync, Backup & Export
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#FFF0F3] text-[#8A6866] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-[#FDE8EA] text-[#8C726B] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5 text-[#4A2C2A]">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 text-[#3D231D]">
           {restoreMessage && (
             <div className="p-3 bg-[#E8F5E9] border border-[#C8E6C9] rounded-[16px] flex items-center space-x-2 text-xs font-semibold text-[#2E7D32]">
               <CheckCircle className="w-4 h-4 shrink-0" />
@@ -170,17 +170,17 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
           )}
 
           {/* Section 1: Native Cloudflare Email Account & Sync */}
-          <div className="bg-white border border-[#F3D5DC] rounded-[20px] p-4 shadow-cozy space-y-3">
+          <div className="bg-white border border-[#F3E5D8] rounded-[20px] p-4 shadow-cozy space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
-                <Cloud className="w-4 h-4 text-[#FF8FA3]" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C726B] flex items-center space-x-1.5">
+                <Cloud className="w-4 h-4 text-[#E85D75]" />
                 <span>Cloudflare Cloud Sync</span>
               </h4>
               <span
                 className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
                   currentUser
                     ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                    : 'bg-[#FFE599] text-[#4A2C2A]'
+                    : 'bg-[#FDECC8] text-[#3D231D]'
                 }`}
               >
                 {currentUser ? 'Connected' : 'Offline / Local'}
@@ -190,11 +190,11 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             {currentUser ? (
               /* Logged In State */
               <div className="space-y-3 pt-1">
-                <div className="p-3 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] flex items-center justify-between">
+                <div className="p-3 bg-[#FFF8F6] border border-[#F3E5D8] rounded-[16px] flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold text-[#8A6866]">Signed in as:</p>
-                    <p className="text-xs font-bold text-[#4A2C2A]">{currentUser.email}</p>
-                    <p className="text-[10px] text-[#8A6866] mt-0.5">
+                    <p className="text-[11px] font-semibold text-[#8C726B]">Signed in as:</p>
+                    <p className="text-xs font-bold text-[#3D231D]">{currentUser.email}</p>
+                    <p className="text-[10px] text-[#8C726B] mt-0.5">
                       {syncState.lastSyncedAt
                         ? `Last synced: ${new Date(syncState.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                         : 'Not synced yet'}
@@ -206,7 +206,7 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
                       type="button"
                       onClick={handleManualSync}
                       disabled={syncState.isSyncing}
-                      className="p-2 bg-white hover:bg-[#FFF0F3] border border-[#F3D5DC] rounded-full text-[#FF8FA3] transition-colors shadow-xs cursor-pointer"
+                      className="p-2 bg-white hover:bg-[#FDE8EA] border border-[#F3E5D8] rounded-full text-[#E85D75] transition-colors shadow-xs cursor-pointer"
                       title="Sync Now"
                     >
                       <RefreshCw
@@ -231,13 +231,13 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             ) : (
               /* Logged Out / Form State */
               <div className="space-y-3 pt-1">
-                <p className="text-[11px] text-[#8A6866] leading-relaxed">
+                <p className="text-[11px] text-[#8C726B] leading-relaxed">
                   Sign in with your email to sync recipes, meal plans, and ingredient photos
                   automatically across all your devices via Cloudflare D1 & R2.
                 </p>
 
                 {/* Tab Switcher */}
-                <div className="flex bg-[#FFF5F7] p-1 rounded-full border border-[#F3D5DC]">
+                <div className="flex bg-[#FFF8F6] p-1 rounded-full border border-[#F3E5D8]">
                   <button
                     type="button"
                     onClick={() => {
@@ -246,8 +246,8 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
                     }}
                     className={`flex-1 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
                       authMode === 'login'
-                        ? 'bg-white text-[#4A2C2A] shadow-xs'
-                        : 'text-[#8A6866] hover:text-[#4A2C2A]'
+                        ? 'bg-white text-[#3D231D] shadow-xs'
+                        : 'text-[#8C726B] hover:text-[#3D231D]'
                     }`}
                   >
                     Sign In
@@ -260,8 +260,8 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
                     }}
                     className={`flex-1 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
                       authMode === 'register'
-                        ? 'bg-white text-[#4A2C2A] shadow-xs'
-                        : 'text-[#8A6866] hover:text-[#4A2C2A]'
+                        ? 'bg-white text-[#3D231D] shadow-xs'
+                        : 'text-[#8C726B] hover:text-[#3D231D]'
                     }`}
                   >
                     Create Account
@@ -274,7 +274,7 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
 
                 <form onSubmit={handleAuthSubmit} className="space-y-2.5">
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8A6866]">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8C726B]">
                       <Mail className="w-3.5 h-3.5" />
                     </div>
                     <input
@@ -283,12 +283,12 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full pl-9 pr-3 py-2 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+                      className="w-full pl-9 pr-3 py-2 bg-[#FFF8F6] border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40"
                     />
                   </div>
 
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8A6866]">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8C726B]">
                       <Lock className="w-3.5 h-3.5" />
                     </div>
                     <input
@@ -298,14 +298,14 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password (min 6 characters)"
-                      className="w-full pl-9 pr-3 py-2 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/40"
+                      className="w-full pl-9 pr-3 py-2 bg-[#FFF8F6] border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={authLoading}
-                    className="w-full py-2.5 px-4 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-98 text-white text-xs font-bold rounded-full shadow-pink-glow transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-[#E85D75] hover:bg-[#D94C65] active:scale-98 text-white text-xs font-bold rounded-full shadow-strawberry transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
                     {authLoading ? (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -319,12 +319,12 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
           </div>
 
           {/* Section 2: Backup & Restore */}
-          <div className="bg-white border border-[#F3D5DC] rounded-[20px] p-4 shadow-cozy space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
-              <Database className="w-3.5 h-3.5 text-[#FF8FA3]" />
+          <div className="bg-white border border-[#F3E5D8] rounded-[20px] p-4 shadow-cozy space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C726B] flex items-center space-x-1.5">
+              <Database className="w-3.5 h-3.5 text-[#E85D75]" />
               <span>Offline Backup & Restore</span>
             </h4>
-            <p className="text-xs text-[#8A6866] leading-relaxed">
+            <p className="text-xs text-[#8C726B] leading-relaxed">
               Export all your recipes, meal plans, and grocery lists into a portable JSON archive.
               You can restore it on any device at any time.
             </p>
@@ -333,18 +333,18 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
               <button
                 type="button"
                 onClick={downloadBackupFile}
-                className="py-2.5 px-3 bg-[#FFE599] hover:bg-[#FFD966] border border-[#F5E6BF] text-[#4A2C2A] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+                className="py-2.5 px-3 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
               >
-                <Download className="w-4 h-4 text-[#4A2C2A]" />
+                <Download className="w-4 h-4 text-[#3D231D]" />
                 <span>Export (.json)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="py-2.5 px-3 bg-[#FFF0F3] hover:bg-[#FFE4E9] border border-[#F3D5DC] text-[#4A2C2A] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+                className="py-2.5 px-3 bg-[#FDE8EA] hover:bg-[#FCD2D8] border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
               >
-                <Upload className="w-4 h-4 text-[#FF8FA3]" />
+                <Upload className="w-4 h-4 text-[#E85D75]" />
                 <span>Restore Backup</span>
               </button>
               <input
@@ -358,12 +358,12 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
           </div>
 
           {/* Section 3: Printable Cookbook / PDF */}
-          <div className="bg-white border border-[#F3D5DC] rounded-[20px] p-4 shadow-cozy space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
-              <Printer className="w-3.5 h-3.5 text-[#FF8FA3]" />
+          <div className="bg-white border border-[#F3E5D8] rounded-[20px] p-4 shadow-cozy space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C726B] flex items-center space-x-1.5">
+              <Printer className="w-3.5 h-3.5 text-[#E85D75]" />
               <span>Printable Cookbook / PDF</span>
             </h4>
-            <p className="text-xs text-[#8A6866] leading-relaxed">
+            <p className="text-xs text-[#8C726B] leading-relaxed">
               Generate a clean, beautifully formatted view of all your recipes ready to print
               or save as a physical keepsake cookbook PDF.
             </p>
@@ -371,9 +371,9 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             <button
               type="button"
               onClick={onPrintAll}
-              className="w-full py-2.5 px-3 bg-[#FFF0F3] hover:bg-[#FFE4E9] border border-[#F3D5DC] text-[#4A2C2A] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+              className="w-full py-2.5 px-3 bg-[#FDE8EA] hover:bg-[#FCD2D8] border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
             >
-              <Printer className="w-4 h-4 text-[#FF8FA3]" />
+              <Printer className="w-4 h-4 text-[#E85D75]" />
               <span>Print Complete Cookbook</span>
             </button>
           </div>
