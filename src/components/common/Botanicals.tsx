@@ -5,101 +5,213 @@ interface BotanicalProps {
   color?: string;
 }
 
+/**
+ * Hand-drawn botanical branch with multiple leaf pairs and delicate berry buds.
+ * Inspired by cozy bakery & botanical stationery artwork.
+ */
 export const BotanicalBranchLeft: React.FC<BotanicalProps> = ({
-  className = "w-12 h-12",
+  className = "w-16 h-16",
   color = "#4A2C2A"
 }) => (
-  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    {/* Main Stem */}
     <path
-      d="M10 70 C 25 55, 45 40, 68 15"
+      d="M10 90 C 25 70, 50 50, 85 15"
       stroke={color}
       strokeWidth="2.2"
       strokeLinecap="round"
     />
-    {/* Left Leaf 1 */}
+    {/* Secondary small curving branch */}
     <path
-      d="M22 58 C 12 56, 8 46, 14 42 C 22 45, 23 52, 22 58 Z"
+      d="M38 60 C 50 64, 62 72, 70 82"
+      stroke={color}
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+
+    {/* Leaf Pair 1 (Bottom) */}
+    <path
+      d="M22 75 C 10 74, 5 62, 14 56 C 24 60, 24 70, 22 75 Z"
       fill="#FCE4EC"
       stroke={color}
       strokeWidth="1.8"
     />
-    {/* Right Leaf 1 */}
     <path
-      d="M32 50 C 36 40, 48 40, 46 48 C 42 54, 35 53, 32 50 Z"
+      d="M32 68 C 38 56, 52 56, 48 68 C 42 74, 34 72, 32 68 Z"
       fill="#FFF0F3"
       stroke={color}
       strokeWidth="1.8"
     />
-    {/* Left Leaf 2 */}
+
+    {/* Leaf Pair 2 (Mid-low) */}
     <path
-      d="M40 42 C 30 38, 28 28, 36 26 C 42 30, 42 36, 40 42 Z"
+      d="M40 54 C 28 50, 24 38, 34 34 C 42 38, 43 47, 40 54 Z"
       fill="#FCE4EC"
       stroke={color}
       strokeWidth="1.8"
     />
-    {/* Right Leaf 2 */}
     <path
-      d="M50 33 C 55 24, 65 26, 62 33 C 58 39, 52 37, 50 33 Z"
+      d="M52 46 C 58 35, 70 37, 66 48 C 60 54, 52 51, 52 46 Z"
       fill="#FFF0F3"
       stroke={color}
       strokeWidth="1.8"
     />
-    {/* Top Tip Leaf */}
+
+    {/* Leaf Pair 3 (Mid-high) */}
     <path
-      d="M68 15 C 64 6, 75 4, 76 10 C 77 15, 72 17, 68 15 Z"
+      d="M58 36 C 48 30, 48 18, 57 16 C 64 21, 63 30, 58 36 Z"
       fill="#FCE4EC"
       stroke={color}
       strokeWidth="1.8"
     />
+    <path
+      d="M70 28 C 76 18, 86 21, 83 31 C 78 36, 71 34, 70 28 Z"
+      fill="#FFF0F3"
+      stroke={color}
+      strokeWidth="1.8"
+    />
+
+    {/* Tip Leaf */}
+    <path
+      d="M85 15 C 82 4, 94 4, 94 12 C 94 18, 88 19, 85 15 Z"
+      fill="#FCE4EC"
+      stroke={color}
+      strokeWidth="1.8"
+    />
+
+    {/* Secondary Branch Leaves */}
+    <path
+      d="M52 68 C 50 60, 58 56, 61 63 C 60 68, 55 70, 52 68 Z"
+      fill="#FFF0F3"
+      stroke={color}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M66 76 C 68 68, 76 68, 77 74 C 76 80, 70 80, 66 76 Z"
+      fill="#FCE4EC"
+      stroke={color}
+      strokeWidth="1.5"
+    />
+
+    {/* Strawberry Berry Accents */}
+    <circle cx="28" cy="58" r="3.2" fill="#FF8FA3" stroke={color} strokeWidth="1.2" />
+    <circle cx="60" cy="40" r="2.8" fill="#FF8FA3" stroke={color} strokeWidth="1.2" />
+    <circle cx="76" cy="22" r="2.4" fill="#FFE599" stroke={color} strokeWidth="1.2" />
   </svg>
 );
 
 export const BotanicalBranchRight: React.FC<BotanicalProps> = ({
-  className = "w-12 h-12",
+  className = "w-16 h-16",
   color = "#4A2C2A"
 }) => (
-  <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <g transform="translate(80, 0) scale(-1, 1)">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g transform="translate(100, 0) scale(-1, 1)">
+      {/* Main Stem */}
       <path
-        d="M10 70 C 25 55, 45 40, 68 15"
+        d="M10 90 C 25 70, 50 50, 85 15"
         stroke={color}
         strokeWidth="2.2"
         strokeLinecap="round"
       />
+      {/* Secondary small curving branch */}
       <path
-        d="M22 58 C 12 56, 8 46, 14 42 C 22 45, 23 52, 22 58 Z"
+        d="M38 60 C 50 64, 62 72, 70 82"
+        stroke={color}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+
+      {/* Leaf Pair 1 */}
+      <path
+        d="M22 75 C 10 74, 5 62, 14 56 C 24 60, 24 70, 22 75 Z"
         fill="#FCE4EC"
         stroke={color}
         strokeWidth="1.8"
       />
       <path
-        d="M32 50 C 36 40, 48 40, 46 48 C 42 54, 35 53, 32 50 Z"
+        d="M32 68 C 38 56, 52 56, 48 68 C 42 74, 34 72, 32 68 Z"
         fill="#FFF0F3"
         stroke={color}
         strokeWidth="1.8"
       />
+
+      {/* Leaf Pair 2 */}
       <path
-        d="M40 42 C 30 38, 28 28, 36 26 C 42 30, 42 36, 40 42 Z"
+        d="M40 54 C 28 50, 24 38, 34 34 C 42 38, 43 47, 40 54 Z"
         fill="#FCE4EC"
         stroke={color}
         strokeWidth="1.8"
       />
       <path
-        d="M50 33 C 55 24, 65 26, 62 33 C 58 39, 52 37, 50 33 Z"
+        d="M52 46 C 58 35, 70 37, 66 48 C 60 54, 52 51, 52 46 Z"
         fill="#FFF0F3"
         stroke={color}
         strokeWidth="1.8"
       />
+
+      {/* Leaf Pair 3 */}
       <path
-        d="M68 15 C 64 6, 75 4, 76 10 C 77 15, 72 17, 68 15 Z"
+        d="M58 36 C 48 30, 48 18, 57 16 C 64 21, 63 30, 58 36 Z"
         fill="#FCE4EC"
         stroke={color}
         strokeWidth="1.8"
       />
+      <path
+        d="M70 28 C 76 18, 86 21, 83 31 C 78 36, 71 34, 70 28 Z"
+        fill="#FFF0F3"
+        stroke={color}
+        strokeWidth="1.8"
+      />
+
+      {/* Tip Leaf */}
+      <path
+        d="M85 15 C 82 4, 94 4, 94 12 C 94 18, 88 19, 85 15 Z"
+        fill="#FCE4EC"
+        stroke={color}
+        strokeWidth="1.8"
+      />
+
+      {/* Secondary Branch Leaves */}
+      <path
+        d="M52 68 C 50 60, 58 56, 61 63 C 60 68, 55 70, 52 68 Z"
+        fill="#FFF0F3"
+        stroke={color}
+        strokeWidth="1.5"
+      />
+      <path
+        d="M66 76 C 68 68, 76 68, 77 74 C 76 80, 70 80, 66 76 Z"
+        fill="#FCE4EC"
+        stroke={color}
+        strokeWidth="1.5"
+      />
+
+      {/* Berries */}
+      <circle cx="28" cy="58" r="3.2" fill="#FF8FA3" stroke={color} strokeWidth="1.2" />
+      <circle cx="60" cy="40" r="2.8" fill="#FF8FA3" stroke={color} strokeWidth="1.2" />
+      <circle cx="76" cy="22" r="2.4" fill="#FFE599" stroke={color} strokeWidth="1.2" />
     </g>
   </svg>
 );
 
+/**
+ * Delicate botanical sprig with floating leaves and star sparkles for header & section framing.
+ */
+export const BotanicalSprig: React.FC<BotanicalProps> = ({
+  className = "w-6 h-6",
+  color = "#4A2C2A"
+}) => (
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M5 35 C 15 25, 25 15, 35 5" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M14 26 C 8 26, 6 20, 10 18 C 16 19, 16 24, 14 26 Z" fill="#FCE4EC" stroke={color} strokeWidth="1.4" />
+    <path d="M22 20 C 25 14, 31 15, 29 20 C 26 23, 23 22, 22 20 Z" fill="#FFF0F3" stroke={color} strokeWidth="1.4" />
+    <path d="M27 13 C 24 8, 30 6, 32 10 C 31 13, 29 14, 27 13 Z" fill="#FCE4EC" stroke={color} strokeWidth="1.4" />
+    <circle cx="18" cy="22" r="2" fill="#FF8FA3" />
+  </svg>
+);
+
+/**
+ * Cute hand-drawn whisk icon
+ */
 export const WhiskIcon: React.FC<{ className?: string; color?: string }> = ({
   className = "w-6 h-6",
   color = "currentColor"

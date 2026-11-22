@@ -74,8 +74,8 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
 
   return (
     <div className="min-h-screen bg-[#FFF5F7] pb-28">
-      {/* Hero Image Container */}
-      <div className="relative w-full aspect-4/3 max-h-[380px] bg-[#FFE599]/30 rounded-b-[36px] overflow-hidden shadow-cozy-lg no-print">
+      {/* Hero Image Container with Deep Rounded Bowl Mask */}
+      <div className="relative w-full aspect-4/3 max-h-[400px] bg-[#FFE599]/30 rounded-b-[64px] sm:rounded-b-[84px] overflow-hidden shadow-cozy-lg no-print">
         <img
           src={recipe.heroImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80'}
           alt={recipe.title}
@@ -132,8 +132,8 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
       {/* Main Recipe Content */}
       <div className="max-w-lg mx-auto px-5 pt-6 relative">
         {/* Botanical Line Art Accent on the right */}
-        <div className="absolute top-14 right-2 pointer-events-none opacity-80 hidden xs:block">
-          <BotanicalBranchRight className="w-16 h-16" color="#4A2C2A" />
+        <div className="absolute top-10 -right-2 pointer-events-none opacity-85">
+          <BotanicalBranchRight className="w-20 h-20 sm:w-24 sm:h-24" color="#4A2C2A" />
         </div>
 
         {/* Title */}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, Camera, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
@@ -18,6 +18,23 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 }) => {
   const isEditing = Boolean(initialRecipe);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalCardRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll and focus modal dialog on mount
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    // Focus the modal container so mouse wheel and keyboard focus stay on the popup
+    modalCardRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+    };
+  }, []);
 
   const [title, setTitle] = useState(initialRecipe?.title || '');
   const [description, setDescription] = useState(initialRecipe?.description || '');
@@ -175,10 +192,19 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#4A2C2A]/30 backdrop-blur-xs flex justify-center items-end sm:items-center sm:p-4 overflow-y-auto">
-      <div className="bg-[#FFF5F7] w-full max-w-lg min-h-[90vh] sm:min-h-0 sm:max-h-[92vh] sm:rounded-3xl flex flex-col shadow-cozy-lg border border-[#F3D5DC] overflow-hidden animate-in slide-in-from-bottom-6 duration-300">
+    <div
+      className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex justify-center items-end sm:items-center sm:p-4 overflow-hidden overscroll-none"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={modalCardRef}
+        tabIndex={-1}
+        className="bg-[#FFF5F7] w-full max-w-lg h-[92vh] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl flex flex-col shadow-cozy-lg border border-[#F3D5DC] overflow-hidden overscroll-contain focus:outline-none animate-in slide-in-from-bottom-6 duration-300"
+      >
         {/* Top Bar Header */}
-        <div className="relative px-5 py-4 border-b border-[#F3D5DC] bg-white/70 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+        <div className="relative px-5 py-4 border-b border-[#F3D5DC] bg-white/70 flex items-center justify-between shrink-0 sticky top-0 z-20 backdrop-blur-md">
           <button
             type="button"
             onClick={onClose}
@@ -194,7 +220,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
         </div>
 
         {/* Scrollable Form Content */}
-        <form onSubmit={handleSave} className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+        <form onSubmit={handleSave} className="flex-1 overflow-y-auto px-5 py-5 space-y-5 overscroll-contain">
           {/* Photo Upload Card */}
           <div className="relative">
             <input
@@ -249,6 +275,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
             <input
               type="text"
               required
+              autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Cinnamon Rolls"

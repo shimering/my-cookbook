@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Cloud,
@@ -39,6 +39,19 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
   const client = getSupabaseClient();
   const isCloudConnected = Boolean(client && supabaseConfig.url && supabaseConfig.anonKey);
 
+  // Lock body scroll on mount
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+    };
+  }, []);
+
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingConfig(true);
@@ -66,8 +79,13 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#4A2C2A]/30 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#FFF5F7] w-full max-w-md max-h-[90vh] rounded-3xl border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-hidden overscroll-none"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-[#FFF5F7] w-full max-w-md max-h-[90vh] rounded-3xl border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-5 py-4 border-b border-[#F3D5DC] bg-white flex items-center justify-between">
           <div className="flex items-center space-x-2">

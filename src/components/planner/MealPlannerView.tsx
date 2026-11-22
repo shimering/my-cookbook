@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -54,6 +54,20 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
   const [recipeSearch, setRecipeSearch] = useState('');
   const [customNoteInput, setCustomNoteInput] = useState('');
   const [servingsMultiplier, setServingsMultiplier] = useState(1);
+
+  // Lock body scroll when add-meal modal is active
+  useEffect(() => {
+    if (modalSlot) {
+      const prevOverflow = document.body.style.overflow;
+      const prevTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+        document.body.style.touchAction = prevTouchAction;
+      };
+    }
+  }, [modalSlot]);
 
   // Generate 7 days for the current week (Monday to Sunday)
   const weekDays = useMemo(() => {
@@ -364,8 +378,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
       {/* Add Meal Modal */}
       {modalSlot && (
-        <div className="fixed inset-0 z-50 bg-[#4A2C2A]/30 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4">
-          <div className="bg-[#FFF5F7] w-full max-w-md max-h-[85vh] rounded-t-3xl sm:rounded-3xl border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 duration-200">
+        <div
+          className="fixed inset-0 z-50 bg-[#4A2C2A]/40 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 overflow-hidden overscroll-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalSlot(null);
+          }}
+        >
+          <div className="bg-[#FFF5F7] w-full max-w-md max-h-[85vh] rounded-t-3xl sm:rounded-3xl border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in slide-in-from-bottom-6 duration-200">
             {/* Modal Header */}
             <div className="px-5 py-3.5 border-b border-[#F3D5DC] bg-white flex items-center justify-between">
               <div>
