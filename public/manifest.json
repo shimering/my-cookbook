@@ -1,0 +1,16 @@
+{
+  "short_name": "MyCookbook",
+  "name": "My Cookbook - Personal Recipe App",
+  "icons": [
+    {
+      "src": "/whisk-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "64x64 128x128 256x256 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FFF5F7",
+  "theme_color": "#FFF5F7",
+  "display": "standalone",
+  "orientation": "portrait"
+}

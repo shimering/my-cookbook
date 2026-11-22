@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-blush: #FFF5F7;
+    --color-cream: #FFFFFF;
+    --color-butter: #FFE599;
+    --color-butter-light: #FFF9E6;
+    --color-strawberry: #FF8FA3;
+    --color-strawberry-hover: #FF758F;
+    --color-berry: #4A2C2A;
+    --color-berry-muted: #8A6866;
+  }
+
+  body {
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #FFF5F7;
+    color: #4A2C2A;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* Custom warm shadows matching Strawberry Milk & Butter aesthetic */
+.shadow-cozy {
+  box-shadow: 0 4px 20px -2px rgba(74, 44, 42, 0.07), 0 2px 6px -1px rgba(74, 44, 42, 0.04);
+}
+
+.shadow-cozy-lg {
+  box-shadow: 0 10px 30px -4px rgba(74, 44, 42, 0.1), 0 4px 12px -2px rgba(74, 44, 42, 0.06);
+}
+
+.shadow-pink-glow {
+  box-shadow: 0 4px 16px rgba(255, 143, 163, 0.4);
+}
+
+/* Custom smooth transitions for checkboxes and strikethrough */
+.strikethrough-transition {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide scrollbars for clean mobile pill carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print Styles for Printable Cookbook / PDF export */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+}
