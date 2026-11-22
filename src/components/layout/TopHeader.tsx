@@ -1,17 +1,19 @@
 import React from 'react';
-import { Cloud, CloudOff, SlidersHorizontal } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import { BotanicalBranchLeft, BotanicalBranchRight, BotanicalFlourish } from '../common/Botanicals';
 
 interface TopHeaderProps {
   onOpenSettings: () => void;
   isOnline?: boolean;
   hasCloudSync?: boolean;
+  isSyncing?: boolean;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   onOpenSettings,
   isOnline = true,
   hasCloudSync = false,
+  isSyncing = false,
 }) => {
   return (
     <header className="relative pt-6 pb-5 px-5 text-center overflow-hidden no-print select-none">
@@ -33,8 +35,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           aria-label="Settings and Cloud Sync"
         >
           {hasCloudSync ? (
-            isOnline ? (
-              <Cloud className="w-4 h-4 text-[#FF8FA3]" />
+            isSyncing ? (
+              <RefreshCw className="w-4 h-4 text-[#FF8FA3] animate-spin" />
+            ) : isOnline ? (
+              <div className="relative">
+                <Cloud className="w-4 h-4 text-[#FF8FA3]" />
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#4CAF50] rounded-full" />
+              </div>
             ) : (
               <CloudOff className="w-4 h-4 text-[#8A6866]" />
             )

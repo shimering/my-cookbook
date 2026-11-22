@@ -7,17 +7,23 @@ import {
   Printer,
   CheckCircle,
   Database,
-  ExternalLink,
+  RefreshCw,
+  LogOut,
+  Mail,
+  Lock,
 } from 'lucide-react';
 import {
   downloadBackupFile,
   restoreFromBackupFile,
 } from '../../services/backupService';
 import {
-  getStoredSupabaseConfig,
-  saveSupabaseConfig,
-  getSupabaseClient,
-} from '../../services/supabaseClient';
+  cloudflareAuth,
+  type CloudflareUser,
+} from '../../services/cloudflareAuthService';
+import {
+  cloudflareSync,
+  type SyncState,
+} from '../../services/cloudflareSyncService';
 
 interface SyncBackupModalProps {
   onClose: () => void;
@@ -31,13 +37,21 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
   onPrintAll,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [supabaseConfig, setSupabaseConfig] = useState(getStoredSupabaseConfig());
-  const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CloudflareUser | null>(
+    cloudflareAuth.getAuthUser()
+  );
+  const [syncState, setSyncState] = useState<SyncState>(
+    cloudflareSync.getSyncState()
+  );
+
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const client = getSupabaseClient();
-  const isCloudConnected = Boolean(client && supabaseConfig.url && supabaseConfig.anonKey);
 
   // Lock body scroll on mount
   useEffect(() => {
@@ -46,20 +60,56 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
 
+    const unsubAuth = cloudflareAuth.onAuthStateChange((user) => {
+      setCurrentUser(user);
+    });
+
+    const unsubSync = cloudflareSync.onSyncStateChange((s) => {
+      setSyncState(s);
+    });
+
     return () => {
       document.body.style.overflow = prevOverflow;
       document.body.style.touchAction = prevTouchAction;
+      unsubAuth();
+      unsubSync();
     };
   }, []);
 
-  const handleSaveConfig = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSavingConfig(true);
-    saveSupabaseConfig(supabaseConfig.url, supabaseConfig.anonKey);
-    setTimeout(() => {
-      setIsSavingConfig(false);
-      setRestoreMessage('Cloud configuration updated!');
-    }, 400);
+    setAuthError(null);
+    setAuthLoading(true);
+
+    try {
+      if (authMode === 'register') {
+        await cloudflareAuth.register(email, password);
+        setRestoreMessage('Account created and signed in successfully!');
+      } else {
+        await cloudflareAuth.login(email, password);
+        setRestoreMessage('Signed in successfully!');
+      }
+      setEmail('');
+      setPassword('');
+      // Trigger instant sync upon login
+      cloudflareSync.syncNow();
+    } catch (err: any) {
+      setAuthError(err.message || 'Authentication failed');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await cloudflareAuth.logout();
+    setRestoreMessage('Signed out from Cloudflare account.');
+  };
+
+  const handleManualSync = async () => {
+    await cloudflareSync.syncNow();
+    if (!cloudflareSync.getSyncState().error) {
+      setRestoreMessage('Sync complete! All devices are up to date.');
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,9 +169,158 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             </div>
           )}
 
-          {/* Section 1: Backup & Restore */}
+          {/* Section 1: Native Cloudflare Email Account & Sync */}
           <div className="bg-white border border-[#F3D5DC] rounded-2xl p-4 shadow-xs space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
+                <Cloud className="w-4 h-4 text-[#FF8FA3]" />
+                <span>Cloudflare Cloud Sync</span>
+              </h4>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  currentUser
+                    ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                    : 'bg-[#FFF9E6] text-[#8A6866]'
+                }`}
+              >
+                {currentUser ? 'Connected' : 'Offline / Local'}
+              </span>
+            </div>
+
+            {currentUser ? (
+              /* Logged In State */
+              <div className="space-y-3 pt-1">
+                <div className="p-3 bg-[#FFF9E6] border border-[#F5E6BF] rounded-xl flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold text-[#8A6866]">Signed in as:</p>
+                    <p className="text-xs font-bold text-[#4A2C2A]">{currentUser.email}</p>
+                    <p className="text-[10px] text-[#8A6866] mt-0.5">
+                      {syncState.lastSyncedAt
+                        ? `Last synced: ${new Date(syncState.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                        : 'Not synced yet'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={handleManualSync}
+                      disabled={syncState.isSyncing}
+                      className="p-2 bg-white hover:bg-[#FFF0F3] border border-[#F3D5DC] rounded-xl text-[#FF8FA3] transition-colors shadow-xs"
+                      title="Sync Now"
+                    >
+                      <RefreshCw
+                        className={`w-4 h-4 ${syncState.isSyncing ? 'animate-spin' : ''}`}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="p-2 bg-white hover:bg-red-50 border border-red-100 rounded-xl text-red-500 transition-colors shadow-xs"
+                      title="Log Out"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {syncState.error && (
+                  <p className="text-[11px] text-red-500 font-medium">{syncState.error}</p>
+                )}
+              </div>
+            ) : (
+              /* Logged Out / Form State */
+              <div className="space-y-3 pt-1">
+                <p className="text-[11px] text-[#8A6866] leading-relaxed">
+                  Sign in with your email to sync recipes, meal plans, and ingredient photos
+                  automatically across all your devices via Cloudflare D1 & R2.
+                </p>
+
+                {/* Tab Switcher */}
+                <div className="flex bg-[#FFF5F7] p-1 rounded-xl border border-[#F3D5DC]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('login');
+                      setAuthError(null);
+                    }}
+                    className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      authMode === 'login'
+                        ? 'bg-white text-[#4A2C2A] shadow-xs'
+                        : 'text-[#8A6866] hover:text-[#4A2C2A]'
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('register');
+                      setAuthError(null);
+                    }}
+                    className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      authMode === 'register'
+                        ? 'bg-white text-[#4A2C2A] shadow-xs'
+                        : 'text-[#8A6866] hover:text-[#4A2C2A]'
+                    }`}
+                  >
+                    Create Account
+                  </button>
+                </div>
+
+                {authError && (
+                  <p className="text-[11px] text-red-500 font-semibold">{authError}</p>
+                )}
+
+                <form onSubmit={handleAuthSubmit} className="space-y-2.5">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8A6866]">
+                      <Mail className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full pl-9 pr-3 py-2 bg-[#FFF9E6] border border-[#F5E6BF] rounded-xl text-xs text-[#4A2C2A] placeholder-[#B89D9B] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/50"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8A6866]">
+                      <Lock className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password (min 6 characters)"
+                      className="w-full pl-9 pr-3 py-2 bg-[#FFF9E6] border border-[#F5E6BF] rounded-xl text-xs text-[#4A2C2A] placeholder-[#B89D9B] focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/50"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full py-2 px-4 bg-[#FF8FA3] hover:bg-[#FF758F] active:scale-98 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5"
+                  >
+                    {authLoading ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <span>{authMode === 'register' ? 'Create Account' : 'Sign In'}</span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Backup & Restore */}
+          <div className="bg-white border border-[#F3D5DC] rounded-2xl p-4 shadow-xs space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
               <Database className="w-3.5 h-3.5 text-[#FF8FA3]" />
               <span>Offline Backup & Restore</span>
             </h4>
@@ -158,9 +357,9 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             </div>
           </div>
 
-          {/* Section 2: Printable Cookbook / PDF */}
+          {/* Section 3: Printable Cookbook / PDF */}
           <div className="bg-white border border-[#F3D5DC] rounded-2xl p-4 shadow-xs space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1.5">
               <Printer className="w-3.5 h-3.5 text-[#FF8FA3]" />
               <span>Printable Cookbook / PDF</span>
             </h4>
@@ -177,82 +376,6 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
               <Printer className="w-4 h-4 text-[#FF8FA3]" />
               <span>Print Complete Cookbook</span>
             </button>
-          </div>
-
-          {/* Section 3: Supabase Cloud Sync */}
-          <div className="bg-white border border-[#F3D5DC] rounded-2xl p-4 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A6866] flex items-center space-x-1">
-                <Cloud className="w-3.5 h-3.5 text-[#FF8FA3]" />
-                <span>Supabase Cloud Sync</span>
-              </h4>
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  isCloudConnected
-                    ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                    : 'bg-[#FFF9E6] text-[#8A6866]'
-                }`}
-              >
-                {isCloudConnected ? 'Connected' : 'Local Storage Mode'}
-              </span>
-            </div>
-
-            <p className="text-[11px] text-[#8A6866] leading-relaxed">
-              Connect your free Supabase project to sync across phone, tablet, and desktop
-              automatically.
-            </p>
-
-            <form onSubmit={handleSaveConfig} className="space-y-2 pt-1">
-              <div>
-                <label className="block text-[11px] font-bold text-[#8A6866] mb-1">
-                  Supabase Project URL
-                </label>
-                <input
-                  type="url"
-                  value={supabaseConfig.url}
-                  onChange={(e) =>
-                    setSupabaseConfig({ ...supabaseConfig, url: e.target.value })
-                  }
-                  placeholder="https://xyzcompany.supabase.co"
-                  className="w-full px-3 py-1.5 bg-[#FFF9E6] border border-[#F5E6BF] rounded-xl text-xs text-[#4A2C2A] placeholder-[#B89D9B] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-[#8A6866] mb-1">
-                  Supabase Anon Public Key
-                </label>
-                <input
-                  type="password"
-                  value={supabaseConfig.anonKey}
-                  onChange={(e) =>
-                    setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value })
-                  }
-                  placeholder="eyJhbGciOiJIUzI1NiIsIn..."
-                  className="w-full px-3 py-1.5 bg-[#FFF9E6] border border-[#F5E6BF] rounded-xl text-xs text-[#4A2C2A] placeholder-[#B89D9B] focus:outline-none"
-                />
-              </div>
-
-              <div className="pt-1 flex items-center justify-between">
-                <a
-                  href="https://supabase.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center text-[10px] text-[#FF8FA3] hover:underline space-x-1"
-                >
-                  <span>Get free credentials at Supabase.com</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </a>
-
-                <button
-                  type="submit"
-                  disabled={isSavingConfig}
-                  className="px-3.5 py-1.5 bg-[#FF8FA3] hover:bg-[#FF758F] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
-                >
-                  {isSavingConfig ? 'Saving...' : 'Save Settings'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>

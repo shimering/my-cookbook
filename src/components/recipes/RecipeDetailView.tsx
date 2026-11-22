@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types';
 import { useWakeLock } from '../../hooks/useWakeLock';
+import { getIngredientIcon } from '../../utils/ingredientIconResolver';
 
 interface RecipeDetailViewProps {
   recipe: Recipe;
@@ -225,6 +226,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                 <div className="space-y-1.5">
                   {items.map((ing) => {
                     const isChecked = checkedIngredients.has(ing.id);
+                    const icon = getIngredientIcon(ing.name);
                     // Compute scaled amount if multiplier changed
                     const displayAmt = ing.displayFraction || (ing.amount ? ing.amount.toString() : '');
 
@@ -248,6 +250,20 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                         >
                           {isChecked && <Check className="w-4 h-4 stroke-[3]" />}
                         </div>
+
+                        {/* Stylized Ingredient Thumbnail */}
+                        {icon && (
+                          <div className="w-7 h-7 rounded-lg bg-[#FFF9E6] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
+                            <img
+                              src={icon.url}
+                              alt={icon.label}
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = icon.fallbackUrl;
+                              }}
+                            />
+                          </div>
+                        )}
 
                         {/* Strikethrough Text */}
                         <div className="flex-1 text-sm font-medium leading-tight">

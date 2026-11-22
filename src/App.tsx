@@ -14,6 +14,8 @@ import { MealPlannerView } from './components/planner/MealPlannerView';
 import { GroceryListView } from './components/groceries/GroceryListView';
 import { SyncBackupModal } from './components/settings/SyncBackupModal';
 import { PrintableCookbook } from './components/export/PrintableCookbook';
+import { cloudflareAuth, type CloudflareUser } from './services/cloudflareAuthService';
+import { cloudflareSync, type SyncState } from './services/cloudflareSyncService';
 
 export function App() {
   // Navigation & View State
@@ -24,9 +26,22 @@ export function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [printRecipes, setPrintRecipes] = useState<Recipe[] | null>(null);
 
-  // Initialize DB with seed recipes on first run
+  // Cloudflare Auth & Sync State
+  const [cfUser, setCfUser] = useState<CloudflareUser | null>(cloudflareAuth.getAuthUser());
+  const [cfSyncState, setCfSyncState] = useState<SyncState>(cloudflareSync.getSyncState());
+
+  // Initialize DB with seed recipes on first run and start Cloudflare auto-sync
   useEffect(() => {
     initializeDatabase().catch((err) => console.error('Failed to init DB:', err));
+    const stopAutoSync = cloudflareSync.startAutoSync(45);
+    const unsubAuth = cloudflareAuth.onAuthStateChange(user => setCfUser(user));
+    const unsubSync = cloudflareSync.onSyncStateChange(s => setCfSyncState(s));
+
+    return () => {
+      stopAutoSync();
+      unsubAuth();
+      unsubSync();
+    };
   }, []);
 
   // Reactive Live Queries via Dexie
@@ -170,6 +185,8 @@ export function App() {
         <TopHeader
           onOpenSettings={() => setShowSettings(true)}
           isOnline={navigator.onLine}
+          hasCloudSync={Boolean(cfUser)}
+          isSyncing={cfSyncState.isSyncing}
         />
       )}
 

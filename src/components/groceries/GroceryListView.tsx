@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { GroceryItem, GroceryCategory } from '../../types';
+import { getIngredientIcon } from '../../utils/ingredientIconResolver';
 
 interface GroceryListViewProps {
   groceryItems: GroceryItem[];
@@ -196,46 +197,63 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 </div>
 
                 <div className="space-y-1.5 pt-1">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleToggle(item.id)}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-[#FFF9E6] cursor-pointer transition-colors group select-none"
-                    >
-                      <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-                        {/* Rounded Tap-Friendly Checkbox */}
-                        <div className="w-6 h-6 rounded-lg bg-[#FFF9E6] border border-[#F5E6BF] group-hover:border-[#FF8FA3] flex items-center justify-center shrink-0 transition-colors">
-                          {/* Unchecked */}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <span className="text-xs font-semibold text-[#4A2C2A] block truncate">
-                            {item.displayQuantity ? `${item.displayQuantity} ` : ''}
-                            {item.unit ? `${item.unit} ` : ''}
-                            {item.name}
-                          </span>
-                          {item.recipeSources && item.recipeSources.length > 0 && (
-                            <span className="text-[10px] text-[#8A6866] truncate block">
-                              For: {item.recipeSources.join(', ')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Delete Item Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteItem(item.id);
-                        }}
-                        className="p-1 text-[#B89D9B] hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete item"
+                  {items.map((item) => {
+                    const icon = getIngredientIcon(item.name);
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => handleToggle(item.id)}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-[#FFF9E6] cursor-pointer transition-colors group select-none"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex items-center space-x-2.5 flex-1 min-w-0">
+                          {/* Rounded Tap-Friendly Checkbox */}
+                          <div className="w-6 h-6 rounded-lg bg-[#FFF9E6] border border-[#F5E6BF] group-hover:border-[#FF8FA3] flex items-center justify-center shrink-0 transition-colors">
+                            {/* Unchecked */}
+                          </div>
+
+                          {/* Stylized Ingredient Thumbnail */}
+                          {icon && (
+                            <div className="w-6 h-6 rounded-md bg-[#FFF9E6] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
+                              <img
+                                src={icon.url}
+                                alt={icon.label}
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = icon.fallbackUrl;
+                                }}
+                              />
+                            </div>
+                          )}
+
+                          <div className="min-w-0 flex-1">
+                            <span className="text-xs font-semibold text-[#4A2C2A] block truncate">
+                              {item.displayQuantity ? `${item.displayQuantity} ` : ''}
+                              {item.unit ? `${item.unit} ` : ''}
+                              {item.name}
+                            </span>
+                            {item.recipeSources && item.recipeSources.length > 0 && (
+                              <span className="text-[10px] text-[#8A6866] truncate block">
+                                For: {item.recipeSources.join(', ')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Delete Item Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteItem(item.id);
+                          }}
+                          className="p-1 text-[#B89D9B] hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Delete item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -280,35 +298,50 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
           {showCompleted && (
             <div className="space-y-1.5 pt-3">
-              {completedItems.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleToggle(item.id)}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/60 hover:bg-white cursor-pointer transition-colors group select-none"
-                >
-                  <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-                    <div className="w-6 h-6 rounded-lg bg-[#FF8FA3] text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    </div>
-                    <span className="text-xs font-medium text-[#B89D9B] line-through decoration-[#FF8FA3] truncate">
-                      {item.displayQuantity ? `${item.displayQuantity} ` : ''}
-                      {item.unit ? `${item.unit} ` : ''}
-                      {item.name}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteItem(item.id);
-                    }}
-                    className="p-1 text-[#B89D9B] hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+              {completedItems.map((item) => {
+                const icon = getIngredientIcon(item.name);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => handleToggle(item.id)}
+                    className="flex items-center justify-between p-2 rounded-xl bg-white/60 hover:bg-white cursor-pointer transition-colors group select-none"
                   >
+                    <div className="flex items-center space-x-2.5 flex-1 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-[#FF8FA3] text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Check className="w-4 h-4 stroke-[3]" />
+                      </div>
+                      {icon && (
+                        <div className="w-6 h-6 rounded-md bg-[#FFF9E6] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden opacity-60">
+                          <img
+                            src={icon.url}
+                            alt={icon.label}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = icon.fallbackUrl;
+                            }}
+                          />
+                        </div>
+                      )}
+                      <span className="text-xs font-medium text-[#B89D9B] line-through decoration-[#FF8FA3] truncate">
+                        {item.displayQuantity ? `${item.displayQuantity} ` : ''}
+                        {item.unit ? `${item.unit} ` : ''}
+                        {item.name}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteItem(item.id);
+                      }}
+                      className="p-1 text-[#B89D9B] hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>
