@@ -11,7 +11,13 @@ import {
   LogOut,
   Mail,
   Lock,
+  Globe,
+  Loader2,
 } from 'lucide-react';
+import type { Recipe } from '../../types';
+import { db } from '../../db/cookbookDb';
+import { getStoredUnitSystem } from '../../utils/unitConverter';
+import { exportCookbookAsHtml } from '../../utils/htmlRecipeExporter';
 import {
   downloadBackupFile,
   restoreFromBackupFile,
@@ -29,12 +35,14 @@ interface SyncBackupModalProps {
   onClose: () => void;
   onDataRestored: () => void;
   onPrintAll: () => void;
+  recipes?: Recipe[];
 }
 
 export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
   onClose,
   onDataRestored,
   onPrintAll,
+  recipes,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentUser, setCurrentUser] = useState<CloudflareUser | null>(
@@ -52,6 +60,7 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
 
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isExportingHtml, setIsExportingHtml] = useState(false);
 
   // Lock body scroll on mount
   useEffect(() => {
@@ -125,6 +134,28 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
       onDataRestored();
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to restore backup file');
+    }
+  };
+
+  const handleExportHtml = async () => {
+    try {
+      setIsExportingHtml(true);
+      setErrorMessage(null);
+      setRestoreMessage(null);
+
+      const allRecipes = recipes && recipes.length > 0 ? recipes : await db.recipes.toArray();
+      if (!allRecipes || allRecipes.length === 0) {
+        setErrorMessage('No recipes found in your cookbook to export.');
+        return;
+      }
+
+      const unitPref = getStoredUnitSystem();
+      const res = await exportCookbookAsHtml(allRecipes, { unitSystem: unitPref });
+      setRestoreMessage(`✨ Successfully exported ${res.recipeCount} recipes to "${res.filename}"!`);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to export HTML cookbook');
+    } finally {
+      setIsExportingHtml(false);
     }
   };
 
@@ -318,42 +349,63 @@ export const SyncBackupModal: React.FC<SyncBackupModalProps> = ({
             )}
           </div>
 
-          {/* Section 2: Backup & Restore */}
+          {/* Section 2: Backup & Export */}
           <div className="bg-white border border-[#F3E5D8] rounded-[20px] p-4 shadow-cozy space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C726B] flex items-center space-x-1.5">
               <Database className="w-3.5 h-3.5 text-[#E85D75]" />
-              <span>Offline Backup & Restore</span>
+              <span>Offline Backup & Webpage Export</span>
             </h4>
             <p className="text-xs text-[#8C726B] leading-relaxed">
-              Export all your recipes, meal plans, and grocery lists into a portable JSON archive.
-              You can restore it on any device at any time.
+              Export all your recipes into a beautiful standalone HTML file with images and steps, or save a complete JSON backup.
             </p>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="space-y-2 pt-1">
+              {/* Standalone HTML File Export Button */}
               <button
                 type="button"
-                onClick={downloadBackupFile}
-                className="py-2.5 px-3 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+                onClick={handleExportHtml}
+                disabled={isExportingHtml}
+                className="w-full py-2.5 px-4 bg-[#E85D75] hover:bg-[#D44760] active:scale-98 text-white text-xs font-bold rounded-full flex items-center justify-center space-x-2 transition-all shadow-strawberry cursor-pointer disabled:opacity-50"
               >
-                <Download className="w-4 h-4 text-[#3D231D]" />
-                <span>Export (.json)</span>
+                {isExportingHtml ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Packaging HTML Cookbook...</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4" />
+                    <span>Export Recipes as Standalone HTML</span>
+                  </>
+                )}
               </button>
 
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="py-2.5 px-3 bg-[#FDE8EA] hover:bg-[#FCD2D8] border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
-              >
-                <Upload className="w-4 h-4 text-[#E85D75]" />
-                <span>Restore Backup</span>
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".json"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={downloadBackupFile}
+                  className="py-2.5 px-3 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-[#3D231D]" />
+                  <span>Backup (.json)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="py-2.5 px-3 bg-[#FDE8EA] hover:bg-[#FCD2D8] border border-[#F3E5D8] text-[#3D231D] text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors shadow-xs cursor-pointer"
+                >
+                  <Upload className="w-4 h-4 text-[#E85D75]" />
+                  <span>Restore (.json)</span>
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </div>
             </div>
           </div>
 

@@ -316,6 +316,7 @@ export function App() {
             setShowSettings(false);
             setPrintRecipes(recipes);
           }}
+          recipes={recipes}
         />
       )}
 
