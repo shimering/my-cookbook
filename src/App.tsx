@@ -61,6 +61,16 @@ export function App() {
     }
   };
 
+  const handleDeleteRecipe = async (id: string) => {
+    await db.recipes.delete(id);
+    if (selectedRecipe && selectedRecipe.id === id) {
+      setSelectedRecipe(null);
+    }
+    setIsCreatingRecipe(false);
+    setEditingRecipe(null);
+    cloudflareSync.syncNow();
+  };
+
   const handleToggleFavorite = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const recipe = await db.recipes.get(id);
@@ -298,6 +308,7 @@ export function App() {
         <RecipeFormModal
           initialRecipe={editingRecipe}
           onSave={handleSaveRecipe}
+          onDelete={handleDeleteRecipe}
           onClose={() => {
             setIsCreatingRecipe(false);
             setEditingRecipe(null);

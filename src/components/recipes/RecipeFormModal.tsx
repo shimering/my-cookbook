@@ -29,6 +29,7 @@ import { extractRecipeFromUrl } from '../../utils/recipeExtractor';
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
   onSave: (recipe: Recipe) => void;
+  onDelete?: (recipeId: string) => void;
   onClose: () => void;
 }
 
@@ -164,12 +165,16 @@ function getQtyOptions(unitSystem: UnitSystem, unit: string): string[] {
 export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   initialRecipe,
   onSave,
+  onDelete,
   onClose,
 }) => {
   const isEditing = Boolean(initialRecipe);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
+  const deleteCancelBtnRef = useRef<HTMLButtonElement>(null);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Lock body scroll and focus modal dialog on mount
   useEffect(() => {
@@ -186,6 +191,29 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       document.body.style.touchAction = prevTouchAction;
     };
   }, []);
+
+  // Handle Escape key to dismiss confirmation or modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showDeleteConfirm) {
+          e.stopPropagation();
+          setShowDeleteConfirm(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showDeleteConfirm, onClose]);
+
+  // Autofocus the safe Cancel action whenever the delete alert dialog opens
+  useEffect(() => {
+    if (showDeleteConfirm) {
+      deleteCancelBtnRef.current?.focus();
+    }
+  }, [showDeleteConfirm]);
 
   const [title, setTitle] = useState(initialRecipe?.title || '');
   const [description, setDescription] = useState(initialRecipe?.description || '');
@@ -492,6 +520,12 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     onSave(recipe);
   };
 
+  const handleDelete = () => {
+    if (initialRecipe?.id && onDelete) {
+      onDelete(initialRecipe.id);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 bg-[#3D231D]/40 backdrop-blur-xs flex justify-center items-end sm:items-center sm:p-4 overflow-hidden overscroll-none"
@@ -517,7 +551,19 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
           <h2 className="font-brand text-lg font-bold text-[#3D231D]">
             {isEditing ? 'Edit Recipe' : 'New Recipe'}
           </h2>
-          <div className="w-8" />
+          {isEditing && onDelete ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-1.5 -mr-1.5 rounded-full hover:bg-red-50 text-[#8C726B] hover:text-red-600 transition-colors cursor-pointer"
+              aria-label="Delete Recipe"
+              title="Delete Recipe"
+            >
+              <Trash2 className="w-5 h-5 stroke-[2]" />
+            </button>
+          ) : (
+            <div className="w-8" />
+          )}
         </div>
 
         {/* Semantic Form with Scrollable Content and Sticky Save Footer */}
@@ -1074,18 +1120,100 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* Danger Zone: Delete Recipe (Only visible when editing an existing recipe) */}
+            {isEditing && onDelete && (
+              <div className="pt-4 border-t border-[#F3E5D8]/80">
+                <div className="bg-[#FFF5F5] border border-red-200/80 rounded-[24px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-red-700">Delete this recipe</h4>
+                    <p className="text-xs text-[#8C726B] mt-0.5">
+                      Permanently remove this recipe from your cookbook.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="self-start sm:self-auto inline-flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-red-600 hover:text-white border border-red-300 text-red-600 text-xs font-bold rounded-full transition-colors shadow-2xs cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Recipe</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Sticky Footer Bar with Prominent Save Recipe Button (Full Pill Rounding) */}
-          <div className="p-4 border-t border-[#F3E5D8] bg-white shrink-0 z-20 shadow-xs">
+          {/* Sticky Footer Bar with Prominent Save Recipe Button and Delete Option */}
+          <div className="p-4 border-t border-[#F3E5D8] bg-white shrink-0 z-20 shadow-xs flex items-center gap-2.5">
+            {isEditing && onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="py-3.5 px-4 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold rounded-full text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center space-x-1.5 shrink-0"
+                aria-label="Delete Recipe"
+                title="Delete Recipe"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </button>
+            )}
             <button
               type="submit"
-              className="w-full py-3.5 px-6 bg-[#E85D75] hover:bg-[#D94C65] active:scale-98 text-white font-bold rounded-full shadow-strawberry text-base transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2"
+              className="flex-1 py-3.5 px-6 bg-[#E85D75] hover:bg-[#D94C65] active:scale-98 text-white font-bold rounded-full shadow-strawberry text-base transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2"
             >
               <span>Save Recipe</span>
             </button>
           </div>
         </form>
+
+        {/* Delete Confirmation Alert Dialog */}
+        {showDeleteConfirm && (
+          <div
+            className="fixed inset-0 z-60 bg-[#3D231D]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-recipe-dialog-title"
+            aria-describedby="delete-recipe-dialog-desc"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowDeleteConfirm(false);
+            }}
+          >
+            <div className="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-cozy-lg border border-[#F3E5D8] flex flex-col items-center text-center space-y-4 animate-in zoom-in-95 duration-200">
+              <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 stroke-[2.2]" />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 id="delete-recipe-dialog-title" className="font-brand text-lg font-bold text-[#3D231D]">
+                  Delete Recipe?
+                </h3>
+                <p id="delete-recipe-dialog-desc" className="text-xs text-[#8C726B] leading-relaxed">
+                  Are you sure you want to delete <strong className="text-[#3D231D]">{title.trim() || 'this recipe'}</strong>? This action will permanently remove it from your cookbook.
+                </p>
+              </div>
+
+              <div className="w-full flex items-center space-x-3 pt-2">
+                <button
+                  type="button"
+                  ref={deleteCancelBtnRef}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2.5 px-4 bg-[#F3E5D8]/50 hover:bg-[#F3E5D8] text-[#3D231D] font-bold rounded-full text-xs transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 active:scale-98 text-white font-bold rounded-full text-xs transition-all duration-200 shadow-xs cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Yes, Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
