@@ -304,7 +304,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3D5DC] bg-[#FFF5F7]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3D5DC] bg-[#F0FDF4]">
           <div className="flex items-center space-x-2.5">
             <div className="w-9 h-9 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
@@ -386,7 +386,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                   className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === 'All'
                       ? 'bg-[#16A34A] text-white font-bold shadow-xs'
-                      : 'bg-[#FFF5F7] text-[#8A6866] hover:text-[#4A2C2A] border border-[#F3D5DC]'
+                      : 'bg-[#F0FDF4] text-[#8A6866] hover:text-[#4A2C2A] border border-[#F3D5DC]'
                   }`}
                 >
                   All ({catalogItems.length})
@@ -401,7 +401,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                       className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                         isActive
                           ? 'bg-[#16A34A] text-white font-bold shadow-xs'
-                          : 'bg-[#FFF5F7] text-[#8A6866] hover:text-[#4A2C2A] border border-[#F3D5DC]'
+                          : 'bg-[#F0FDF4] text-[#8A6866] hover:text-[#4A2C2A] border border-[#F3D5DC]'
                       }`}
                     >
                       {cat} ({count})
@@ -445,7 +445,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center space-x-1.5 flex-wrap">
                             <span className="text-xs font-bold text-[#4A2C2A]">{item.name}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFF5F7] border border-[#F3D5DC] text-[#8A6866] font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F0FDF4] border border-[#F3D5DC] text-[#8A6866] font-medium">
                               {item.category}
                             </span>
                           </div>
@@ -460,7 +460,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                       {/* Right: Quantity, Unit, Note & Add Button */}
                       <div className="flex items-center space-x-2 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-[#F3D5DC]/60">
                         {/* Quantity Input */}
-                        <div className="flex items-center space-x-1 bg-[#FFF5F7] border border-[#F3D5DC] rounded-[10px] px-2 py-1">
+                        <div className="flex items-center space-x-1 bg-[#F0FDF4] border border-[#F3D5DC] rounded-[10px] px-2 py-1">
                           <input
                             type="text"
                             value={currentInput.amount}
@@ -509,7 +509,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                             )
                           }
                           placeholder="Note (e.g. organic)"
-                          className="w-24 sm:w-28 text-xs px-2 py-1 bg-[#FFF5F7] border border-[#F3D5DC] rounded-[10px] text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
+                          className="w-24 sm:w-28 text-xs px-2 py-1 bg-[#F0FDF4] border border-[#F3D5DC] rounded-[10px] text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
                           title="Custom notes"
                         />
 
@@ -558,7 +558,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
         {activeTab === 'manage' && (
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
             {/* Section 1: Categories Management */}
-            <div className="bg-[#FFF5F7] border border-[#F3D5DC] rounded-[20px] p-4 space-y-3">
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[20px] p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-serif text-sm font-bold text-[#4A2C2A]">Grocery Categories</h3>
@@ -597,7 +597,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                     return (
                       <div
                         key={cat}
-                        className="flex items-center space-x-1 bg-white border-2 border-[#FF8FA3] rounded-[12px] p-1.5"
+                        className="flex items-center space-x-1 bg-white border-2 border-[#16A34A] rounded-[12px] p-1.5"
                       >
                         <input
                           type="text"
@@ -605,7 +605,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                           onChange={(e) =>
                             setEditingCategory({ ...editingCategory, newName: e.target.value })
                           }
-                          className="flex-1 text-xs px-2 py-1 bg-[#FFF5F7] rounded focus:outline-none"
+                          className="flex-1 text-xs px-2 py-1 bg-[#F0FDF4] rounded focus:outline-none"
                           autoFocus
                         />
                         <button
@@ -679,7 +679,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
               {isAddingItem && (
                 <form
                   onSubmit={handleAddNewItemToCatalog}
-                  className="bg-[#FFF5F7] border border-[#F3D5DC] rounded-[16px] p-3.5 space-y-2.5 animate-in fade-in"
+                  className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[16px] p-3.5 space-y-2.5 animate-in fade-in"
                 >
                   <h4 className="text-xs font-bold text-[#4A2C2A]">Add New Item to Catalog</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -802,7 +802,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                 {catalogItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-2 rounded-[12px] bg-[#FFF5F7] border border-[#F3D5DC]/60 text-xs"
+                    className="flex items-center justify-between p-2 rounded-[12px] bg-[#F0FDF4] border border-[#BBF7D0]/60 text-xs"
                   >
                     <div className="min-w-0 flex-1 flex items-center space-x-2">
                       <span className="font-semibold text-[#4A2C2A] truncate">{item.name}</span>
@@ -855,7 +855,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
         )}
 
         {/* Modal Footer */}
-        <div className="p-3.5 bg-[#FFF5F7] border-t border-[#F3D5DC] flex items-center justify-between text-xs">
+        <div className="p-3.5 bg-[#F0FDF4] border-t border-[#BBF7D0] flex items-center justify-between text-xs">
           <span className="text-[#8A6866] flex items-center space-x-1">
             <Sparkles className="w-3.5 h-3.5 text-[#16A34A]" />
             <span>Strawberry Milk & Butter Pantry</span>

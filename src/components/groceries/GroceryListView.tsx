@@ -166,7 +166,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               <button
                 type="button"
                 onClick={onClearAll}
-                className="text-xs font-semibold text-[#8A6866] hover:text-red-500 px-3 py-1 bg-[#FFF5F7] hover:bg-red-50 rounded-full transition-colors border border-[#F3D5DC] cursor-pointer"
+                className="text-xs font-semibold text-[#8A6866] hover:text-red-500 px-3 py-1 bg-[#F0FDF4] hover:bg-red-50 rounded-full transition-colors border border-[#F3D5DC] cursor-pointer"
                 title="Reset Grocery List"
               >
                 Reset
@@ -250,7 +250,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               value={manualNotes}
               onChange={(e) => setManualNotes(e.target.value)}
               placeholder="Custom note for this item (e.g. Get ripe ones, organic pasture-raised, low sodium)"
-              className="w-full px-3.5 py-2 bg-[#FFF5F7] border border-[#F3D5DC] rounded-[12px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
+              className="w-full px-3.5 py-2 bg-[#F0FDF4] border border-[#F3D5DC] rounded-[12px] text-xs text-[#4A2C2A] placeholder-[#8A6866]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
             />
           )}
         </form>

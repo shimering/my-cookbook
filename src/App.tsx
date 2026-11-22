@@ -185,8 +185,36 @@ export function App() {
     }
   };
 
+  // Dynamic background & selection colors per tab
+  const getTabBgColor = () => {
+    if (selectedRecipe) return 'bg-[#FFF5F7]';
+    switch (activeTab) {
+      case 'planner':
+        return 'bg-[#FAF5FF]'; // Soft lavender purple
+      case 'groceries':
+        return 'bg-[#F0FDF4]'; // Soft fresh mint green
+      case 'recipes':
+      default:
+        return 'bg-[#FFF5F7]'; // Signature strawberry milk blush pink
+    }
+  };
+
+  const getTabSelectionColor = () => {
+    switch (activeTab) {
+      case 'planner':
+        return 'selection:bg-[#8B5CF6] selection:text-white';
+      case 'groceries':
+        return 'selection:bg-[#16A34A] selection:text-white';
+      case 'recipes':
+      default:
+        return 'selection:bg-[#FF8FA3] selection:text-white';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#FFF5F7] text-[#4A2C2A] flex flex-col justify-between selection:bg-[#FF8FA3] selection:text-white">
+    <div
+      className={`min-h-screen ${getTabBgColor()} ${getTabSelectionColor()} text-[#4A2C2A] flex flex-col justify-between transition-colors duration-300`}
+    >
       {/* Top Header (Visible unless viewing recipe in Cooking Mode or full print view) */}
       {!selectedRecipe && !printRecipes && (
         <TopHeader

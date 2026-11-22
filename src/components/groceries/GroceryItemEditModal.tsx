@@ -166,7 +166,7 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3D5DC] bg-[#FFF5F7]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#BBF7D0] bg-[#F0FDF4]">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
               <Edit3 className="w-4 h-4 stroke-[2.2]" />

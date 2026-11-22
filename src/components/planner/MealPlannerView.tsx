@@ -383,9 +383,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             if (e.target === e.currentTarget) setModalSlot(null);
           }}
         >
-          <div className="bg-[#FFF5F7] w-full max-w-md max-h-[85vh] rounded-t-[24px] sm:rounded-[24px] border border-[#F3D5DC] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in slide-in-from-bottom-6 duration-200">
+          <div className="bg-[#FAF5FF] w-full max-w-md max-h-[85vh] rounded-t-[24px] sm:rounded-[24px] border border-[#E9D5FF] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in slide-in-from-bottom-6 duration-200">
             {/* Modal Header */}
-            <div className="px-5 py-3.5 border-b border-[#F3D5DC] bg-white flex items-center justify-between">
+            <div className="px-5 py-3.5 border-b border-[#E9D5FF] bg-white flex items-center justify-between">
               <div>
                 <h3 className="font-serif text-base font-bold text-[#4A2C2A]">
                   Add to {modalSlot.slot.charAt(0).toUpperCase() + modalSlot.slot.slice(1)}
@@ -394,7 +394,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               </div>
               <button
                 onClick={() => setModalSlot(null)}
-                className="p-1.5 rounded-full hover:bg-[#FFF0F3] text-[#8A6866] cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[#F3E8FF] text-[#8A6866] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -448,7 +448,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               {/* Divider */}
               <div className="relative flex items-center justify-center">
                 <div className="border-t border-[#F3D5DC] w-full" />
-                <span className="bg-[#FFF5F7] px-2 text-[10px] font-bold text-[#8A6866] uppercase">
+                <span className="bg-[#FAF5FF] px-2 text-[10px] font-bold text-[#8A6866] uppercase">
                   or custom note
                 </span>
               </div>
