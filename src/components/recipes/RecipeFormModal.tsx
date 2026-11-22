@@ -7,6 +7,11 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
+  Sparkles,
+  Link2,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
@@ -19,6 +24,7 @@ import { parseQuantity } from '../../utils/fractionParser';
 import { getStoredCatalogItems } from '../../data/groceryCatalog';
 import { db } from '../../db/cookbookDb';
 import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
+import { extractRecipeFromUrl } from '../../utils/recipeExtractor';
 
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
@@ -264,6 +270,51 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
   const [isCompressing, setIsCompressing] = useState(false);
 
+  // URL extraction state
+  const [urlInput, setUrlInput] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState('');
+  const [extractionSuccess, setExtractionSuccess] = useState('');
+
+  // Extract Recipe from Web URL
+  const handleExtractUrl = async () => {
+    if (!urlInput.trim()) return;
+
+    try {
+      setIsExtracting(true);
+      setExtractionError('');
+      setExtractionSuccess('');
+
+      const extracted = await extractRecipeFromUrl(urlInput.trim());
+
+      if (extracted.title) setTitle(extracted.title);
+      if (extracted.description) setDescription(extracted.description);
+      if (extracted.heroImage) setHeroImage(extracted.heroImage);
+      if (extracted.prepTimeMinutes) setPrepTimeMinutes(String(extracted.prepTimeMinutes));
+      if (extracted.cookTimeMinutes) setCookTimeMinutes(String(extracted.cookTimeMinutes));
+      if (extracted.servings) setServings(String(extracted.servings));
+      if (extracted.categories && extracted.categories.length > 0) {
+        setCategories(extracted.categories);
+      }
+      if (extracted.ingredients && extracted.ingredients.length > 0) {
+        setIngredients(extracted.ingredients);
+      }
+      if (extracted.steps && extracted.steps.length > 0) {
+        setSteps(extracted.steps);
+      }
+
+      setExtractionSuccess(
+        `✨ Extracted "${extracted.title || 'Recipe'}" with ${extracted.ingredients.length} ingredients and ${extracted.steps.length} steps!`
+      );
+    } catch (err: any) {
+      setExtractionError(
+        err?.message || 'Failed to extract recipe from URL. Please check the link or enter details manually.'
+      );
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   // Handle Photo Upload from either Camera or Gallery
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -473,6 +524,81 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
         <form id="recipe-form" onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable Form Content */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5 overscroll-contain">
+            {/* 🪄 Import from Recipe Link Card */}
+            <div className="bg-[#FFF0F3]/70 border border-[#F3E5D8] rounded-[24px] p-4 shadow-2xs">
+              <div className="flex items-center space-x-2.5 mb-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#E85D75] text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Sparkles className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="font-brand text-xs sm:text-sm font-bold text-[#3D231D]">
+                    Import from Recipe Link
+                  </h3>
+                  <p className="text-[11px] text-[#8C726B]">
+                    Paste any recipe URL to auto-extract ingredients, steps & photo
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8C726B]">
+                    <Link2 className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    type="url"
+                    value={urlInput}
+                    onChange={(e) => {
+                      setUrlInput(e.target.value);
+                      if (extractionError) setExtractionError('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleExtractUrl();
+                      }
+                    }}
+                    placeholder="https://www.allrecipes.com/recipe/..."
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-full text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40"
+                    disabled={isExtracting}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleExtractUrl}
+                  disabled={isExtracting || !urlInput.trim()}
+                  className="px-4 py-2 bg-[#E85D75] hover:bg-[#D44760] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5 shrink-0"
+                >
+                  {isExtracting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Extracting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Extract</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {extractionError && (
+                <div className="mt-2.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded-[12px] p-2.5 flex items-start space-x-2 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+                  <span className="flex-1">{extractionError}</span>
+                </div>
+              )}
+
+              {extractionSuccess && (
+                <div className="mt-2.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-[12px] p-2.5 flex items-center space-x-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <span className="flex-1">{extractionSuccess}</span>
+                </div>
+              )}
+            </div>
+
             {/* Photo Upload Card with border-radius: 24px (Camera & Gallery Options) */}
             <div className="relative">
               {/* Camera Input (opens native camera directly on mobile) */}
