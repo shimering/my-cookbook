@@ -19,5 +19,6 @@ Because this environment runs on Windows PowerShell, invoke CLI binaries using `
 ## Architectural Conventions
 1. **Offline-First:** All mutations must immediately succeed in local Dexie IndexedDB. Network synchronization is asynchronous and handled in the background by `cloudflareSyncService`.
 2. **Component Structure:** Keep UI components modular within `src/components/`, organized by feature domain (`planner/`, `groceries/`, `recipe/`, `common/`).
-3. **Styling:** Follow the cozy "Strawberry Milk & Butter" aesthetic with Tailwind CSS classes.
-4. **Testing:** New utility functions and sync logic must be accompanied by Vitest tests in `__tests__/` directories.
+3. **Styling:** Follow the cozy "Strawberry Milk & Butter" aesthetic with Tailwind CSS classes (see `responsive-ui-design` skill).
+4. **Quality & Filter Gate:** Adhere to the `anti-slop` skill to eliminate generic AI tropes, enforce WCAG 2.2 accessibility, and execute the pre-ship Delivery Gate check.
+5. **Testing:** New utility functions and sync logic must be accompanied by Vitest tests in `__tests__/` directories.
