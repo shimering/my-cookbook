@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { filterSuggestions, type SuggestionItem } from '../AutocompleteInput';
+import { filterSuggestions, type SuggestionItem } from '../../../utils/suggestionUtils';
 
 describe('AutocompleteInput prefix filtering', () => {
   const sampleItems: SuggestionItem[] = [

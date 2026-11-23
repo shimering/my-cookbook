@@ -1,5 +1,5 @@
 import { db } from '../db/cookbookDb';
-import type { Recipe, PlannedMeal, GroceryItem } from '../types';
+import type { Recipe, PlannedMeal, GroceryItem, MealSlot } from '../types';
 import { cloudflareAuth } from './cloudflareAuthService';
 
 const LAST_SYNCED_KEY = 'my_cookbook_last_synced_at';
@@ -37,6 +37,65 @@ function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([u8arr], { type: mime });
 }
 
+interface UploadResponse {
+  url: string;
+  key: string;
+  error?: string;
+}
+
+interface RemoteIngredient {
+  id?: string;
+  name: string;
+  quantity: string | number;
+  unit?: string;
+  section?: string;
+}
+
+interface RemoteRecipe {
+  id: string;
+  title: string;
+  description?: string;
+  heroImage?: string;
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  servings?: number;
+  categories?: string[];
+  isFavorite?: boolean | number;
+  createdAt: string | number;
+  updatedAt: string | number;
+  deletedAt?: string | number | null;
+  ingredients?: RemoteIngredient[];
+  instructions?: string[];
+}
+
+interface RemoteMealPlan {
+  id: string;
+  date: string;
+  slot: MealSlot;
+  recipeId?: string;
+  customTitle?: string;
+  servingsMultiplier?: number;
+  deletedAt?: string | number | null;
+}
+
+interface RemoteGrocery {
+  id: string;
+  name: string;
+  quantity?: number;
+  unit?: string;
+  category?: string;
+  isChecked?: boolean | number;
+  isManual?: boolean | number;
+  deletedAt?: string | number | null;
+}
+
+interface SyncPayloadResponse {
+  recipes: RemoteRecipe[];
+  mealPlans: RemoteMealPlan[];
+  groceries: RemoteGrocery[];
+  serverTime: number;
+}
+
 export const cloudflareSync = {
   getSyncState(): SyncState {
     return state;
@@ -66,7 +125,7 @@ export const cloudflareSync = {
       body: formData,
     });
 
-    const data = await res.json() as any;
+    const data = (await res.json()) as UploadResponse;
     if (!res.ok) {
       throw new Error(data.error || 'Upload failed');
     }
@@ -183,16 +242,11 @@ export const cloudflareSync = {
           await cloudflareAuth.logout();
           throw new Error('Your session expired. Please sign in again.');
         }
-        const errData = await res.json() as any;
+        const errData = (await res.json()) as { error?: string };
         throw new Error(errData.error || 'Sync failed');
       }
 
-      const syncResult = await res.json() as {
-        recipes: any[];
-        mealPlans: any[];
-        groceries: any[];
-        serverTime: number;
-      };
+      const syncResult = (await res.json()) as SyncPayloadResponse;
 
       // 4. Merge incoming changes into IndexedDB
       // Merge remote recipes
@@ -212,10 +266,10 @@ export const cloudflareSync = {
             isFavorite: Boolean(remoteR.isFavorite),
             createdAt: new Date(remoteR.createdAt).toISOString(),
             updatedAt: new Date(remoteR.updatedAt).toISOString(),
-            ingredients: (remoteR.ingredients || []).map((ing: any) => ({
-              id: ing.id,
+            ingredients: (remoteR.ingredients || []).map((ing: RemoteIngredient) => ({
+              id: ing.id || crypto.randomUUID(),
               name: ing.name,
-              amount: parseFloat(ing.quantity) || 0,
+              amount: typeof ing.quantity === 'number' ? ing.quantity : parseFloat(String(ing.quantity)) || 0,
               unit: ing.unit || '',
               section: ing.section,
             })),
@@ -255,10 +309,10 @@ export const cloudflareSync = {
           const mappedGroc: GroceryItem = {
             id: remoteG.id,
             name: remoteG.name,
-            amount: remoteG.quantity,
-            unit: remoteG.unit,
-            displayQuantity: String(remoteG.quantity || ''),
-            category: remoteG.category,
+            amount: remoteG.quantity ?? 1,
+            unit: remoteG.unit ?? '',
+            displayQuantity: String(remoteG.quantity ?? ''),
+            category: remoteG.category ?? 'Other',
             checked: Boolean(remoteG.isChecked),
             isManual: Boolean(remoteG.isManual),
           };
@@ -269,9 +323,12 @@ export const cloudflareSync = {
       const newSyncedAt = syncResult.serverTime || Date.now();
       localStorage.setItem(LAST_SYNCED_KEY, String(newSyncedAt));
       updateState({ isSyncing: false, lastSyncedAt: newSyncedAt, error: null });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Cloudflare Sync error:', err);
-      updateState({ isSyncing: false, error: err.message || 'Sync failed' });
+      updateState({
+        isSyncing: false,
+        error: err instanceof Error ? err.message : 'Sync failed',
+      });
     }
   },
 

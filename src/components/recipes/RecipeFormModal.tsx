@@ -332,11 +332,13 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       }
 
       setExtractionSuccess(
-        `✨ Extracted "${extracted.title || 'Recipe'}" with ${extracted.ingredients.length} ingredients and ${extracted.steps.length} steps!`
+        `Extracted "${extracted.title || 'Recipe'}" with ${extracted.ingredients.length} ingredients and ${extracted.steps.length} steps!`
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       setExtractionError(
-        err?.message || 'Failed to extract recipe from URL. Please check the link or enter details manually.'
+        err instanceof Error
+          ? err.message
+          : 'Failed to extract recipe from URL. Please check the link or enter details manually.'
       );
     } finally {
       setIsExtracting(false);
@@ -701,31 +703,34 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     <button
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
-                      className="p-1.5 rounded-full bg-[#FDE8EA] text-[#E85D75] active:scale-90 transition-transform"
+                      className="p-2 rounded-full bg-[#FDE8EA] text-[#E85D75] active:scale-90 transition-transform cursor-pointer"
                       title="Take new photo with camera"
+                      aria-label="Take new photo with camera"
                     >
                       <Camera className="w-3.5 h-3.5 stroke-[2.2]" />
                     </button>
                     <button
                       type="button"
                       onClick={() => galleryInputRef.current?.click()}
-                      className="p-1.5 rounded-full bg-[#FDECC8] text-[#3D231D] active:scale-90 transition-transform"
+                      className="p-2 rounded-full bg-[#FDECC8] text-[#3D231D] active:scale-90 transition-transform cursor-pointer"
                       title="Choose from photo gallery"
+                      aria-label="Choose from photo gallery"
                     >
                       <ImageIcon className="w-3.5 h-3.5 stroke-[2.2]" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setHeroImage('')}
-                      className="p-1.5 rounded-full bg-red-100 text-red-600 active:scale-90 transition-transform"
+                      className="p-2 rounded-full bg-red-100 text-red-600 active:scale-90 transition-transform cursor-pointer"
                       title="Remove photo"
+                      aria-label="Remove recipe photo"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="w-full py-6 px-4 border-2 border-dashed border-[#F3E5D8] bg-white rounded-[24px] flex flex-col items-center justify-center space-y-3.5 shadow-2xs">
+                <div className="w-full py-6 px-4 border-2 border-dashed border-[#F3E5D8] bg-white rounded-3xl flex flex-col items-center justify-center space-y-3.5 shadow-2xs">
                   <div className="text-center">
                     <span className="text-xs font-bold text-[#3D231D] uppercase tracking-wider block">
                       {isCompressing ? 'Compressing photo...' : 'Recipe Photo'}
@@ -856,9 +861,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       type="button"
                       key={cat}
                       onClick={() => toggleCategory(cat)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                      aria-pressed={isSelected}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 cursor-pointer ${
                         isSelected
-                          ? 'bg-[#E85D75] text-white shadow-xs font-bold'
+                          ? 'bg-[#E85D75] text-white shadow-xs font-bold border border-[#D94C65]'
                           : 'bg-white border border-[#F3E5D8] text-[#3D231D] hover:bg-[#FDECC8]'
                       }`}
                     >
@@ -1073,7 +1079,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 {steps.map((step, index) => (
                   <div
                     key={step.id}
-                    className="bg-[#FDECC8]/40 border border-[#F3E5D8] p-3.5 rounded-[24px] shadow-xs space-y-2"
+                    className="bg-[#FDECC8]/40 border border-[#F3E5D8] p-3.5 rounded-2xl shadow-xs space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-[#3D231D] font-brand">
@@ -1084,8 +1090,9 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                           type="button"
                           disabled={index === 0}
                           onClick={() => moveStep(index, 'up')}
-                          className="p-1 text-[#8C726B] hover:text-[#3D231D] disabled:opacity-30 cursor-pointer"
+                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
                           title="Move Up"
+                          aria-label="Move step up"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
@@ -1093,16 +1100,18 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                           type="button"
                           disabled={index === steps.length - 1}
                           onClick={() => moveStep(index, 'down')}
-                          className="p-1 text-[#8C726B] hover:text-[#3D231D] disabled:opacity-30 cursor-pointer"
+                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
                           title="Move Down"
+                          aria-label="Move step down"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => removeStep(index)}
-                          className="p-1 text-[#8C726B] hover:text-red-500 ml-1 cursor-pointer"
+                          className="p-1.5 text-[#8C726B] hover:text-red-500 active:scale-95 ml-1 cursor-pointer rounded"
                           title="Remove Step"
+                          aria-label="Remove step"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

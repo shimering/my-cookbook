@@ -26,7 +26,7 @@ const mockLocalStorage = {
   },
 };
 
-globalThis.localStorage = mockLocalStorage as any;
+globalThis.localStorage = mockLocalStorage as unknown as Storage;
 
 describe('groceryCatalog', () => {
   beforeEach(() => {

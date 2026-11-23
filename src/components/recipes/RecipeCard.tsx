@@ -60,7 +60,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         <button
           type="button"
           onClick={(e) => onToggleFavorite(recipe.id, e)}
-          className="p-1.5 rounded-full hover:bg-[#FFF8F6] transition-colors"
+          className="p-2.5 -m-1 rounded-full hover:bg-[#FFF8F6] active:scale-95 transition-all cursor-pointer touch-manipulation"
           title={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-label={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >

@@ -13,6 +13,12 @@ function notify(user: CloudflareUser | null) {
   listeners.forEach(fn => fn(user));
 }
 
+interface AuthResponse {
+  user: CloudflareUser;
+  token: string;
+  error?: string;
+}
+
 export const cloudflareAuth = {
   getAuthToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
@@ -45,7 +51,7 @@ export const cloudflareAuth = {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json() as any;
+    const data = (await res.json()) as AuthResponse;
     if (!res.ok) {
       throw new Error(data.error || 'Registration failed');
     }
@@ -63,7 +69,7 @@ export const cloudflareAuth = {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json() as any;
+    const data = (await res.json()) as AuthResponse;
     if (!res.ok) {
       throw new Error(data.error || 'Login failed');
     }
@@ -109,12 +115,13 @@ export const cloudflareAuth = {
         return null;
       }
 
-      const data = await res.json() as { user: CloudflareUser };
+      const data = (await res.json()) as { user: CloudflareUser };
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       notify(data.user);
       return data.user;
-    } catch (err) {
+    } catch (err: unknown) {
       // Offline: keep cached user
+      console.warn('[cloudflareAuthService] Offline fallback: session check failed, using cached user', err);
       return this.getAuthUser();
     }
   },

@@ -11,13 +11,9 @@ export interface UseWakeLockReturn {
  * React hook to keep the screen awake while the cook is viewing a recipe.
  */
 export function useWakeLock(autoRequest: boolean = true): UseWakeLockReturn {
-  const [isSupported, setIsSupported] = useState<boolean>(false);
+  const isSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
   const [isActive, setIsActive] = useState<boolean>(false);
   const sentinelRef = useRef<WakeLockSentinel | null>(null);
-
-  useEffect(() => {
-    setIsSupported('wakeLock' in navigator);
-  }, []);
 
   const request = useCallback(async () => {
     if (!('wakeLock' in navigator)) return;
@@ -48,21 +44,40 @@ export function useWakeLock(autoRequest: boolean = true): UseWakeLockReturn {
   }, []);
 
   useEffect(() => {
+    let released = false;
+
     if (autoRequest && isSupported) {
-      request();
+      navigator.wakeLock.request('screen').then(
+        (sentinel) => {
+          if (released) {
+            void sentinel.release();
+            return;
+          }
+          sentinelRef.current = sentinel;
+          setIsActive(true);
+          sentinel.addEventListener('release', () => {
+            if (!released) setIsActive(false);
+          });
+        },
+        (err) => {
+          console.info('Wake lock request denied or not active:', err);
+          if (!released) setIsActive(false);
+        }
+      );
     }
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && autoRequest && isSupported) {
-        request();
+        void request();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      released = true;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      release();
+      void release();
     };
   }, [autoRequest, isSupported, request, release]);
 

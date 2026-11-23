@@ -63,6 +63,7 @@ export interface CatalogItem {
   defaultUnit?: string;
   notes?: string;
   isCustom?: boolean;
+  icon?: string;
 }
 
 export interface GroceryItem {
@@ -76,6 +77,7 @@ export interface GroceryItem {
   isManual: boolean;          // true if added directly by user (e.g. coffee, paper towels)
   notes?: string;             // Custom notes (e.g. "Extra ripe", "Organic", "Brand X")
   recipeSources?: string[];   // Recipe titles that contributed this ingredient
+  icon?: string;              // Custom icon or emoji
 }
 
 export interface DayPlan {

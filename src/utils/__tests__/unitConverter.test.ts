@@ -25,8 +25,8 @@ const mockLocalStorage = {
   },
 };
 
-globalThis.localStorage = mockLocalStorage as any;
-globalThis.window = { localStorage: mockLocalStorage } as any;
+globalThis.localStorage = mockLocalStorage as unknown as Storage;
+globalThis.window = { localStorage: mockLocalStorage } as unknown as Window & typeof globalThis;
 
 describe('unitConverter', () => {
   beforeEach(() => {

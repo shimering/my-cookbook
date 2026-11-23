@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types';
 import { useWakeLock } from '../../hooks/useWakeLock';
-import { getIngredientIcon } from '../../utils/ingredientIconResolver';
+import { resolveItemIcon } from '../../utils/ingredientIconResolver';
+import { ItemIconBadge } from '../common/ItemIconBadge';
 import {
   convertIngredient,
   getStoredUnitSystem,
@@ -119,8 +120,9 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Print button */}
               <button
                 onClick={() => onPrint(recipe)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
+                className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title="Print Recipe"
+                aria-label="Print Recipe"
               >
                 <Printer className="w-4 h-4 stroke-[2]" />
               </button>
@@ -128,8 +130,9 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Edit button */}
               <button
                 onClick={() => onEdit(recipe)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
+                className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title="Edit Recipe"
+                aria-label="Edit Recipe"
               >
                 <Edit3 className="w-4 h-4 stroke-[2]" />
               </button>
@@ -137,8 +140,9 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               {/* Favorite button */}
               <button
                 onClick={(e) => onToggleFavorite(recipe.id, e)}
-                className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
+                className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-[#3D231D] shadow-cozy hover:bg-white active:scale-95 transition-all border border-[#F3E5D8] cursor-pointer"
                 title={recipe.isFavorite ? 'Remove favorite' : 'Add favorite'}
+                aria-label={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart
                   className={`w-5 h-5 transition-transform active:scale-125 ${
@@ -179,18 +183,22 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                 <Users className="w-3.5 h-3.5 text-[#3D231D]" />
                 <span>{currentServings} servings</span>
               </div>
-              <div className="flex items-center space-x-1 border-l border-[#F3E5D8] pl-1.5 no-print">
+              <div className="flex items-center space-x-1.5 border-l border-[#F3E5D8] pl-2 no-print">
                 <button
                   type="button"
                   onClick={() => setServingsMultiplier((prev) => Math.max(0.5, prev - 0.5))}
-                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer shadow-2xs"
+                  aria-label="Decrease servings"
+                  title="Decrease servings"
                 >
                   -
                 </button>
                 <button
                   type="button"
                   onClick={() => setServingsMultiplier((prev) => prev + 0.5)}
-                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFF8F6] active:scale-95 text-xs font-bold border border-[#F3E5D8] cursor-pointer shadow-2xs"
+                  aria-label="Increase servings"
+                  title="Increase servings"
                 >
                   +
                 </button>
@@ -301,7 +309,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                   <div className="space-y-2">
                     {items.map((ing) => {
                       const isChecked = checkedIngredients.has(ing.id);
-                      const icon = getIngredientIcon(ing.name);
+                      const itemIcon = resolveItemIcon(ing.name);
                       const converted = convertIngredient(ing, unitSystem, servingsMultiplier);
                       const displayAmt = converted.displayQuantity;
                       const displayUnit = converted.unit;
@@ -328,18 +336,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
                           </div>
 
                           {/* Stylized Ingredient Thumbnail */}
-                          {icon && (
-                            <div className="w-7 h-7 rounded-[8px] bg-[#FDECC8]/40 border border-[#F3E5D8] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs">
-                              <img
-                                src={icon.url}
-                                alt={icon.label}
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = icon.fallbackUrl;
-                                }}
-                              />
-                            </div>
-                          )}
+                          <ItemIconBadge icon={itemIcon} size="md" isCompleted={isChecked} />
 
                           {/* Strikethrough Text */}
                           <div className="flex-1 text-sm font-medium leading-tight">

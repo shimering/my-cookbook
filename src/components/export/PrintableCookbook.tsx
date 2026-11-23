@@ -43,7 +43,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
               type="button"
               onClick={() => setUnitSystem('us')}
               aria-pressed={unitSystem === 'us'}
-              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-full transition-all active:scale-95 cursor-pointer ${
                 unitSystem === 'us'
                   ? 'bg-[#E85D75] text-white shadow-xs font-bold'
                   : 'text-[#8C726B] hover:text-[#3D231D]'
@@ -55,7 +55,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
               type="button"
               onClick={() => setUnitSystem('metric')}
               aria-pressed={unitSystem === 'metric'}
-              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full transition-all active:scale-95 cursor-pointer ${
                 unitSystem === 'metric'
                   ? 'bg-[#E85D75] text-white shadow-xs font-bold'
                   : 'text-[#8C726B] hover:text-[#3D231D]'
@@ -68,14 +68,15 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#E85D75] hover:bg-[#D94C65] text-white text-xs font-bold rounded-full shadow-strawberry transition-all cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#E85D75] hover:bg-[#D94C65] active:scale-95 text-white text-xs font-bold rounded-full shadow-strawberry transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Print / Save as PDF</span>
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-[#FFF5F7] text-[#3D231D] transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-[#FFF5F7] text-[#3D231D] active:scale-95 transition-all cursor-pointer"
+            aria-label="Close printable cookbook dialog"
           >
             <X className="w-5 h-5" />
           </button>
@@ -112,7 +113,7 @@ export const PrintableCookbook: React.FC<PrintableCookbookProps> = ({ recipes, o
             {/* Photo & Ingredients Side by Side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {recipe.heroImage && (
-                <div className="rounded-[20px] overflow-hidden aspect-4/3 max-h-72 bg-[#FFF5F7] border border-[#F3E5D8]">
+                <div className="rounded-2xl overflow-hidden aspect-4/3 max-h-72 bg-[#FFF5F7] border border-[#F3E5D8]">
                   <img
                     src={recipe.heroImage}
                     alt={recipe.title}

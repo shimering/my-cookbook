@@ -6,7 +6,7 @@ import {
   Trash2,
   Utensils,
   ShoppingBag,
-  Sparkles,
+  ListPlus,
   Calendar as CalendarIcon,
   X,
   Search,
@@ -68,10 +68,12 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
     }
   }, [modalSlot]);
 
+  // Stable today reference for date highlighting
+  const [todayStr] = useState(() => formatLocalDate(new Date()));
+
   // Generate 7 days for the current week (Sunday to Saturday)
   const weekDays = useMemo(() => {
     const days: { dateStr: string; dayName: string; formatted: string; isToday: boolean }[] = [];
-    const todayStr = formatLocalDate(new Date());
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(currentWeekStart);
@@ -87,7 +89,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
       });
     }
     return days;
-  }, [currentWeekStart]);
+  }, [currentWeekStart, todayStr]);
 
   const activeDay = weekDays[activeDayIndex] || weekDays[0];
 
@@ -162,12 +164,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
   return (
     <div className="pb-28 px-4 sm:px-6 max-w-[1120px] mx-auto">
-      {/* Week Header & Navigation - Rounded 24px */}
-      <div className="flex items-center justify-between mb-4 bg-white border border-[#F3E5D8] rounded-[24px] p-3.5 sm:p-4 shadow-cozy">
+      {/* Week Header & Navigation */}
+      <div className="flex items-center justify-between mb-4 bg-white border border-[#F3E5D8] rounded-3xl p-3.5 sm:p-4 shadow-cozy">
         <button
           onClick={() => changeWeek('prev')}
-          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] transition-colors cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] active:scale-95 transition-all cursor-pointer"
           title="Previous Week"
+          aria-label="Previous Week"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -184,14 +187,15 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
 
         <button
           onClick={() => changeWeek('next')}
-          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] transition-colors cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#FFF3CC] text-[#3D231D] active:scale-95 transition-all cursor-pointer"
           title="Next Week"
+          aria-label="Next Week"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 7-Day Calendar Tabs (Monday to Sunday) - Rounded 16px */}
+      {/* 7-Day Calendar Tabs (Monday to Sunday) */}
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4">
         {weekDays.map((day, idx) => {
           const isSelected = idx === activeDayIndex;
@@ -202,7 +206,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             <button
               key={day.dateStr}
               onClick={() => setActiveDayIndex(idx)}
-              className={`flex flex-col items-center py-2.5 px-1 rounded-[16px] transition-all duration-200 border cursor-pointer ${
+              className={`flex flex-col items-center py-2.5 px-1 rounded-xl transition-all duration-200 border cursor-pointer ${
                 isSelected
                   ? 'bg-[#8B5CF6] text-white border-[#7C3AED] shadow-sm font-bold'
                   : 'bg-white hover:bg-[#FFF3CC]/50 text-[#3D231D] border-[#F3E5D8] shadow-xs'
@@ -229,11 +233,11 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         })}
       </div>
 
-      {/* Generate Grocery List Floating Trigger Banner - Butter Yellow, Rounded 24px */}
-      <div className="bg-[#FFE599] border border-[#F5E6BF] rounded-[24px] p-4 mb-5 shadow-cozy flex items-center justify-between">
+      {/* Generate Grocery List Floating Trigger Banner - Butter Yellow */}
+      <div className="bg-[#FFE599] border border-[#F5E6BF] rounded-3xl p-4 mb-5 shadow-cozy flex items-center justify-between">
         <div>
           <h4 className="text-xs font-bold text-[#3D231D] flex items-center space-x-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
+            <ListPlus className="w-3.5 h-3.5 text-[#8B5CF6]" />
             <span>Generate Groceries</span>
           </h4>
           <p className="text-[11px] text-[#8C726B] mt-0.5">
@@ -255,7 +259,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
         </button>
       </div>
 
-      {/* Slots for the active day - Rounded 24px cards */}
+      {/* Slots for the active day */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {MEAL_SLOTS.map(({ slot, label, icon }) => {
           const slotMeals = mealsBySlot[slot];
@@ -263,7 +267,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
           return (
             <div
               key={slot}
-              className="bg-white border border-[#F3E5D8] rounded-[24px] p-4 shadow-cozy space-y-3"
+              className="bg-white border border-[#F3E5D8] rounded-3xl p-4 shadow-cozy space-y-3"
             >
               {/* Slot Header */}
               <div className="flex items-center justify-between">
@@ -291,7 +295,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     return (
                       <div
                         key={meal.id}
-                        className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] p-2.5 flex items-center justify-between space-x-2 shadow-xs"
+                        className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-xl p-2.5 flex items-center justify-between space-x-2 shadow-xs"
                       >
                         <div
                           className="flex items-center space-x-2.5 flex-1 min-w-0 cursor-pointer"
@@ -301,10 +305,10 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                             <img
                               src={matchedRecipe.heroImage}
                               alt={matchedRecipe.title}
-                              className="w-10 h-10 rounded-[10px] object-cover shrink-0 border border-[#F5E6BF]"
+                              className="w-10 h-10 rounded-lg object-cover shrink-0 border border-[#F5E6BF]"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-[10px] bg-[#FFE599] flex items-center justify-center shrink-0 text-[#3D231D]">
+                            <div className="w-10 h-10 rounded-lg bg-[#FFE599] flex items-center justify-center shrink-0 text-[#3D231D]">
                               <Utensils className="w-4 h-4" />
                             </div>
                           )}
@@ -320,7 +324,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                         </div>
 
                         {/* Serving Multiplier Selector */}
-                        <div className="flex items-center space-x-1 text-xs text-[#8C726B] shrink-0">
+                        <div className="flex items-center space-x-1.5 text-xs text-[#8C726B] shrink-0">
                           <button
                             type="button"
                             onClick={() =>
@@ -329,8 +333,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                                 Math.max(0.5, meal.servingsMultiplier - 0.5)
                               )
                             }
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] active:scale-95 font-bold border border-[#F5E6BF] shadow-2xs cursor-pointer"
                             title="Decrease Servings"
+                            aria-label="Decrease servings multiplier"
                           >
                             -
                           </button>
@@ -342,8 +347,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                             onClick={() =>
                               onUpdateServingMultiplier(meal.id, meal.servingsMultiplier + 0.5)
                             }
-                            className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] font-bold border border-[#F5E6BF] cursor-pointer"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-[#3D231D] hover:bg-[#FFE599] active:scale-95 font-bold border border-[#F5E6BF] shadow-2xs cursor-pointer"
                             title="Increase Servings"
+                            aria-label="Increase servings multiplier"
                           >
                             +
                           </button>
@@ -352,8 +358,9 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                           <button
                             type="button"
                             onClick={() => onRemoveMeal(meal.id)}
-                            className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg transition-colors ml-1 cursor-pointer"
+                            className="p-2 text-[#8C726B] hover:text-red-500 rounded-lg active:scale-95 transition-all ml-1 cursor-pointer"
                             title="Remove from meal plan"
+                            aria-label={`Remove ${meal.recipeTitle} from ${label}`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -363,12 +370,13 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                   })}
                 </div>
               ) : (
-                <div
+                <button
+                  type="button"
                   onClick={() => setModalSlot({ date: activeDay.dateStr, slot })}
-                  className="py-3 px-3 border border-dashed border-[#F3E5D8] rounded-[16px] text-center text-[11px] text-[#8C726B] cursor-pointer hover:bg-[#FFF3CC]/30 transition-colors"
+                  className="w-full py-3 px-3 border border-dashed border-[#F3E5D8] rounded-xl text-center text-[11px] text-[#8C726B] hover:text-[#3D231D] cursor-pointer hover:bg-[#FFF3CC]/30 transition-colors focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/30"
                 >
                   Empty slot — tap to plan {label.toLowerCase()}
-                </div>
+                </button>
               )}
             </div>
           );
@@ -383,7 +391,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
             if (e.target === e.currentTarget) setModalSlot(null);
           }}
         >
-          <div className="bg-[#FAF5FF] w-full max-w-md max-h-[85vh] rounded-t-[24px] sm:rounded-[24px] border border-[#E9D5FF] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in slide-in-from-bottom-6 duration-200">
+          <div className="bg-[#FAF5FF] w-full max-w-md max-h-[85vh] rounded-t-3xl sm:rounded-3xl border border-[#E9D5FF] shadow-cozy-lg flex flex-col overflow-hidden overscroll-contain animate-in slide-in-from-bottom-6 duration-200">
             {/* Modal Header */}
             <div className="px-5 py-3.5 border-b border-[#E9D5FF] bg-white flex items-center justify-between">
               <div>
@@ -394,7 +402,8 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
               </div>
               <button
                 onClick={() => setModalSlot(null)}
-                className="p-1.5 rounded-full hover:bg-[#F3E8FF] text-[#8C726B] cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[#F3E8FF] text-[#8C726B] active:scale-95 transition-all cursor-pointer"
+                aria-label="Close add meal dialog"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -413,7 +422,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     value={recipeSearch}
                     onChange={(e) => setRecipeSearch(e.target.value)}
                     placeholder="Search cookbook..."
-                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#FF8FA3]"
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-xl text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#FF8FA3]"
                   />
                 </div>
 
@@ -422,12 +431,12 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     <div
                       key={recipe.id}
                       onClick={() => handleConfirmAddMeal(recipe)}
-                      className="flex items-center space-x-2.5 p-2 bg-white hover:bg-[#FFF3CC]/40 border border-[#F3E5D8] rounded-[16px] cursor-pointer transition-colors"
+                      className="flex items-center space-x-2.5 p-2 bg-white hover:bg-[#FFF3CC]/40 border border-[#F3E5D8] rounded-xl cursor-pointer transition-colors"
                     >
                       <img
                         src={recipe.heroImage}
                         alt={recipe.title}
-                        className="w-9 h-9 rounded-[10px] object-cover shrink-0 border border-[#F3E5D8]"
+                        className="w-9 h-9 rounded-lg object-cover shrink-0 border border-[#F3E5D8]"
                       />
                       <div className="flex-1 min-w-0">
                         <span className="text-xs font-bold text-[#3D231D] block truncate">
@@ -464,7 +473,7 @@ export const MealPlannerView: React.FC<MealPlannerViewProps> = ({
                     value={customNoteInput}
                     onChange={(e) => setCustomNoteInput(e.target.value)}
                     placeholder="e.g. Leftover Curry"
-                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#8B5CF6]"
+                    className="flex-1 px-3.5 py-2 bg-white border border-[#F3E5D8] rounded-xl text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#8B5CF6]"
                   />
                   <button
                     type="button"

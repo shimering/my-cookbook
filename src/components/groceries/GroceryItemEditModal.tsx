@@ -3,6 +3,9 @@ import { X, Save, Edit3 } from 'lucide-react';
 import type { GroceryItem } from '../../types';
 import { getStoredCatalogItems } from '../../data/groceryCatalog';
 import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
+import { resolveItemIcon } from '../../utils/ingredientIconResolver';
+import { ItemIconBadge } from '../common/ItemIconBadge';
+import { IconPicker } from '../common/IconPicker';
 
 interface GroceryItemEditModalProps {
   item: GroceryItem | null;
@@ -27,6 +30,8 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
   const [unit, setUnit] = useState(item.unit || '');
   const [category, setCategory] = useState(item.category || categories[0] || 'Produce');
   const [notes, setNotes] = useState(item.notes || '');
+  const [icon, setIcon] = useState<string>(item.icon || '');
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [catalogItems] = useState<SuggestionItem[]>(() => getStoredCatalogItems());
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,6 +48,7 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
       unit: unit.trim(),
       category,
       notes: notes.trim() || undefined,
+      icon: icon.trim() || undefined,
     });
 
     onClose();
@@ -67,6 +73,45 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
           required
           ariaLabel="Item Name"
         />
+      </div>
+
+      {/* Icon & Photo Customization */}
+      <div className="bg-[#FFFDF7] border border-[#F5E6BF] rounded-[16px] p-3 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <ItemIconBadge
+              icon={resolveItemIcon(name, category, icon || undefined)}
+              size="lg"
+            />
+            <div>
+              <span className="text-xs font-bold text-[#3D231D] block">Item Photo / Icon</span>
+              <span className="text-[10px] text-[#8C726B]">
+                {icon?.startsWith('data:image/') || icon?.startsWith('http')
+                  ? 'Custom photo attached'
+                  : icon
+                  ? `Custom: ${icon}`
+                  : 'Auto-detected'}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsPickerOpen(!isPickerOpen)}
+            className="px-3 py-1.5 bg-white border border-[#F5E6BF] hover:bg-[#FFF3CC] text-xs font-semibold text-[#3D231D] rounded-full transition-colors cursor-pointer"
+          >
+            {isPickerOpen ? 'Hide Options' : 'Upload / Change'}
+          </button>
+        </div>
+
+        {isPickerOpen && (
+          <IconPicker
+            value={icon}
+            onChange={setIcon}
+            itemName={name}
+            itemCategory={category}
+            onClose={() => setIsPickerOpen(false)}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -129,7 +174,7 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
         </button>
         <button
           type="submit"
-          className="px-5 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs flex items-center space-x-1.5 cursor-pointer"
+          className="px-5 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
         >
           <Save className="w-3.5 h-3.5" />
           <span>Save Changes</span>
@@ -146,7 +191,7 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
   onClose,
   onSave,
 }) => {
-  // Lock body scroll when modal is open
+  // Lock body scroll when open
   useEffect(() => {
     if (!isOpen) return;
     const prevOverflow = document.body.style.overflow;
@@ -164,42 +209,37 @@ export const GroceryItemEditModal: React.FC<GroceryItemEditModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs transition-opacity duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-item-modal-title"
     >
       <div
-        className="bg-white border border-[#F3E5D8] rounded-[24px] shadow-cozy-lg w-full max-w-md overflow-hidden text-[#3D231D] animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-md bg-[#FFFDF7] rounded-3xl border border-[#F5E6BF] shadow-cozy overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="edit-item-dialog-title"
-        style={{ overscrollBehavior: 'contain' }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#BBF7D0] bg-[#F0FDF4]">
+        {/* Modal Header */}
+        <div className="p-4 bg-[#FFF3CC] border-b border-[#F5E6BF] flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
-              <Edit3 className="w-4 h-4 stroke-[2.2]" />
+            <div className="w-7 h-7 rounded-full bg-[#FFE599] text-amber-900 flex items-center justify-center">
+              <Edit3 className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <h2 id="edit-item-dialog-title" className="font-serif text-base font-bold text-[#3D231D]">
-                Edit Grocery Item
-              </h2>
-              <span className="text-[11px] text-[#8C726B]">Update quantity, department, and notes</span>
-            </div>
+            <h3 id="edit-item-modal-title" className="font-serif font-bold text-sm text-[#3D231D]">
+              Edit Grocery Item
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-[#FFF0F3] text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
-            aria-label="Close"
+            className="p-1 rounded-full text-[#8C726B] hover:text-[#3D231D] hover:bg-black/5 transition-colors cursor-pointer"
+            aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Inner Form keyed by item.id */}
+        {/* Modal Body Form */}
         <InnerEditForm
-          key={item.id}
           item={item}
           categories={categories}
           onClose={onClose}

@@ -1,12 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useId } from 'react';
+import { filterSuggestions, type SuggestionItem } from '../../utils/suggestionUtils';
 
-export interface SuggestionItem {
-  id?: string;
-  name: string;
-  category?: string;
-  defaultUnit?: string;
-  notes?: string;
-}
+export type { SuggestionItem };
 
 export interface AutocompleteInputProps {
   value: string;
@@ -30,33 +25,6 @@ export interface AutocompleteInputProps {
   maxSuggestions?: number;
 }
 
-export function filterSuggestions(
-  items: SuggestionItem[],
-  inputValue: string,
-  maxSuggestions = 15
-): SuggestionItem[] {
-  const query = inputValue.trimStart().toLowerCase();
-  if (!query) return [];
-
-  const seen = new Set<string>();
-  const results: SuggestionItem[] = [];
-
-  for (const item of items) {
-    if (!item || !item.name) continue;
-    const lower = item.name.toLowerCase();
-    // Strictly starts with the typed query (not merely contains)
-    if (lower.startsWith(query)) {
-      if (!seen.has(lower)) {
-        seen.add(lower);
-        results.push(item);
-        if (results.length >= maxSuggestions) break;
-      }
-    }
-  }
-
-  return results;
-}
-
 export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   value,
   onChange,
@@ -78,7 +46,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   autoFocus = false,
   maxSuggestions = 15,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [isFocused, setIsFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -94,15 +62,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     [items, value, maxSuggestions]
   );
 
-  // Open dropdown when focused and matching prefix items exist
-  useEffect(() => {
-    if (isFocused && query.length > 0 && matches.length > 0) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-      setHighlightedIndex(-1);
-    }
-  }, [isFocused, query, matches.length]);
+  const isDropdownOpen = isOpen && isFocused && query.length > 0 && matches.length > 0;
 
   // Handle outside click / touch dismiss
   useEffect(() => {
@@ -131,7 +91,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (isOpen && matches.length > 0) {
+    if (isDropdownOpen) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setHighlightedIndex((prev) => (prev + 1) % matches.length);
@@ -165,7 +125,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative ${containerClassName} ${isOpen ? 'z-40' : ''}`}
+      className={`relative ${containerClassName} ${isDropdownOpen ? 'z-40' : ''}`}
     >
       <input
         ref={inputRef}
@@ -173,9 +133,13 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         id={id}
         name={name}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setIsOpen(true);
+        }}
         onFocus={() => {
           setIsFocused(true);
+          setIsOpen(true);
           if (onFocus) onFocus();
         }}
         onBlur={() => {
@@ -189,20 +153,20 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         autoComplete={autoComplete}
         aria-label={ariaLabel}
         aria-autocomplete="list"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? listboxId : undefined}
+        aria-expanded={isDropdownOpen}
+        aria-controls={isDropdownOpen ? listboxId : undefined}
         role="combobox"
         disabled={disabled}
         autoFocus={autoFocus}
       />
 
       {/* Suggestion Box: Positioned right after the input box */}
-      {isOpen && matches.length > 0 && (
+      {isDropdownOpen && (
         <div
           id={listboxId}
           role="listbox"
           aria-label="Suggestions"
-          className={`absolute left-0 top-full mt-1.5 w-full bg-white border border-[#F3E5D8] rounded-[16px] shadow-cozy-lg z-50 max-h-56 overflow-y-auto overscroll-contain py-1 animate-in fade-in zoom-in-95 duration-100 ${dropdownClassName}`}
+          className={`absolute left-0 top-full mt-1.5 w-full bg-white border border-[#F3E5D8] rounded-2xl shadow-cozy-lg z-50 max-h-56 overflow-y-auto overscroll-contain py-1 animate-in fade-in zoom-in-95 duration-100 ${dropdownClassName}`}
         >
           {matches.map((item, idx) => {
             const isHighlighted = idx === highlightedIndex;

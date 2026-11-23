@@ -3,16 +3,20 @@ import {
   Check,
   Plus,
   Trash2,
-  Sparkles,
   ShoppingBag,
   ChevronDown,
   ChevronUp,
   Edit2,
   BookOpen,
+  Camera,
+  Upload,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { GroceryItem, CatalogItem } from '../../types';
-import { getIngredientIcon } from '../../utils/ingredientIconResolver';
+import { resolveItemIcon } from '../../utils/ingredientIconResolver';
+import { ItemIconBadge } from '../common/ItemIconBadge';
+import { IconPicker } from '../common/IconPicker';
+import { compressImageToDataUrl } from '../../services/imageCompression';
 import { getStoredCategories, getStoredCatalogItems } from '../../data/groceryCatalog';
 import { AutocompleteInput, type SuggestionItem } from '../common/AutocompleteInput';
 import { GroceryCatalogModal } from './GroceryCatalogModal';
@@ -51,6 +55,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
         category: item.category,
         defaultUnit: item.defaultUnit,
         notes: item.notes,
+        icon: item.icon,
       });
     }
     for (const item of groceryItems) {
@@ -61,6 +66,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
           category: item.category,
           defaultUnit: item.unit,
           notes: item.notes,
+          icon: item.icon,
         });
       }
     }
@@ -73,6 +79,9 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
   const [manualUnit, setManualUnit] = useState('');
   const [manualCategory, setManualCategory] = useState<string>(categories[0] || 'Produce');
   const [manualNotes, setManualNotes] = useState('');
+  const [manualIcon, setManualIcon] = useState('');
+  const [isManualIconPickerOpen, setIsManualIconPickerOpen] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
 
   // Modals state
@@ -121,14 +130,34 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
     onToggleItem(id);
   };
 
+  const handleQuickPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploadingPhoto(true);
+      const dataUrl = await compressImageToDataUrl(file, {
+        maxSizeMB: 0.05,
+        maxWidthOrHeight: 256,
+      });
+      setManualIcon(dataUrl);
+    } catch (err) {
+      console.error('Failed to compress/upload grocery photo:', err);
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
   const handleAddManual = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!manualName.trim()) return;
+    const trimmedName = manualName.trim();
+    if (!trimmedName) return;
 
     const numAmount = parseFloat(manualAmount) || 1;
 
     onAddItem({
-      name: manualName.trim(),
+      name: trimmedName,
       amount: numAmount,
       unit: manualUnit.trim(),
       displayQuantity: manualAmount.trim() || '1',
@@ -136,13 +165,16 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       isManual: true,
       notes: manualNotes.trim() || undefined,
       recipeSources: ['Manual Addition'],
+      icon: manualIcon.trim() || undefined,
     });
 
     setManualName('');
     setManualAmount('1');
     setManualUnit('');
     setManualNotes('');
+    setManualIcon('');
     setShowNotesInput(false);
+    setIsManualIconPickerOpen(false);
   };
 
   const handleSaveItemEdit = (id: string, updates: Partial<Omit<GroceryItem, 'id'>>) => {
@@ -153,8 +185,8 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
   return (
     <div className="pb-28 px-4 sm:px-6 max-w-[1120px] mx-auto">
-      {/* List Header & Summary Card - Rounded 24px */}
-      <div className="bg-white border border-[#F3E5D8] rounded-[24px] p-4 sm:p-5 shadow-cozy mb-5">
+      {/* List Header & Summary Card */}
+      <div className="bg-white border border-[#F3E5D8] rounded-3xl p-4 sm:p-5 shadow-cozy mb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center space-x-2.5">
             <div className="w-10 h-10 rounded-full bg-[#ECFDF5] text-[#16A34A] flex items-center justify-center">
@@ -206,6 +238,20 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
         {/* Quick Add Form with Quantity, Unit, Category & Notes */}
         <form onSubmit={handleAddManual} className="mt-3 space-y-2 pt-2 border-t border-[#F3E5D8]/60">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {/* Live Icon / Photo Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsManualIconPickerOpen(!isManualIconPickerOpen)}
+              className="cursor-pointer hover:scale-105 active:scale-95 transition-transform shrink-0 self-center"
+              title="Click to choose icon or upload photo"
+              aria-label="Item icon or photo"
+            >
+              <ItemIconBadge
+                icon={resolveItemIcon(manualName, manualCategory, manualIcon || undefined)}
+                size="lg"
+              />
+            </button>
+
             {/* Item Name with Suggestions appearing right after the box */}
             <div className="flex-1 min-w-0">
               <AutocompleteInput
@@ -216,10 +262,11 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                   if (item.category) setManualCategory(item.category);
                   if (item.defaultUnit && !manualUnit) setManualUnit(item.defaultUnit);
                   if (item.notes && !manualNotes) setManualNotes(item.notes);
+                  if (item.icon) setManualIcon(item.icon);
                 }}
                 items={allSuggestions}
                 placeholder="Add item (e.g. Honeycrisp Apples, Oat Milk...)"
-                className="w-full px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
+                className="w-full px-3.5 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-xl text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 required
                 ariaLabel="Add grocery item name"
               />
@@ -232,7 +279,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 value={manualAmount}
                 onChange={(e) => setManualAmount(e.target.value)}
                 placeholder="Qty"
-                className="w-14 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-center font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
+                className="w-14 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-xl text-xs text-center font-semibold text-[#3D231D] focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 title="Quantity"
               />
 
@@ -242,7 +289,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                 value={manualUnit}
                 onChange={(e) => setManualUnit(e.target.value)}
                 placeholder="unit"
-                className="w-16 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
+                className="w-16 px-2 py-2.5 bg-[#FFF3CC] border border-[#F5E6BF] rounded-xl text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 title="Unit (e.g. lbs, cup, pack, pcs)"
               />
 
@@ -250,7 +297,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               <select
                 value={manualCategory}
                 onChange={(e) => setManualCategory(e.target.value)}
-                className="px-2.5 py-2.5 bg-white border border-[#F3E5D8] rounded-[16px] text-xs font-semibold text-[#8C726B] focus:outline-none cursor-pointer max-w-[130px] truncate"
+                className="px-2.5 py-2.5 bg-white border border-[#F3E5D8] rounded-xl text-xs font-semibold text-[#8C726B] focus:outline-none cursor-pointer max-w-[130px] truncate"
               >
                 {categories.map((c) => (
                   <option key={c} value={c}>
@@ -270,16 +317,67 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
             </div>
           </div>
 
-          {/* Optional Notes toggle & input */}
-          <div className="flex items-center justify-between text-[11px] pt-0.5">
-            <button
-              type="button"
-              onClick={() => setShowNotesInput(!showNotesInput)}
-              className="text-[#8C726B] hover:text-[#16A34A] font-medium flex items-center space-x-1 cursor-pointer"
-            >
-              <span>{showNotesInput ? '- Hide note' : '+ Add custom note (e.g. organic, brand preference)'}</span>
-            </button>
+          {/* Optional Notes toggle, Photo upload & Custom icon */}
+          <div className="flex items-center justify-between text-[11px] pt-0.5 flex-wrap gap-2">
+            <div className="flex items-center space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowNotesInput(!showNotesInput)}
+                className="text-[#8C726B] hover:text-[#16A34A] font-medium flex items-center space-x-1 cursor-pointer"
+              >
+                <span>{showNotesInput ? '- Hide note' : '+ Add note'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsManualIconPickerOpen(!isManualIconPickerOpen)}
+                className="text-[#8C726B] hover:text-[#16A34A] font-medium flex items-center space-x-1 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>
+                  {manualIcon
+                    ? manualIcon.startsWith('data:image/') || manualIcon.startsWith('http')
+                      ? 'Custom photo attached'
+                      : `Icon: ${manualIcon}`
+                    : '+ Photo / Custom icon'}
+                </span>
+              </button>
+
+              {manualIcon && (
+                <button
+                  type="button"
+                  onClick={() => setManualIcon('')}
+                  className="text-amber-800 hover:underline cursor-pointer"
+                >
+                  Reset icon
+                </button>
+              )}
+            </div>
+
+            {/* Quick Upload Button */}
+            <label className="text-[#16A34A] hover:underline font-semibold flex items-center space-x-1 cursor-pointer">
+              <Upload className="w-3 h-3" />
+              <span>{isUploadingPhoto ? 'Uploading...' : 'Upload photo'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleQuickPhotoUpload}
+                disabled={isUploadingPhoto}
+              />
+            </label>
           </div>
+
+          {/* Expandable Icon & Photo Picker */}
+          {isManualIconPickerOpen && (
+            <IconPicker
+              value={manualIcon}
+              onChange={setManualIcon}
+              itemName={manualName}
+              itemCategory={manualCategory}
+              onClose={() => setIsManualIconPickerOpen(false)}
+            />
+          )}
 
           {showNotesInput && (
             <input
@@ -303,7 +401,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
             return (
               <div
                 key={aisle}
-                className="bg-white border border-[#F3E5D8] rounded-[24px] p-4 shadow-cozy space-y-2.5"
+                className="bg-white border border-[#F3E5D8] rounded-3xl p-4 shadow-cozy space-y-2.5"
               >
                 <div className="flex items-center justify-between pb-1.5 border-b border-[#F3E5D8]">
                   <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#16A34A]">
@@ -316,7 +414,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
                 <div className="space-y-2 pt-1">
                   {items.map((item) => {
-                    const icon = getIngredientIcon(item.name);
+                    const itemIcon = resolveItemIcon(item.name, item.category, item.icon);
                     const qtyDisplay = [item.displayQuantity || (item.amount ? String(item.amount) : ''), item.unit]
                       .filter(Boolean)
                       .join(' ');
@@ -325,7 +423,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                       <div
                         key={item.id}
                         onClick={() => handleToggle(item.id)}
-                        className="flex items-center justify-between p-2.5 rounded-[16px] hover:bg-[#FFF3CC]/30 cursor-pointer transition-colors group select-none border border-transparent hover:border-[#F5E6BF]"
+                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#FFF3CC]/30 cursor-pointer transition-colors group select-none border border-transparent hover:border-[#F5E6BF]"
                       >
                         <div className="flex items-start space-x-2.5 flex-1 min-w-0">
                           {/* Rounded Tap-Friendly Checkbox (border-radius: 6px) */}
@@ -334,18 +432,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                           </div>
 
                           {/* Stylized Ingredient Thumbnail */}
-                          {icon && (
-                            <div className="w-7 h-7 rounded-[8px] bg-[#FFF3CC] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-2xs mt-0.5">
-                              <img
-                                src={icon.url}
-                                alt={icon.label}
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = icon.fallbackUrl;
-                                }}
-                              />
-                            </div>
-                          )}
+                          <ItemIconBadge icon={itemIcon} size="md" className="mt-0.5" />
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center space-x-1.5 flex-wrap">
@@ -381,8 +468,9 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                               e.stopPropagation();
                               setEditingItem(item);
                             }}
-                            className="p-1.5 text-[#8C726B] hover:text-[#3D231D] hover:bg-white rounded-full opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            className="p-2 text-[#8C726B] hover:text-[#3D231D] hover:bg-white rounded-full opacity-70 group-hover:opacity-100 active:scale-95 transition-all cursor-pointer"
                             title="Edit quantity, unit, or notes"
+                            aria-label={`Edit ${item.name}`}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
@@ -393,8 +481,9 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                               e.stopPropagation();
                               onDeleteItem(item.id);
                             }}
-                            className="p-1.5 text-[#8C726B] hover:text-red-500 hover:bg-white rounded-full opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            className="p-2 text-[#8C726B] hover:text-red-500 hover:bg-white rounded-full opacity-70 group-hover:opacity-100 active:scale-95 transition-all cursor-pointer"
                             title="Delete item"
+                            aria-label={`Remove ${item.name} from grocery list`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -409,9 +498,13 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-white border border-[#F3E5D8] rounded-[24px] p-8 text-center my-4 shadow-cozy max-w-md mx-auto">
+        <div className="bg-white border border-[#F3E5D8] rounded-3xl p-8 text-center my-4 shadow-cozy max-w-md mx-auto">
           <div className="w-12 h-12 bg-[#ECFDF5] rounded-full flex items-center justify-center mx-auto mb-2.5 text-[#16A34A]">
-            <Sparkles className="w-6 h-6" />
+            {completedItems.length > 0 ? (
+              <Check className="w-6 h-6 stroke-[2.5]" />
+            ) : (
+              <ShoppingBag className="w-6 h-6 stroke-[2]" />
+            )}
           </div>
           <h4 className="font-serif text-base font-bold text-[#3D231D] mb-1">
             {completedItems.length > 0 ? 'All done shopping!' : 'Your list is empty'}
@@ -424,7 +517,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
           <button
             type="button"
             onClick={() => setIsCatalogModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer"
           >
             <BookOpen className="w-4 h-4 stroke-[2.2]" />
             <span>Browse Available Food Items</span>
@@ -434,7 +527,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
 
       {/* Completed Items Section (Collapsible) */}
       {completedItems.length > 0 && (
-        <div className="mt-5 bg-white/70 border border-[#F3E5D8] rounded-[24px] p-4 shadow-xs">
+        <div className="mt-5 bg-white/70 border border-[#F3E5D8] rounded-3xl p-4 shadow-xs">
           <button
             type="button"
             onClick={() => setShowCompleted(!showCompleted)}
@@ -455,7 +548,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
           {showCompleted && (
             <div className="space-y-1.5 pt-3">
               {completedItems.map((item) => {
-                const icon = getIngredientIcon(item.name);
+                const itemIcon = resolveItemIcon(item.name, item.category, item.icon);
                 const qtyDisplay = [item.displayQuantity || (item.amount ? String(item.amount) : ''), item.unit]
                   .filter(Boolean)
                   .join(' ');
@@ -470,18 +563,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
                       <div className="w-6 h-6 rounded-[6px] bg-[#16A34A] text-white flex items-center justify-center shrink-0 shadow-xs">
                         <Check className="w-4 h-4 stroke-[3]" />
                       </div>
-                      {icon && (
-                        <div className="w-6 h-6 rounded-[6px] bg-[#FFF3CC] border border-[#F5E6BF] flex items-center justify-center p-0.5 shrink-0 overflow-hidden opacity-60">
-                          <img
-                            src={icon.url}
-                            alt={icon.label}
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = icon.fallbackUrl;
-                            }}
-                          />
-                        </div>
-                      )}
+                      <ItemIconBadge icon={itemIcon} size="sm" isCompleted />
                       <div className="min-w-0 flex-1 flex items-center space-x-2">
                         <span className="text-xs font-medium text-[#8C726B]/70 line-through decoration-[#16A34A] truncate">
                           {qtyDisplay ? `${qtyDisplay} ` : ''}

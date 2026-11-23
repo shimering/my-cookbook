@@ -17,7 +17,7 @@ export interface ExtractedRecipeData {
 /**
  * Parses an ISO 8601 duration (e.g. "PT15M", "PT1H30M", "P0DT0H25M") or human text into minutes.
  */
-export function parseDurationToMinutes(duration?: string | null): number {
+export function parseDurationToMinutes(duration?: unknown): number {
   if (!duration) return 0;
   const str = String(duration).trim();
 
@@ -52,7 +52,7 @@ export function parseDurationToMinutes(duration?: string | null): number {
  * Parses servings / yield into a number.
  * e.g. "4 servings", 4, ["4"], "Makes 12 cookies"
  */
-export function parseYieldToServings(yieldData?: any): number {
+export function parseYieldToServings(yieldData?: unknown): number {
   if (!yieldData) return 4;
   const str = Array.isArray(yieldData) ? String(yieldData[0]) : String(yieldData);
   const match = str.match(/\d+/);
@@ -155,12 +155,12 @@ export function parseRawIngredientLine(raw: string, index: number): Ingredient {
 /**
  * Extracts instruction steps from Schema.org recipeInstructions format.
  */
-export function parseRawInstructions(instructionsData: any): RecipeStep[] {
+export function parseRawInstructions(instructionsData: unknown): RecipeStep[] {
   if (!instructionsData) return [];
 
   const rawSteps: string[] = [];
 
-  const processNode = (node: any) => {
+  const processNode = (node: unknown) => {
     if (!node) return;
     if (typeof node === 'string') {
       const trimmed = node.trim();
@@ -175,23 +175,24 @@ export function parseRawInstructions(instructionsData: any): RecipeStep[] {
       return;
     }
 
-    if (typeof node === 'object') {
+    if (typeof node === 'object' && node !== null) {
+      const obj = node as Record<string, unknown>;
       // HowToStep
-      if (node.text) {
-        const text = String(node.text).trim();
+      if (obj.text) {
+        const text = String(obj.text).trim();
         if (text) rawSteps.push(text);
         return;
       }
       // HowToSection with itemListElement
-      if (node.itemListElement) {
-        processNode(node.itemListElement);
+      if (obj.itemListElement) {
+        processNode(obj.itemListElement);
         return;
       }
       // Fallback description or name
-      if (node.description) {
-        rawSteps.push(String(node.description).trim());
-      } else if (node.name) {
-        rawSteps.push(String(node.name).trim());
+      if (obj.description) {
+        rawSteps.push(String(obj.description).trim());
+      } else if (obj.name) {
+        rawSteps.push(String(obj.name).trim());
       }
     }
   };
@@ -207,7 +208,7 @@ export function parseRawInstructions(instructionsData: any): RecipeStep[] {
       // Strip leading step numbers like "1. ", "Step 1: "
       const cleanLine = line
         .replace(/<\/?[^>]+(>|$)/g, '') // remove HTML tags
-        .replace(/^(?:Step\s*\d+[:.]?|\d+[\).])\s*/i, '')
+        .replace(/^(?:Step\s*\d+[:.]?|\d+[).])\s*/i, '')
         .trim();
       if (cleanLine.length > 0) {
         finalSteps.push(cleanLine);
@@ -225,7 +226,7 @@ export function parseRawInstructions(instructionsData: any): RecipeStep[] {
 /**
  * Extracts a high resolution image URL from recipe image data or OpenGraph tags.
  */
-export function extractImageUrl(imageData: any, html: string): string {
+export function extractImageUrl(imageData: unknown, html: string): string {
   if (imageData) {
     if (typeof imageData === 'string' && imageData.trim()) {
       return imageData.trim();
@@ -233,11 +234,15 @@ export function extractImageUrl(imageData: any, html: string): string {
     if (Array.isArray(imageData) && imageData.length > 0) {
       const first = imageData[0];
       if (typeof first === 'string') return first.trim();
-      if (first && typeof first === 'object' && first.url) return String(first.url).trim();
+      if (typeof first === 'object' && first !== null && 'url' in first) {
+        const urlVal = (first as Record<string, unknown>).url;
+        if (typeof urlVal === 'string') return urlVal.trim();
+      }
     }
-    if (typeof imageData === 'object') {
-      if (imageData.url) return String(imageData.url).trim();
-      if (imageData.contentUrl) return String(imageData.contentUrl).trim();
+    if (typeof imageData === 'object' && imageData !== null) {
+      const record = imageData as Record<string, unknown>;
+      if (typeof record.url === 'string') return record.url.trim();
+      if (typeof record.contentUrl === 'string') return record.contentUrl.trim();
     }
   }
 
@@ -264,7 +269,7 @@ export function extractImageUrl(imageData: any, html: string): string {
  * Searches for Schema.org Recipe in JSON-LD scripts or HTML microdata.
  */
 export function parseRecipeFromHtml(html: string, sourceUrl?: string): ExtractedRecipeData {
-  let recipeObj: any = null;
+  let recipeObj: Record<string, unknown> | null = null;
 
   // 1. Look for <script type="application/ld+json"> blocks
   const jsonLdRegex = /<script\s+[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
@@ -273,20 +278,22 @@ export function parseRecipeFromHtml(html: string, sourceUrl?: string): Extracted
   while ((match = jsonLdRegex.exec(html)) !== null) {
     try {
       const content = match[1].trim();
-      const parsed = JSON.parse(content);
+      const parsed = JSON.parse(content) as unknown;
 
-      const findRecipeInObj = (obj: any): any => {
+      const findRecipeInObj = (obj: unknown): Record<string, unknown> | null => {
         if (!obj || typeof obj !== 'object') return null;
 
+        const record = obj as Record<string, unknown>;
+
         // Direct Recipe object
-        const type = obj['@type'];
+        const type = record['@type'];
         if (type === 'Recipe' || (Array.isArray(type) && type.includes('Recipe'))) {
-          return obj;
+          return record;
         }
 
         // Nested @graph array
-        if (Array.isArray(obj['@graph'])) {
-          for (const item of obj['@graph']) {
+        if (Array.isArray(record['@graph'])) {
+          for (const item of record['@graph']) {
             const found = findRecipeInObj(item);
             if (found) return found;
           }
@@ -443,7 +450,10 @@ export async function extractRecipeFromUrl(url: string): Promise<ExtractedRecipe
     if (!['http:', 'https:'].includes(parsed.protocol)) {
       throw new Error('Please enter a valid web URL starting with http:// or https://');
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes('http')) {
+      throw err;
+    }
     throw new Error('Please enter a valid website URL (e.g. https://www.allrecipes.com/...)');
   }
 
@@ -456,7 +466,7 @@ export async function extractRecipeFromUrl(url: string): Promise<ExtractedRecipe
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json() as { recipe?: ExtractedRecipeData; html?: string };
       if (data.recipe) {
         return data.recipe;
       }
@@ -483,9 +493,11 @@ export async function extractRecipeFromUrl(url: string): Promise<ExtractedRecipe
       );
     }
     return recipe;
-  } catch (err: any) {
+  } catch (err: unknown) {
     throw new Error(
-      err?.message || 'Could not extract recipe from this URL. Please verify the link or enter details manually.'
+      err instanceof Error
+        ? err.message
+        : 'Could not extract recipe from this URL. Please verify the link or enter details manually.'
     );
   }
 }

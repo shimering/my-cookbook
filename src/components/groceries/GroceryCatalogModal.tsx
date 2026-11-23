@@ -11,7 +11,7 @@ import {
   SlidersHorizontal,
   FolderPlus,
   ArrowLeft,
-  Sparkles,
+  Store,
 } from 'lucide-react';
 import type { CatalogItem, GroceryItem } from '../../types';
 import {
@@ -21,7 +21,9 @@ import {
   saveStoredCatalogItems,
   resetStoredCatalog,
 } from '../../data/groceryCatalog';
-import { getIngredientIcon } from '../../utils/ingredientIconResolver';
+import { resolveItemIcon } from '../../utils/ingredientIconResolver';
+import { ItemIconBadge } from '../common/ItemIconBadge';
+import { IconPicker } from '../common/IconPicker';
 
 interface GroceryCatalogModalProps {
   isOpen: boolean;
@@ -64,8 +66,11 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
   const [newItemCategory, setNewItemCategory] = useState<string>(categories[0] || 'Produce');
   const [newItemUnit, setNewItemUnit] = useState('');
   const [newItemNote, setNewItemNote] = useState('');
+  const [newItemIcon, setNewItemIcon] = useState('');
+  const [isNewItemIconPickerOpen, setIsNewItemIconPickerOpen] = useState(false);
 
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
+  const [isEditItemIconPickerOpen, setIsEditItemIconPickerOpen] = useState(false);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -132,6 +137,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
       isManual: true,
       notes: custom.note ? custom.note.trim() : undefined,
       recipeSources: ['Available Foods Catalog'],
+      icon: item.icon,
     });
 
     setRecentlyAddedId(item.id);
@@ -243,6 +249,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
       category: newItemCategory,
       defaultUnit: newItemUnit.trim() || undefined,
       notes: newItemNote.trim() || undefined,
+      icon: newItemIcon.trim() || undefined,
       isCustom: true,
     };
 
@@ -250,6 +257,8 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
     setNewItemName('');
     setNewItemUnit('');
     setNewItemNote('');
+    setNewItemIcon('');
+    setIsNewItemIconPickerOpen(false);
     setIsAddingItem(false);
   };
 
@@ -264,6 +273,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
     );
     updateCatalogItems(updated);
     setEditingItem(null);
+    setIsEditItemIconPickerOpen(false);
   };
 
   const handleDeleteItemFromCatalog = (id: string, name: string) => {
@@ -296,7 +306,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white border border-[#F3E5D8] rounded-[24px] shadow-cozy-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden text-[#3D231D] animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white border border-[#F3E5D8] rounded-3xl shadow-cozy-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden text-[#3D231D] animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -373,6 +383,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                   <button
                     onClick={() => setSearchQuery('')}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
+                    aria-label="Clear grocery item search"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -415,7 +426,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
             <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
               {filteredCatalogItems.length > 0 ? (
                 filteredCatalogItems.map((item) => {
-                  const icon = getIngredientIcon(item.name);
+                  const itemIcon = resolveItemIcon(item.name, item.category, item.icon);
                   const currentInput = itemInputs[item.id] || {
                     amount: '1',
                     unit: item.defaultUnit || '',
@@ -426,22 +437,11 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                   return (
                     <div
                       key={item.id}
-                      className="p-3 rounded-[18px] bg-white border border-[#F3E5D8] hover:border-[#16A34A]/40 shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                      className="p-3 rounded-2xl bg-white border border-[#F3E5D8] hover:border-[#16A34A]/40 shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
                     >
                       {/* Left: Thumbnail & Name & Category */}
                       <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                        {icon && (
-                          <div className="w-8 h-8 rounded-[8px] bg-[#FFF3CC] border border-[#F5E6BF] flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-2xs">
-                            <img
-                              src={icon.url}
-                              alt={icon.label}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = icon.fallbackUrl;
-                              }}
-                            />
-                          </div>
-                        )}
+                        <ItemIconBadge icon={itemIcon} size="lg" />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center space-x-1.5 flex-wrap">
                             <span className="text-xs font-bold text-[#3D231D]">{item.name}</span>
@@ -460,7 +460,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                       {/* Right: Quantity, Unit, Note & Add Button */}
                       <div className="flex items-center space-x-2 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-[#F3E5D8]/60">
                         {/* Quantity Input */}
-                        <div className="flex items-center space-x-1 bg-[#F0FDF4] border border-[#F3E5D8] rounded-[10px] px-2 py-1">
+                        <div className="flex items-center space-x-1 bg-[#F0FDF4] border border-[#F3E5D8] rounded-lg px-2 py-1">
                           <input
                             type="text"
                             value={currentInput.amount}
@@ -509,7 +509,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                             )
                           }
                           placeholder="Note (e.g. organic)"
-                          className="w-24 sm:w-28 text-xs px-2 py-1 bg-[#F0FDF4] border border-[#F3E5D8] rounded-[10px] text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
+                          className="w-24 sm:w-28 text-xs px-2 py-1 bg-[#F0FDF4] border border-[#F3E5D8] rounded-lg text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
                           title="Custom notes"
                         />
 
@@ -558,7 +558,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
         {activeTab === 'manage' && (
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
             {/* Section 1: Categories Management */}
-            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[20px] p-4 space-y-3">
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-serif text-sm font-bold text-[#3D231D]">Grocery Categories</h3>
@@ -576,11 +576,11 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="New category name (e.g. Deli & Cheese, Snacks)"
-                  className="flex-1 px-3 py-2 bg-white border border-[#F3E5D8] rounded-[12px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
+                  className="flex-1 px-3 py-2 bg-white border border-[#F3E5D8] rounded-xl text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#16A34A]/40"
                 />
                 <button
                   type="submit"
-                  className="px-3.5 py-2 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-[12px] flex items-center space-x-1 cursor-pointer"
+                  className="px-3.5 py-2 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-xl flex items-center space-x-1 cursor-pointer"
                 >
                   <FolderPlus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -597,7 +597,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                     return (
                       <div
                         key={cat}
-                        className="flex items-center space-x-1 bg-white border-2 border-[#16A34A] rounded-[12px] p-1.5"
+                        className="flex items-center space-x-1 bg-white border-2 border-[#16A34A] rounded-xl p-1.5"
                       >
                         <input
                           type="text"
@@ -610,15 +610,17 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                         />
                         <button
                           onClick={handleSaveEditCategory}
-                          className="p-1 bg-emerald-500 text-white rounded hover:bg-emerald-600 cursor-pointer"
+                          className="p-1.5 bg-emerald-500 text-white rounded hover:bg-emerald-600 active:scale-95 cursor-pointer"
                           title="Save"
+                          aria-label="Save category name"
                         >
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </button>
                         <button
                           onClick={() => setEditingCategory(null)}
-                          className="p-1 bg-gray-200 text-[#3D231D] rounded hover:bg-gray-300 cursor-pointer"
+                          className="p-1.5 bg-gray-200 text-[#3D231D] rounded hover:bg-gray-300 active:scale-95 cursor-pointer"
                           title="Cancel"
+                          aria-label="Cancel editing category"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -629,7 +631,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                   return (
                     <div
                       key={cat}
-                      className="flex items-center justify-between bg-white border border-[#F3E5D8] rounded-[12px] px-3 py-2 text-xs shadow-2xs"
+                      className="flex items-center justify-between bg-white border border-[#F3E5D8] rounded-xl px-3 py-2 text-xs shadow-2xs"
                     >
                       <div className="flex items-center space-x-1.5 min-w-0">
                         <span className="font-semibold text-[#3D231D] truncate">{cat}</span>
@@ -638,15 +640,17 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                       <div className="flex items-center space-x-1">
                         <button
                           onClick={() => setEditingCategory({ oldName: cat, newName: cat })}
-                          className="p-1 text-[#8C726B] hover:text-[#3D231D] rounded cursor-pointer"
+                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] rounded active:scale-95 cursor-pointer"
                           title="Rename Category"
+                          aria-label={`Rename category ${cat}`}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(cat)}
-                          className="p-1 text-[#8C726B] hover:text-red-500 rounded cursor-pointer"
+                          className="p-1.5 text-[#8C726B] hover:text-red-500 rounded active:scale-95 cursor-pointer"
                           title="Delete Category"
+                          aria-label={`Delete category ${cat}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -658,7 +662,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
             </div>
 
             {/* Section 2: Catalog Items Management */}
-            <div className="bg-white border border-[#F3E5D8] rounded-[20px] p-4 space-y-3 shadow-cozy">
+            <div className="bg-white border border-[#F3E5D8] rounded-2xl p-4 space-y-3 shadow-cozy">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-serif text-sm font-bold text-[#3D231D]">Food Grocery Items</h3>
@@ -668,7 +672,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                 </div>
                 <button
                   onClick={() => setIsAddingItem(!isAddingItem)}
-                  className="px-3 py-1.5 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-full flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full flex items-center space-x-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>{isAddingItem ? 'Close Form' : 'Add New Item'}</span>
@@ -679,22 +683,65 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
               {isAddingItem && (
                 <form
                   onSubmit={handleAddNewItemToCatalog}
-                  className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-[16px] p-3.5 space-y-2.5 animate-in fade-in"
+                  className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-3.5 space-y-2.5 animate-in fade-in"
                 >
                   <h4 className="text-xs font-bold text-[#3D231D]">Add New Item to Catalog</h4>
+
+                  {/* Icon Selector Bar */}
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-[#BBF7D0]">
+                    <div className="flex items-center space-x-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsNewItemIconPickerOpen(!isNewItemIconPickerOpen)}
+                        className="cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                        title="Click to customize icon"
+                        aria-label="Choose item icon"
+                      >
+                        <ItemIconBadge
+                          icon={resolveItemIcon(newItemName, newItemCategory, newItemIcon || undefined)}
+                          size="lg"
+                        />
+                      </button>
+                      <div>
+                        <span className="text-xs font-semibold text-[#3D231D] block">Item Icon</span>
+                        <span className="text-[10px] text-[#8C726B]">
+                          {newItemIcon ? `Custom: ${newItemIcon}` : 'Auto-detected from name'}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsNewItemIconPickerOpen(!isNewItemIconPickerOpen)}
+                      className="px-3 py-1 bg-white border border-[#BBF7D0] hover:bg-[#F0FDF4] text-xs font-semibold text-[#16A34A] rounded-full transition-colors cursor-pointer"
+                    >
+                      {isNewItemIconPickerOpen ? 'Hide Picker' : 'Choose Icon'}
+                    </button>
+                  </div>
+
+                  {/* Expandable Icon Picker */}
+                  {isNewItemIconPickerOpen && (
+                    <IconPicker
+                      value={newItemIcon}
+                      onChange={setNewItemIcon}
+                      itemName={newItemName}
+                      itemCategory={newItemCategory}
+                      onClose={() => setIsNewItemIconPickerOpen(false)}
+                    />
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
                       value={newItemName}
                       onChange={(e) => setNewItemName(e.target.value)}
                       placeholder="Item name (e.g. Almond Flour)"
-                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-[10px] text-xs text-[#3D231D] focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
+                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-lg text-xs text-[#3D231D] focus:outline-none focus:ring-1 focus:ring-[#16A34A]"
                       required
                     />
                     <select
                       value={newItemCategory}
                       onChange={(e) => setNewItemCategory(e.target.value)}
-                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     >
                       {categories.map((c) => (
                         <option key={c} value={c}>
@@ -707,27 +754,30 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                       value={newItemUnit}
                       onChange={(e) => setNewItemUnit(e.target.value)}
                       placeholder="Default unit (e.g. lbs, bag, box)"
-                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     />
                     <input
                       type="text"
                       value={newItemNote}
                       onChange={(e) => setNewItemNote(e.target.value)}
                       placeholder="Default notes (e.g. Organic, gluten free)"
-                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F3E5D8] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     />
                   </div>
                   <div className="flex justify-end space-x-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setIsAddingItem(false)}
-                      className="px-3 py-1.5 text-xs text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
+                      onClick={() => {
+                        setIsAddingItem(false);
+                        setIsNewItemIconPickerOpen(false);
+                      }}
+                      className="px-3 py-1.5 text-xs text-[#8C726B] hover:text-[#3D231D] active:scale-95 cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
+                      className="px-4 py-1.5 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
                     >
                       Save Item
                     </button>
@@ -739,22 +789,65 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
               {editingItem && (
                 <form
                   onSubmit={handleSaveEditItem}
-                  className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-[16px] p-3.5 space-y-2.5 animate-in fade-in"
+                  className="bg-[#FFF3CC] border border-[#F5E6BF] rounded-2xl p-3.5 space-y-2.5 animate-in fade-in"
                 >
                   <h4 className="text-xs font-bold text-[#3D231D]">Edit Catalog Item</h4>
+
+                  {/* Icon Selector Bar */}
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-[#F5E6BF]">
+                    <div className="flex items-center space-x-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditItemIconPickerOpen(!isEditItemIconPickerOpen)}
+                        className="cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                        title="Click to customize icon"
+                        aria-label="Change item icon"
+                      >
+                        <ItemIconBadge
+                          icon={resolveItemIcon(editingItem.name, editingItem.category, editingItem.icon || undefined)}
+                          size="lg"
+                        />
+                      </button>
+                      <div>
+                        <span className="text-xs font-semibold text-[#3D231D] block">Item Icon</span>
+                        <span className="text-[10px] text-[#8C726B]">
+                          {editingItem.icon ? `Custom: ${editingItem.icon}` : 'Auto-detected from name'}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditItemIconPickerOpen(!isEditItemIconPickerOpen)}
+                      className="px-3 py-1 bg-white border border-[#F5E6BF] hover:bg-amber-50 text-xs font-semibold text-[#8C726B] hover:text-[#3D231D] rounded-full transition-colors cursor-pointer"
+                    >
+                      {isEditItemIconPickerOpen ? 'Hide Picker' : 'Change Icon'}
+                    </button>
+                  </div>
+
+                  {/* Expandable Icon Picker */}
+                  {isEditItemIconPickerOpen && (
+                    <IconPicker
+                      value={editingItem.icon || ''}
+                      onChange={(newIcon) => setEditingItem({ ...editingItem, icon: newIcon || undefined })}
+                      itemName={editingItem.name}
+                      itemCategory={editingItem.category}
+                      onClose={() => setIsEditItemIconPickerOpen(false)}
+                    />
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
                       value={editingItem.name}
                       onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
                       placeholder="Item name"
-                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                       required
                     />
                     <select
                       value={editingItem.category}
                       onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
-                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     >
                       {categories.map((c) => (
                         <option key={c} value={c}>
@@ -769,27 +862,30 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
                         setEditingItem({ ...editingItem, defaultUnit: e.target.value })
                       }
                       placeholder="Default unit"
-                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     />
                     <input
                       type="text"
                       value={editingItem.notes || ''}
                       onChange={(e) => setEditingItem({ ...editingItem, notes: e.target.value })}
                       placeholder="Default notes"
-                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-[10px] text-xs text-[#3D231D] focus:outline-none"
+                      className="px-3 py-2 bg-white border border-[#F5E6BF] rounded-lg text-xs text-[#3D231D] focus:outline-none"
                     />
                   </div>
                   <div className="flex justify-end space-x-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setEditingItem(null)}
-                      className="px-3 py-1.5 text-xs text-[#8C726B] hover:text-[#3D231D] cursor-pointer"
+                      onClick={() => {
+                        setEditingItem(null);
+                        setIsEditItemIconPickerOpen(false);
+                      }}
+                      className="px-3 py-1.5 text-xs text-[#8C726B] hover:text-[#3D231D] active:scale-95 cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
+                      className="px-4 py-1.5 bg-[#16A34A] hover:bg-[#15803D] active:scale-95 text-white text-xs font-bold rounded-full shadow-xs cursor-pointer"
                     >
                       Update Item
                     </button>
@@ -799,43 +895,49 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
 
               {/* Items Management List */}
               <div className="max-h-64 overflow-y-auto space-y-1.5 pt-1">
-                {catalogItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-2 rounded-[12px] bg-[#F0FDF4] border border-[#BBF7D0]/60 text-xs"
-                  >
-                    <div className="min-w-0 flex-1 flex items-center space-x-2">
-                      <span className="font-semibold text-[#3D231D] truncate">{item.name}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-[#F3E5D8] text-[#8C726B]">
-                        {item.category}
-                      </span>
-                      {item.defaultUnit && (
-                        <span className="text-[10px] text-[#8C726B]">({item.defaultUnit})</span>
-                      )}
+                {catalogItems.map((item) => {
+                  const itemIcon = resolveItemIcon(item.name, item.category, item.icon);
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-2 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0]/60 text-xs"
+                    >
+                      <div className="min-w-0 flex-1 flex items-center space-x-2">
+                        <ItemIconBadge icon={itemIcon} size="sm" />
+                        <span className="font-semibold text-[#3D231D] truncate">{item.name}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-[#F3E5D8] text-[#8C726B]">
+                          {item.category}
+                        </span>
+                        {item.defaultUnit && (
+                          <span className="text-[10px] text-[#8C726B]">({item.defaultUnit})</span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-1 shrink-0">
+                        <button
+                          onClick={() => setEditingItem(item)}
+                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] rounded active:scale-95 cursor-pointer"
+                          title="Edit Item"
+                          aria-label={`Edit ${item.name}`}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItemFromCatalog(item.id, item.name)}
+                          className="p-1.5 text-[#8C726B] hover:text-red-500 rounded active:scale-95 cursor-pointer"
+                          title="Delete Item"
+                          aria-label={`Delete ${item.name} from catalog`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1 shrink-0">
-                      <button
-                        onClick={() => setEditingItem(item)}
-                        className="p-1 text-[#8C726B] hover:text-[#3D231D] rounded cursor-pointer"
-                        title="Edit Item"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItemFromCatalog(item.id, item.name)}
-                        className="p-1 text-[#8C726B] hover:text-red-500 rounded cursor-pointer"
-                        title="Delete Item"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Reset Library to Defaults */}
-            <div className="flex items-center justify-between p-3.5 bg-amber-50/60 border border-amber-200/60 rounded-[16px]">
+            <div className="flex items-center justify-between p-3.5 bg-amber-50/60 border border-amber-200/60 rounded-2xl">
               <div>
                 <h4 className="text-xs font-bold text-[#3D231D]">Reset Standard Food Library</h4>
                 <p className="text-[11px] text-[#8C726B]">
@@ -857,7 +959,7 @@ export const GroceryCatalogModal: React.FC<GroceryCatalogModalProps> = ({
         {/* Modal Footer */}
         <div className="p-3.5 bg-[#F0FDF4] border-t border-[#BBF7D0] flex items-center justify-between text-xs">
           <span className="text-[#8C726B] flex items-center space-x-1">
-            <Sparkles className="w-3.5 h-3.5 text-[#16A34A]" />
+            <Store className="w-3.5 h-3.5 text-[#16A34A]" />
             <span>Strawberry Milk & Butter Pantry</span>
           </span>
           <button
