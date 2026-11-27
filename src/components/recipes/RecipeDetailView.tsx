@@ -103,7 +103,13 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
           <img
             src={recipe.heroImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80'}
             alt={recipe.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full ${
+              recipe.heroImageScale !== undefined &&
+              recipe.heroImageScale < 0.99 &&
+              !recipe.heroImage.startsWith('data:image/')
+                ? 'object-contain bg-[#FFFDF7]'
+                : 'object-cover'
+            }`}
           />
 
           {/* Top Floating Action Bar */}

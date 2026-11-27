@@ -185,5 +185,53 @@ describe('recipeExtractor', () => {
       expect(result.description).toContain('Warm, gooey');
       expect(result.heroImage).toBe('https://example.com/rolls.jpg');
     });
+
+    it('prefers 16:9 image candidates from JSON-LD image array when available, otherwise falls back to main image', () => {
+      const sampleHtmlWith16x9 = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <script type="application/ld+json">
+          {
+            "@type": "Recipe",
+            "name": "Widescreen Cake",
+            "image": [
+              { "@type": "ImageObject", "url": "https://example.com/square.jpg", "width": 1000, "height": 1000 },
+              { "@type": "ImageObject", "url": "https://example.com/wide.jpg", "width": 1200, "height": 675 }
+            ],
+            "recipeIngredient": ["1 cup flour"],
+            "recipeInstructions": [{ "@type": "HowToStep", "text": "Bake it." }]
+          }
+          </script>
+        </head>
+        <body></body>
+        </html>
+      `;
+      const resultWide = parseRecipeFromHtml(sampleHtmlWith16x9, 'https://example.com/cake');
+      expect(resultWide.heroImage).toBe('https://example.com/wide.jpg');
+
+      const sampleHtmlWithout16x9 = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <script type="application/ld+json">
+          {
+            "@type": "Recipe",
+            "name": "Portrait Tart",
+            "image": [
+              "https://example.com/main-portrait.jpg",
+              "https://example.com/secondary.jpg"
+            ],
+            "recipeIngredient": ["1 cup flour"],
+            "recipeInstructions": [{ "@type": "HowToStep", "text": "Bake it." }]
+          }
+          </script>
+        </head>
+        <body></body>
+        </html>
+      `;
+      const resultFallback = parseRecipeFromHtml(sampleHtmlWithout16x9, 'https://example.com/tart');
+      expect(resultFallback.heroImage).toBe('https://example.com/main-portrait.jpg');
+    });
   });
 });

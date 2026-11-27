@@ -15,7 +15,10 @@ const listeners = new Set<SyncListener>();
 
 let state: SyncState = {
   isSyncing: false,
-  lastSyncedAt: Number(localStorage.getItem(LAST_SYNCED_KEY)) || null,
+  lastSyncedAt:
+    typeof localStorage !== 'undefined'
+      ? Number(localStorage.getItem(LAST_SYNCED_KEY)) || null
+      : null,
   error: null,
 };
 
@@ -125,7 +128,13 @@ export const cloudflareSync = {
       body: formData,
     });
 
-    const data = (await res.json()) as UploadResponse;
+    const rawText = await res.text();
+    let data: UploadResponse;
+    try {
+      data = JSON.parse(rawText) as UploadResponse;
+    } catch {
+      throw new Error(`Upload endpoint unavailable (HTTP ${res.status})`);
+    }
     if (!res.ok) {
       throw new Error(data.error || 'Upload failed');
     }
@@ -236,29 +245,51 @@ export const cloudflareSync = {
         }),
       });
 
+      const rawSyncText = await res.text();
       if (!res.ok) {
         if (res.status === 401) {
           // Token expired
           await cloudflareAuth.logout();
           throw new Error('Your session expired. Please sign in again.');
         }
-        const errData = (await res.json()) as { error?: string };
-        throw new Error(errData.error || 'Sync failed');
+        let errMessage = `Sync failed (HTTP ${res.status})`;
+        try {
+          const errData = JSON.parse(rawSyncText) as { error?: string };
+          if (errData.error) errMessage = errData.error;
+        } catch {
+          if (res.status === 404) {
+            errMessage = 'Cloud sync API (/api/sync) is only active when deployed on Cloudflare Pages or running via Wrangler.';
+          }
+        }
+        throw new Error(errMessage);
       }
 
-      const syncResult = (await res.json()) as SyncPayloadResponse;
+      let syncResult: SyncPayloadResponse;
+      try {
+        syncResult = JSON.parse(rawSyncText) as SyncPayloadResponse;
+      } catch {
+        throw new Error('Cloud sync API returned an unexpected non-JSON response.');
+      }
 
-      // 4. Merge incoming changes into IndexedDB
+      // 4. Merge incoming changes into IndexedDB while preserving local-only metadata
       // Merge remote recipes
       for (const remoteR of syncResult.recipes || []) {
         if (remoteR.deletedAt) {
           await db.recipes.delete(remoteR.id);
         } else {
+          const existing = await db.recipes.get(remoteR.id);
+          const existingIngMap = new Map(
+            (existing?.ingredients || []).map((i) => [i.id, i])
+          );
+
           const mapped: Recipe = {
             id: remoteR.id,
             title: remoteR.title,
             description: remoteR.description,
-            heroImage: remoteR.heroImage || '',
+            heroImage: remoteR.heroImage || existing?.heroImage || '',
+            originalHeroImage: existing?.originalHeroImage,
+            heroImageScale: existing?.heroImageScale,
+            heroImagePosition: existing?.heroImagePosition,
             prepTimeMinutes: remoteR.prepTimeMinutes || 0,
             cookTimeMinutes: remoteR.cookTimeMinutes || 0,
             servings: remoteR.servings || 1,
@@ -266,13 +297,18 @@ export const cloudflareSync = {
             isFavorite: Boolean(remoteR.isFavorite),
             createdAt: new Date(remoteR.createdAt).toISOString(),
             updatedAt: new Date(remoteR.updatedAt).toISOString(),
-            ingredients: (remoteR.ingredients || []).map((ing: RemoteIngredient) => ({
-              id: ing.id || crypto.randomUUID(),
-              name: ing.name,
-              amount: typeof ing.quantity === 'number' ? ing.quantity : parseFloat(String(ing.quantity)) || 0,
-              unit: ing.unit || '',
-              section: ing.section,
-            })),
+            ingredients: (remoteR.ingredients || []).map((ing: RemoteIngredient) => {
+              const ingId = ing.id || crypto.randomUUID();
+              const prevIng = existingIngMap.get(ingId);
+              return {
+                id: ingId,
+                name: ing.name,
+                amount: typeof ing.quantity === 'number' ? ing.quantity : parseFloat(String(ing.quantity)) || 0,
+                unit: ing.unit || '',
+                displayFraction: prevIng?.displayFraction,
+                section: ing.section,
+              };
+            }),
             steps: (remoteR.instructions || []).map((stepText: string, idx: number) => ({
               id: `step-${idx + 1}`,
               stepNumber: idx + 1,
@@ -289,12 +325,14 @@ export const cloudflareSync = {
         if (remoteM.deletedAt) {
           await db.mealPlans.delete(remoteM.id);
         } else {
+          const existing = await db.mealPlans.get(remoteM.id);
           const mappedPlan: PlannedMeal = {
             id: remoteM.id,
             date: remoteM.date,
             slot: remoteM.slot,
             recipeId: remoteM.recipeId,
-            customNote: remoteM.customTitle,
+            recipeTitle: existing?.recipeTitle,
+            customNote: remoteM.customTitle ?? existing?.customNote,
             servingsMultiplier: remoteM.servingsMultiplier || 1,
           };
           await db.mealPlans.put(mappedPlan);
@@ -306,22 +344,28 @@ export const cloudflareSync = {
         if (remoteG.deletedAt) {
           await db.groceryItems.delete(remoteG.id);
         } else {
+          const existing = await db.groceryItems.get(remoteG.id);
           const mappedGroc: GroceryItem = {
             id: remoteG.id,
             name: remoteG.name,
             amount: remoteG.quantity ?? 1,
             unit: remoteG.unit ?? '',
-            displayQuantity: String(remoteG.quantity ?? ''),
+            displayQuantity: existing?.displayQuantity || String(remoteG.quantity ?? ''),
             category: remoteG.category ?? 'Other',
             checked: Boolean(remoteG.isChecked),
             isManual: Boolean(remoteG.isManual),
+            notes: existing?.notes,
+            recipeSources: existing?.recipeSources,
+            icon: existing?.icon,
           };
           await db.groceryItems.put(mappedGroc);
         }
       }
 
       const newSyncedAt = syncResult.serverTime || Date.now();
-      localStorage.setItem(LAST_SYNCED_KEY, String(newSyncedAt));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(LAST_SYNCED_KEY, String(newSyncedAt));
+      }
       updateState({ isSyncing: false, lastSyncedAt: newSyncedAt, error: null });
     } catch (err: unknown) {
       console.error('Cloudflare Sync error:', err);

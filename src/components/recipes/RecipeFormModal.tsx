@@ -12,9 +12,11 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Info,
 } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
+import { RecipePhotoFramingEditor } from './RecipePhotoFramingEditor';
 import {
   convertIngredient,
   getStoredUnitSystem,
@@ -218,6 +220,15 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const [title, setTitle] = useState(initialRecipe?.title || '');
   const [description, setDescription] = useState(initialRecipe?.description || '');
   const [heroImage, setHeroImage] = useState(initialRecipe?.heroImage || '');
+  const [originalHeroImage, setOriginalHeroImage] = useState(
+    initialRecipe?.originalHeroImage || initialRecipe?.heroImage || ''
+  );
+  const [heroImageScale, setHeroImageScale] = useState<number>(initialRecipe?.heroImageScale ?? 1.0);
+  const [heroImagePosition, setHeroImagePosition] = useState<{ x: number; y: number }>(
+    initialRecipe?.heroImagePosition ?? { x: 0, y: 0 }
+  );
+  const [isExtractedImage, setIsExtractedImage] = useState(false);
+  const getFramedDataUrlRef = useRef<(() => Promise<string>) | null>(null);
   const [prepTimeMinutes, setPrepTimeMinutes] = useState(initialRecipe?.prepTimeMinutes?.toString() || '15');
   const [cookTimeMinutes, setCookTimeMinutes] = useState(initialRecipe?.cookTimeMinutes?.toString() || '15');
   const [servings, setServings] = useState(initialRecipe?.servings?.toString() || '4');
@@ -317,7 +328,13 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
       if (extracted.title) setTitle(extracted.title);
       if (extracted.description) setDescription(extracted.description);
-      if (extracted.heroImage) setHeroImage(extracted.heroImage);
+      if (extracted.heroImage) {
+        setHeroImage(extracted.heroImage);
+        setOriginalHeroImage(extracted.heroImage);
+        setHeroImageScale(1.0);
+        setHeroImagePosition({ x: 0, y: 0 });
+        setIsExtractedImage(true);
+      }
       if (extracted.prepTimeMinutes) setPrepTimeMinutes(String(extracted.prepTimeMinutes));
       if (extracted.cookTimeMinutes) setCookTimeMinutes(String(extracted.cookTimeMinutes));
       if (extracted.servings) setServings(String(extracted.servings));
@@ -354,6 +371,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       setIsCompressing(true);
       const dataUrl = await compressImageToDataUrl(file);
       setHeroImage(dataUrl);
+      setOriginalHeroImage(dataUrl);
+      setHeroImageScale(1.0);
+      setHeroImagePosition({ x: 0, y: 0 });
+      setIsExtractedImage(false);
     } catch (err) {
       console.error('Failed to compress image:', err);
     } finally {
@@ -490,7 +511,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   };
 
   // Save Recipe
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       alert('Please enter a recipe title');
@@ -502,11 +523,24 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       .filter((s) => s.instruction.trim().length > 0)
       .map((s, idx) => ({ ...s, stepNumber: idx + 1 }));
 
+    // Generate framed 16:9 crop if framing editor is active
+    let finalHeroImage = heroImage;
+    if (getFramedDataUrlRef.current && (originalHeroImage || heroImage)) {
+      try {
+        finalHeroImage = await getFramedDataUrlRef.current();
+      } catch (err) {
+        console.warn('Could not generate framed crop, using original:', err);
+      }
+    }
+
     const recipe: Recipe = {
       id: initialRecipe?.id || `recipe-${Date.now()}`,
       title: title.trim(),
       description: description.trim(),
-      heroImage: heroImage || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+      heroImage: finalHeroImage || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+      originalHeroImage: originalHeroImage || undefined,
+      heroImageScale,
+      heroImagePosition,
       prepTimeMinutes: parseInt(prepTimeMinutes, 10) || 15,
       cookTimeMinutes: parseInt(cookTimeMinutes, 10) || 15,
       servings: parseInt(servings, 10) || 4,
@@ -667,68 +701,29 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 className="hidden"
               />
 
-              {heroImage ? (
-                <div className="relative w-full aspect-video rounded-[24px] overflow-hidden border border-[#F3E5D8] bg-white shadow-inner group">
-                  <img src={heroImage} alt="Recipe Preview" className="w-full h-full object-cover" />
-                  {/* Desktop Hover Controls */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-3">
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-white text-[#3D231D] text-xs font-bold rounded-full shadow-md hover:bg-[#FDE8EA] transition-colors cursor-pointer"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-[#E85D75]" />
-                      <span>Take Photo</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => galleryInputRef.current?.click()}
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-white text-[#3D231D] text-xs font-bold rounded-full shadow-md hover:bg-[#FDECC8] transition-colors cursor-pointer"
-                    >
-                      <ImageIcon className="w-3.5 h-3.5 text-[#3D231D]" />
-                      <span>From Gallery</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setHeroImage('')}
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-full shadow-md transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove</span>
-                    </button>
-                  </div>
-
-                  {/* Always-visible mobile action strip at bottom-right */}
-                  <div className="absolute bottom-2.5 right-2.5 flex sm:hidden items-center space-x-1.5 bg-white/90 backdrop-blur-md p-1 rounded-full shadow-sm border border-[#F3E5D8]">
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="p-2 rounded-full bg-[#FDE8EA] text-[#E85D75] active:scale-90 transition-transform cursor-pointer"
-                      title="Take new photo with camera"
-                      aria-label="Take new photo with camera"
-                    >
-                      <Camera className="w-3.5 h-3.5 stroke-[2.2]" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => galleryInputRef.current?.click()}
-                      className="p-2 rounded-full bg-[#FDECC8] text-[#3D231D] active:scale-90 transition-transform cursor-pointer"
-                      title="Choose from photo gallery"
-                      aria-label="Choose from photo gallery"
-                    >
-                      <ImageIcon className="w-3.5 h-3.5 stroke-[2.2]" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setHeroImage('')}
-                      className="p-2 rounded-full bg-red-100 text-red-600 active:scale-90 transition-transform cursor-pointer"
-                      title="Remove photo"
-                      aria-label="Remove recipe photo"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+              {originalHeroImage || heroImage ? (
+                <RecipePhotoFramingEditor
+                  imageSrc={originalHeroImage || heroImage}
+                  initialScale={heroImageScale}
+                  initialPosition={heroImagePosition}
+                  autoFitNonMatching={isExtractedImage}
+                  onChange={({ scale, position, getFramedDataUrl }) => {
+                    setHeroImageScale(scale);
+                    setHeroImagePosition(position);
+                    getFramedDataUrlRef.current = getFramedDataUrl;
+                  }}
+                  onTakePhoto={() => cameraInputRef.current?.click()}
+                  onFromGallery={() => galleryInputRef.current?.click()}
+                  onRemove={() => {
+                    setHeroImage('');
+                    setOriginalHeroImage('');
+                    setHeroImageScale(1.0);
+                    setHeroImagePosition({ x: 0, y: 0 });
+                    setIsExtractedImage(false);
+                    getFramedDataUrlRef.current = null;
+                  }}
+                  disabled={isCompressing}
+                />
               ) : (
                 <div className="w-full py-6 px-4 border-2 border-dashed border-[#F3E5D8] bg-white rounded-3xl flex flex-col items-center justify-center space-y-3.5 shadow-2xs">
                   <div className="text-center">
@@ -758,6 +753,25 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                       <ImageIcon className="w-4 h-4 stroke-[2.2]" />
                       <span>Photo Gallery</span>
                     </button>
+                  </div>
+
+                  {/* Preferred Dimensions & Ratio Information Callout */}
+                  <div className="pt-2.5 border-t border-[#F5E6BF]/80 flex items-start space-x-2 text-[#8C726B] max-w-sm text-left">
+                    <Info className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                    <div className="text-[11px] leading-relaxed">
+                      <span className="font-bold text-[#3D231D] block">
+                        Preferred Dimensions & Aspect Ratios:
+                      </span>
+                      <span className="block text-[#8C726B]">
+                        • <strong>16:9 Landscape</strong> (Recommended: 1200 × 675 px, min. 800 × 450 px)
+                      </span>
+                      <span className="block text-[#8C726B]">
+                        • <strong>4:3 Standard</strong> (1200 × 900 px, min. 800 × 600 px)
+                      </span>
+                      <span className="block text-[#8C726B]/80 text-[10px] mt-0.5">
+                        Supports JPG, PNG, and WebP. You can move and zoom your photo after adding.
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

@@ -18,7 +18,10 @@ export interface Recipe {
   id: string;
   title: string;
   description?: string;
-  heroImage: string;          // Data URL or remote URL
+  heroImage: string;          // Data URL or remote URL (framed 16:9 ready for display)
+  originalHeroImage?: string; // Source uncropped image for re-framing
+  heroImageScale?: number;    // Zoom scale (1.0 to 3.0)
+  heroImagePosition?: { x: number; y: number }; // Offset { x, y } in percentage of frame
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;

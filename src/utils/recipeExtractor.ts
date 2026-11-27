@@ -224,7 +224,54 @@ export function parseRawInstructions(instructionsData: unknown): RecipeStep[] {
 }
 
 /**
+ * Scores an image candidate for how well it matches preferred 16:9 widescreen dimensions.
+ */
+function scoreImageCandidate(candidate: unknown): { url: string; score: number } | null {
+  let url = '';
+  let width = 0;
+  let height = 0;
+
+  if (typeof candidate === 'string') {
+    url = candidate.trim();
+  } else if (typeof candidate === 'object' && candidate !== null) {
+    const record = candidate as Record<string, unknown>;
+    if (typeof record.url === 'string') {
+      url = record.url.trim();
+    } else if (typeof record.contentUrl === 'string') {
+      url = record.contentUrl.trim();
+    }
+    width = Number(record.width) || 0;
+    height = Number(record.height) || 0;
+  }
+
+  if (!url) return null;
+
+  let score = 10;
+
+  if (width > 0 && height > 0) {
+    const ratio = width / height;
+    if (Math.abs(ratio - 16 / 9) <= 0.15 && width >= 600) {
+      score += 50; // Preferred 16:9 landscape
+    } else if (ratio > 1.1 && width >= 600) {
+      score += 30; // Landscape (e.g. 4:3)
+    } else if (Math.abs(ratio - 1) <= 0.1 && width >= 600) {
+      score += 15; // Square
+    }
+  }
+
+  if (/16x9|16-9|1200x675|1280x720|1600x900/i.test(url)) {
+    score += 45;
+  } else if (/4x3|4-3|1200x900|800x600/i.test(url)) {
+    score += 25;
+  }
+
+  return { url, score };
+}
+
+/**
  * Extracts a high resolution image URL from recipe image data or OpenGraph tags.
+ * Prefers images matching 16:9 widescreen dimensions when multiple candidates exist,
+ * otherwise falls back to the main image normally.
  */
 export function extractImageUrl(imageData: unknown, html: string): string {
   if (imageData) {
@@ -232,17 +279,21 @@ export function extractImageUrl(imageData: unknown, html: string): string {
       return imageData.trim();
     }
     if (Array.isArray(imageData) && imageData.length > 0) {
-      const first = imageData[0];
-      if (typeof first === 'string') return first.trim();
-      if (typeof first === 'object' && first !== null && 'url' in first) {
-        const urlVal = (first as Record<string, unknown>).url;
-        if (typeof urlVal === 'string') return urlVal.trim();
+      const scoredCandidates = imageData
+        .map((item, index) => {
+          const scored = scoreImageCandidate(item);
+          return scored ? { ...scored, index } : null;
+        })
+        .filter((item): item is { url: string; score: number; index: number } => item !== null);
+
+      if (scoredCandidates.length > 0) {
+        scoredCandidates.sort((a, b) => (b.score !== a.score ? b.score - a.score : a.index - b.index));
+        return scoredCandidates[0].url;
       }
     }
     if (typeof imageData === 'object' && imageData !== null) {
-      const record = imageData as Record<string, unknown>;
-      if (typeof record.url === 'string') return record.url.trim();
-      if (typeof record.contentUrl === 'string') return record.contentUrl.trim();
+      const scored = scoreImageCandidate(imageData);
+      if (scored) return scored.url;
     }
   }
 
@@ -457,6 +508,8 @@ export async function extractRecipeFromUrl(url: string): Promise<ExtractedRecipe
     throw new Error('Please enter a valid website URL (e.g. https://www.allrecipes.com/...)');
   }
 
+  let backendError = '';
+
   // 1. Try our own backend / Vite dev server endpoint
   try {
     const res = await fetch('/api/extract-recipe', {
@@ -466,38 +519,59 @@ export async function extractRecipeFromUrl(url: string): Promise<ExtractedRecipe
     });
 
     if (res.ok) {
-      const data = await res.json() as { recipe?: ExtractedRecipeData; html?: string };
+      const data = (await res.json()) as { recipe?: ExtractedRecipeData; html?: string };
       if (data.recipe) {
         return data.recipe;
       }
       if (data.html) {
-        return parseRecipeFromHtml(data.html, trimmedUrl);
+        const recipe = parseRecipeFromHtml(data.html, trimmedUrl);
+        if (!recipe.title || (recipe.ingredients.length === 0 && recipe.steps.length === 0)) {
+          throw new Error(
+            'Could not find standard recipe details on this page. You can still enter your recipe manually!'
+          );
+        }
+        return recipe;
+      }
+    } else {
+      const errBody = (await res.json().catch(() => ({}))) as { error?: string };
+      if (errBody.error) {
+        backendError = errBody.error;
       }
     }
-  } catch {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes('standard recipe details')) {
+      throw err;
+    }
     // Endpoint unavailable, proceed to CORS proxy fallback
   }
 
-  // 2. Fallback: Fetch HTML via free CORS proxy and parse client-side
-  try {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(trimmedUrl)}`;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) {
-      throw new Error(`Failed to load recipe page (HTTP ${res.status})`);
+  // 2. Fallback: Fetch HTML via public CORS proxies with short timeouts
+  const proxyUrls = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(trimmedUrl)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(trimmedUrl)}`,
+  ];
+
+  for (const proxyUrl of proxyUrls) {
+    try {
+      const res = await fetch(proxyUrl, {
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) continue;
+      const html = await res.text();
+      if (!html || html.includes('window._cf_chl_opt')) continue;
+      const recipe = parseRecipeFromHtml(html, trimmedUrl);
+      if (!recipe.title || (recipe.ingredients.length === 0 && recipe.steps.length === 0)) {
+        continue;
+      }
+      return recipe;
+    } catch {
+      // Try next proxy
     }
-    const html = await res.text();
-    const recipe = parseRecipeFromHtml(html, trimmedUrl);
-    if (!recipe.title || (recipe.ingredients.length === 0 && recipe.steps.length === 0)) {
-      throw new Error(
-        'Could not find standard recipe details on this page. You can still enter your recipe manually!'
-      );
-    }
-    return recipe;
-  } catch (err: unknown) {
-    throw new Error(
-      err instanceof Error
-        ? err.message
-        : 'Could not extract recipe from this URL. Please verify the link or enter details manually.'
-    );
   }
+
+  throw new Error(
+    backendError
+      ? `Could not import from this website (${backendError}). Some sites block automated imports — you can still enter your recipe manually!`
+      : 'Could not extract recipe from this URL. Please verify the link or enter details manually.'
+  );
 }
