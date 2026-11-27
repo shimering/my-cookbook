@@ -28,6 +28,8 @@ export interface Recipe {
   categories: string[];       // e.g. ["Breakfast", "Desserts", "Quick Meals"]
   ingredients: Ingredient[];
   steps: RecipeStep[];
+  sourceUrl?: string;         // Link to the original recipe webpage
+  youtubeUrl?: string;        // Link to a YouTube video for the recipe
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;

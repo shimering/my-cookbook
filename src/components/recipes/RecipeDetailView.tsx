@@ -10,6 +10,8 @@ import {
   Printer,
   Zap,
   Scale,
+  ExternalLink,
+  Video,
 } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types';
 import { useWakeLock } from '../../hooks/useWakeLock';
@@ -39,8 +41,34 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
   onAddToMealPlan,
   onPrint,
 }) => {
-  // Screen Wake-Lock keeps the phone awake while cooking!
-  const { isActive: isWakeLockActive, isSupported: isWakeLockSupported } = useWakeLock(true);
+  // Screen Wake-Lock keeps the phone awake while cooking, toggleable by the user
+  const [wakeLockEnabled, setWakeLockEnabled] = useState<boolean>(true);
+  const {
+    isActive: isWakeLockActive,
+    isSupported: isWakeLockSupported,
+    request: requestWakeLock,
+    release: releaseWakeLock,
+  } = useWakeLock(wakeLockEnabled);
+
+  const handleToggleWakeLock = async () => {
+    if (isWakeLockActive || wakeLockEnabled) {
+      setWakeLockEnabled(false);
+      await releaseWakeLock();
+    } else {
+      setWakeLockEnabled(true);
+      await requestWakeLock();
+    }
+  };
+
+  const isSafeHttpUrl = (url?: string): boolean => {
+    if (!url) return false;
+    try {
+      const parsed = new URL(url.trim());
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
 
   // Set of checked ingredient IDs for interactive cooking checklist
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set());
@@ -211,21 +239,57 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               </div>
             </div>
 
-            {/* Wake Lock Indicator Pill */}
+            {/* Pressable Wake Lock Toggle Pill */}
             {isWakeLockSupported && (
-              <div
-                className={`inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-[#F3E5D8] ${
+              <button
+                type="button"
+                onClick={handleToggleWakeLock}
+                aria-pressed={isWakeLockActive}
+                aria-label={isWakeLockActive ? 'Turn off screen awake' : 'Keep screen awake'}
+                className={`inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border border-[#F3E5D8] cursor-pointer active:scale-95 ${
                   isWakeLockActive
-                    ? 'bg-[#FDECC8] text-[#3D231D] shadow-xs'
-                    : 'bg-white text-[#8C726B]'
+                    ? 'bg-[#FDECC8] hover:bg-[#FCE3B0] text-[#3D231D] shadow-xs'
+                    : 'bg-white hover:bg-[#FFF0F3] text-[#8C726B]'
                 }`}
-                title="Screen Wake-Lock is active while viewing this recipe"
+                title={
+                  isWakeLockActive
+                    ? 'Screen Awake is ON — tap to turn off'
+                    : 'Screen Awake is OFF — tap to keep screen awake'
+                }
               >
                 <Zap className={`w-3.5 h-3.5 ${isWakeLockActive ? 'fill-[#3D231D] text-[#3D231D]' : 'text-[#8C726B]'}`} />
-                <span>{isWakeLockActive ? 'Screen Awake' : 'Wake Lock'}</span>
-              </div>
+                <span>{isWakeLockActive ? 'Screen Awake' : 'Screen Awake Off'}</span>
+              </button>
             )}
           </div>
+
+          {/* Recipe Source & YouTube Video Links (if provided) */}
+          {(isSafeHttpUrl(recipe.sourceUrl) || isSafeHttpUrl(recipe.youtubeUrl)) && (
+            <div className="mb-4 flex flex-wrap gap-2 no-print">
+              {isSafeHttpUrl(recipe.sourceUrl) && (
+                <a
+                  href={recipe.sourceUrl!.trim()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-white hover:bg-[#FFF0F3] text-[#3D231D] hover:text-[#E85D75] border border-[#F3E5D8] rounded-full text-xs font-bold transition-colors shadow-2xs"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[#E85D75]" />
+                  <span>Original Recipe</span>
+                </a>
+              )}
+              {isSafeHttpUrl(recipe.youtubeUrl) && (
+                <a
+                  href={recipe.youtubeUrl!.trim()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#FFF0F3] hover:bg-[#FDE8EA] text-[#E85D75] border border-[#F3E5D8] rounded-full text-xs font-bold transition-colors shadow-2xs"
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  <span>Watch on YouTube</span>
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Action Button: Add to Meal Plan (Full Pill Rounding) */}
           <div className="mb-6 flex gap-2 no-print">

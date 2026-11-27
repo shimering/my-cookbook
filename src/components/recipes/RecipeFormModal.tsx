@@ -15,6 +15,7 @@ import {
   Info,
   Layers,
   X,
+  Video,
 } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
@@ -249,6 +250,8 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const [servings, setServings] = useState(initialRecipe?.servings?.toString() || '4');
   const [categories, setCategories] = useState<string[]>(initialRecipe?.categories || ['Breakfast']);
   const [customTag, setCustomTag] = useState('');
+  const [sourceUrl, setSourceUrl] = useState(initialRecipe?.sourceUrl || '');
+  const [youtubeUrl, setYoutubeUrl] = useState(initialRecipe?.youtubeUrl || '');
 
   // Unit system for adding/editing measurements: 'us' (cups, tbsp) or 'metric' (grams, ml)
   const [formUnitSystem, setFormUnitSystem] = useState<UnitSystem>(() => getStoredUnitSystem());
@@ -339,8 +342,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       setExtractionError('');
       setExtractionSuccess('');
 
-      const extracted = await extractRecipeFromUrl(urlInput.trim());
+      const trimmedUrl = urlInput.trim();
+      const extracted = await extractRecipeFromUrl(trimmedUrl);
 
+      setSourceUrl(trimmedUrl);
       if (extracted.title) setTitle(extracted.title);
       if (extracted.description) setDescription(extracted.description);
       if (extracted.heroImage) {
@@ -669,6 +674,8 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       categories: categories.length ? categories : ['Other'],
       ingredients: cleanIngredients,
       steps: cleanSteps,
+      sourceUrl: sourceUrl.trim() || undefined,
+      youtubeUrl: youtubeUrl.trim() || undefined,
       isFavorite: initialRecipe?.isFavorite || false,
       createdAt: initialRecipe?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -927,6 +934,47 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 placeholder="A brief note about this delicious dish..."
                 className="w-full px-4 py-2.5 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 shadow-cozy resize-none"
               />
+            </div>
+
+            {/* Recipe Source Link & YouTube Video Link (Optional) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
+                  Recipe Link (Optional)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8C726B]">
+                    <Link2 className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    type="url"
+                    value={sourceUrl}
+                    onChange={(e) => setSourceUrl(e.target.value)}
+                    placeholder="https://example.com/recipe"
+                    aria-label="Recipe link URL"
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-[14px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 focus:border-[#E85D75] shadow-cozy"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#8C726B] mb-1.5">
+                  YouTube Video Link (Optional)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#E85D75]">
+                    <Video className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    type="url"
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    aria-label="YouTube video link URL"
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-[#F3E5D8] rounded-[14px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 focus:border-[#E85D75] shadow-cozy"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Metadata Row: Prep Time, Cook Time, Servings (Butter Peach, border-radius: 16px) */}
