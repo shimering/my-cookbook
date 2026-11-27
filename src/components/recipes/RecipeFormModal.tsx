@@ -150,18 +150,31 @@ const COUNT_QTY_OPTIONS = [
   '12',
 ];
 
-function getQtyOptions(unitSystem: UnitSystem, unit: string): string[] {
-  if (unitSystem === 'us') {
-    return US_QTY_OPTIONS;
-  }
-  const u = (unit || '').toLowerCase();
-  if (u === 'kg' || u === 'l') {
-    return METRIC_VOLUME_LARGE_OPTIONS;
-  }
+export function getQtyOptions(unitSystem: UnitSystem, unit: string): string[] {
+  const u = (unit || '').toLowerCase().trim();
   if (u === 'g' || u === 'ml') {
     return METRIC_WEIGHT_QTY_OPTIONS;
   }
-  return COUNT_QTY_OPTIONS;
+  if (u === 'kg' || u === 'l') {
+    return METRIC_VOLUME_LARGE_OPTIONS;
+  }
+  if (
+    u === 'cup' ||
+    u === 'tbsp' ||
+    u === 'tsp' ||
+    u === 'oz' ||
+    u === 'fl oz' ||
+    u === 'lb' ||
+    u === 'pt' ||
+    u === 'qt' ||
+    u === 'gal'
+  ) {
+    return US_QTY_OPTIONS;
+  }
+  if (COUNT_UNITS.some((cu) => cu.value === u)) {
+    return COUNT_QTY_OPTIONS;
+  }
+  return unitSystem === 'metric' ? METRIC_WEIGHT_QTY_OPTIONS : US_QTY_OPTIONS;
 }
 
 export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
@@ -405,22 +418,39 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     if (targetSystem === formUnitSystem) return;
     setFormUnitSystem(targetSystem);
 
-    const converted = ingredients.map((ing) => {
-      if (!ing.name.trim() || !ing.amount) {
+    setIngredients((prev) =>
+      prev.map((ing) => {
+        if (!ing.name.trim() || !ing.amount) {
+          const isMetric = targetSystem === 'metric';
+          const defaultUnit = isMetric ? 'g' : 'cup';
+          const defaultQty = isMetric ? '100' : '1';
+          const defaultAmount = isMetric ? 100 : 1;
+          return {
+            ...ing,
+            unit: defaultUnit,
+            displayFraction: defaultQty,
+            amount: defaultAmount,
+          };
+        }
+        const res = convertIngredient(ing, targetSystem, 1);
         return {
           ...ing,
-          unit: targetSystem === 'metric' ? (ing.unit === 'cup' ? 'g' : ing.unit) : (ing.unit === 'g' ? 'cup' : ing.unit),
+          amount: res.amount,
+          unit: res.unit,
+          displayFraction: res.displayQuantity,
         };
-      }
-      const res = convertIngredient(ing, targetSystem, 1);
-      return {
-        ...ing,
-        amount: res.amount,
-        unit: res.unit,
-        displayFraction: res.displayQuantity,
-      };
+      })
+    );
+  };
+
+  // Helper to update one or more fields on an ingredient cleanly using functional state
+  const updateIngredient = (index: number, updates: Partial<Ingredient>) => {
+    setIngredients((prev) => {
+      const updated = [...prev];
+      if (!updated[index]) return prev;
+      updated[index] = { ...updated[index], ...updates };
+      return updated;
     });
-    setIngredients(converted);
   };
 
   // Quantity dropdown select handler
@@ -429,13 +459,17 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
       const custom = prompt('Enter custom quantity (e.g. 1 1/2, 250, 0.5):');
       if (custom && custom.trim()) {
         const parsedNum = parseQuantity(custom.trim()).valueOf();
-        handleIngredientChange(index, 'displayFraction', custom.trim());
-        handleIngredientChange(index, 'amount', parsedNum > 0 ? parsedNum : 1);
+        updateIngredient(index, {
+          displayFraction: custom.trim(),
+          amount: parsedNum > 0 ? parsedNum : 1,
+        });
       }
     } else {
       const parsedNum = parseQuantity(val).valueOf();
-      handleIngredientChange(index, 'displayFraction', val);
-      handleIngredientChange(index, 'amount', parsedNum > 0 ? parsedNum : 1);
+      updateIngredient(index, {
+        displayFraction: val,
+        amount: parsedNum > 0 ? parsedNum : 1,
+      });
     }
   };
 
@@ -444,23 +478,31 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     if (val === '__custom__') {
       const custom = prompt('Enter custom measurement unit (e.g. handful, dash, sheet):');
       if (custom && custom.trim()) {
-        handleIngredientChange(index, 'unit', custom.trim());
+        updateIngredient(index, { unit: custom.trim() });
       }
     } else {
-      handleIngredientChange(index, 'unit', val);
+      const u = val.toLowerCase();
+      const current = ingredients[index];
+      const updates: Partial<Ingredient> = { unit: val };
+      if ((u === 'g' || u === 'ml') && current && (current.amount === 1 || current.displayFraction === '1')) {
+        updates.amount = 100;
+        updates.displayFraction = '100';
+      } else if (u === 'cup' && current && current.amount === 100) {
+        updates.amount = 1;
+        updates.displayFraction = '1';
+      }
+      updateIngredient(index, updates);
     }
   };
 
   // Ingredients Helpers
   const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
-    const updated = [...ingredients];
-    updated[index] = { ...updated[index], [field]: value };
-    setIngredients(updated);
+    updateIngredient(index, { [field]: value });
   };
 
   const addIngredient = (section: string = '') => {
-    setIngredients([
-      ...ingredients,
+    setIngredients((prev) => [
+      ...prev,
       {
         id: `ing-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
         name: '',
@@ -473,7 +515,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   };
 
   const removeIngredient = (index: number) => {
-    setIngredients(ingredients.filter((_, i) => i !== index));
+    setIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Steps Helpers
@@ -1005,7 +1047,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         <option value="__custom__">+ Custom Qty...</option>
                       </select>
 
-                      {/* Unit Dropdown Menu with List of Measurements (scoped strictly to US or Metric) */}
+                      {/* Unit Dropdown Menu with List of Measurements (Primary system first, other system accessible) */}
                       <select
                         value={ing.unit || ''}
                         onChange={(e) => handleUnitSelect(index, e.target.value)}
@@ -1018,21 +1060,39 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                         )}
 
                         {formUnitSystem === 'metric' ? (
-                          <optgroup label="Metric (g, ml, kg, l)">
-                            {METRIC_UNITS.map((u) => (
-                              <option key={u.value} value={u.value}>
-                                {u.label}
-                              </option>
-                            ))}
-                          </optgroup>
+                          <>
+                            <optgroup label="Metric (g, ml, kg, l)">
+                              {METRIC_UNITS.map((u) => (
+                                <option key={u.value} value={u.value}>
+                                  {u.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="US Customary (cups, spoons, oz)">
+                              {US_UNITS.map((u) => (
+                                <option key={u.value} value={u.value}>
+                                  {u.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          </>
                         ) : (
-                          <optgroup label="US Customary (cups, spoons, oz)">
-                            {US_UNITS.map((u) => (
-                              <option key={u.value} value={u.value}>
-                                {u.label}
-                              </option>
-                            ))}
-                          </optgroup>
+                          <>
+                            <optgroup label="US Customary (cups, spoons, oz)">
+                              {US_UNITS.map((u) => (
+                                <option key={u.value} value={u.value}>
+                                  {u.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="Metric (g, ml, kg, l)">
+                              {METRIC_UNITS.map((u) => (
+                                <option key={u.value} value={u.value}>
+                                  {u.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          </>
                         )}
 
                         <optgroup label="Count & Portions">
