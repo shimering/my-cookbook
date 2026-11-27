@@ -16,8 +16,14 @@ import {
   Layers,
   X,
   Video,
+  GripVertical,
 } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
+import {
+  reorderIngredients,
+  moveIngredientToSection,
+  reorderSteps,
+} from '../../utils/dragReorder';
 import { compressImageToDataUrl } from '../../services/imageCompression';
 import { RecipePhotoFramingEditor } from './RecipePhotoFramingEditor';
 import {
@@ -602,6 +608,268 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const hasNamedSections = useMemo(() => {
     return ingredientGroups.some((g) => g.section !== '');
   }, [ingredientGroups]);
+
+  // Drag & Drop State for Ingredients
+  const [draggedIngIndex, setDraggedIngIndex] = useState<number | null>(null);
+  const [dragOverIngIndex, setDragOverIngIndex] = useState<number | null>(null);
+  const [dragOverSection, setDragOverSection] = useState<string | null>(null);
+
+  const resetIngDragState = () => {
+    setDraggedIngIndex(null);
+    setDragOverIngIndex(null);
+    setDragOverSection(null);
+  };
+
+  const handleIngDropOnItem = (targetIndex: number, targetSection?: string) => {
+    if (draggedIngIndex === null) {
+      resetIngDragState();
+      return;
+    }
+    const currentSec = (ingredients[draggedIngIndex]?.section || '').trim();
+    const resolvedTargetSec = targetSection !== undefined ? targetSection.trim() : currentSec;
+    if (draggedIngIndex !== targetIndex || currentSec !== resolvedTargetSec) {
+      setIngredients((prev) =>
+        reorderIngredients(prev, draggedIngIndex, targetIndex, resolvedTargetSec)
+      );
+    }
+    resetIngDragState();
+  };
+
+  const handleIngDropOnSection = (targetSection: string) => {
+    if (draggedIngIndex === null) {
+      resetIngDragState();
+      return;
+    }
+    setIngredients((prev) => moveIngredientToSection(prev, draggedIngIndex, targetSection));
+    resetIngDragState();
+  };
+
+  const handleIngTouchMove = (e: React.TouchEvent) => {
+    if (draggedIngIndex === null || !e.touches[0]) return;
+    const { clientX, clientY } = e.touches[0];
+    const elements = document.elementsFromPoint(clientX, clientY);
+    const rowEl = elements.find((el) => (el as HTMLElement).dataset?.ingIndex !== undefined) as HTMLElement | undefined;
+    if (rowEl && rowEl.dataset.ingIndex !== undefined) {
+      const idx = parseInt(rowEl.dataset.ingIndex, 10);
+      if (!Number.isNaN(idx)) {
+        setDragOverIngIndex(idx);
+        setDragOverSection(null);
+        return;
+      }
+    }
+    const secEl = elements.find((el) => (el as HTMLElement).dataset?.ingSection !== undefined) as HTMLElement | undefined;
+    if (secEl && secEl.dataset.ingSection !== undefined) {
+      setDragOverSection(secEl.dataset.ingSection);
+      setDragOverIngIndex(null);
+    }
+  };
+
+  const handleIngTouchEnd = () => {
+    if (draggedIngIndex === null) return;
+    if (dragOverIngIndex !== null) {
+      const targetSec = (ingredients[dragOverIngIndex]?.section || '').trim();
+      handleIngDropOnItem(dragOverIngIndex, targetSec);
+    } else if (dragOverSection !== null) {
+      handleIngDropOnSection(dragOverSection);
+    } else {
+      resetIngDragState();
+    }
+  };
+
+  // Drag & Drop State for Steps
+  const [draggedStepIndex, setDraggedStepIndex] = useState<number | null>(null);
+  const [dragOverStepIndex, setDragOverStepIndex] = useState<number | null>(null);
+
+  const resetStepDragState = () => {
+    setDraggedStepIndex(null);
+    setDragOverStepIndex(null);
+  };
+
+  const handleStepDrop = (targetIndex: number) => {
+    if (draggedStepIndex !== null && draggedStepIndex !== targetIndex) {
+      setSteps((prev) => reorderSteps(prev, draggedStepIndex, targetIndex));
+    }
+    resetStepDragState();
+  };
+
+  const handleStepTouchMove = (e: React.TouchEvent) => {
+    if (draggedStepIndex === null || !e.touches[0]) return;
+    const { clientX, clientY } = e.touches[0];
+    const elements = document.elementsFromPoint(clientX, clientY);
+    const stepEl = elements.find((el) => (el as HTMLElement).dataset?.stepIndex !== undefined) as HTMLElement | undefined;
+    if (stepEl && stepEl.dataset.stepIndex !== undefined) {
+      const idx = parseInt(stepEl.dataset.stepIndex, 10);
+      if (!Number.isNaN(idx)) {
+        setDragOverStepIndex(idx);
+      }
+    }
+  };
+
+  const handleStepTouchEnd = () => {
+    if (draggedStepIndex !== null && dragOverStepIndex !== null) {
+      handleStepDrop(dragOverStepIndex);
+    } else {
+      resetStepDragState();
+    }
+  };
+
+  const renderIngredientRow = (ing: Ingredient, index: number) => {
+    const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
+    const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
+    const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
+    const ingSection = (ing.section || '').trim();
+    const isDragging = draggedIngIndex === index;
+    const isDragOver = dragOverIngIndex === index && draggedIngIndex !== index;
+
+    return (
+      <div
+        key={ing.id}
+        data-ing-index={index}
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', String(index));
+          setDraggedIngIndex(index);
+        }}
+        onDragOver={(e) => {
+          if (draggedIngIndex === null) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          if (dragOverIngIndex !== index) {
+            setDragOverIngIndex(index);
+            setDragOverSection(null);
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleIngDropOnItem(index, ingSection);
+        }}
+        onDragEnd={resetIngDragState}
+        className={`flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border shadow-xs transition-all ${
+          isDragging
+            ? 'opacity-50 scale-[0.98] border-[#E85D75] ring-2 ring-[#E85D75]/30'
+            : isDragOver
+              ? 'border-[#E85D75] ring-2 ring-[#E85D75] bg-[#FFF0F3]/40'
+              : 'border-[#F3E5D8]'
+        }`}
+      >
+        {/* Drag Handle (works with both mouse and mobile touch) */}
+        <button
+          type="button"
+          onTouchStart={() => setDraggedIngIndex(index)}
+          onTouchMove={handleIngTouchMove}
+          onTouchEnd={handleIngTouchEnd}
+          className="p-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none shrink-0 rounded"
+          aria-label={`Drag to reorder ${ing.name || 'ingredient'}`}
+          title="Drag to reorder or move between sections"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+
+        {/* Quantity Dropdown Menu */}
+        <select
+          value={currentQtyVal}
+          onChange={(e) => handleQuantitySelect(index, e.target.value)}
+          aria-label="Ingredient quantity"
+          className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+        >
+          {hasCustomQty && (
+            <option value={currentQtyVal}>{currentQtyVal}</option>
+          )}
+          {qtyOptions.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+          <option value="__custom__">+ Custom Qty...</option>
+        </select>
+
+        {/* Unit Dropdown Menu with List of Measurements */}
+        <select
+          value={ing.unit || ''}
+          onChange={(e) => handleUnitSelect(index, e.target.value)}
+          className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+          aria-label="Measurement unit"
+        >
+          {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
+            <option value={ing.unit}>{ing.unit} (custom)</option>
+          )}
+
+          {formUnitSystem === 'metric' ? (
+            <>
+              <optgroup label="Metric (g, ml, kg, l)">
+                {METRIC_UNITS.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {u.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="US Customary (cups, spoons, oz)">
+                {US_UNITS.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {u.label}
+                  </option>
+                ))}
+              </optgroup>
+            </>
+          ) : (
+            <>
+              <optgroup label="US Customary (cups, spoons, oz)">
+                {US_UNITS.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {u.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Metric (g, ml, kg, l)">
+                {METRIC_UNITS.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {u.label}
+                  </option>
+                ))}
+              </optgroup>
+            </>
+          )}
+
+          <optgroup label="Count & Portions">
+            {COUNT_UNITS.map((u) => (
+              <option key={u.value} value={u.value}>
+                {u.label}
+              </option>
+            ))}
+          </optgroup>
+          <option value="__custom__">+ Custom unit...</option>
+        </select>
+
+        {/* Ingredient Name Box */}
+        <div className="flex-1 min-w-0">
+          <AutocompleteInput
+            value={ing.name}
+            onChange={(val) => handleIngredientChange(index, 'name', val)}
+            onSelect={(item) => {
+              handleIngredientChange(index, 'name', item.name);
+            }}
+            items={grocerySuggestions}
+            placeholder="Ingredient name (e.g. Flour)"
+            className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
+            ariaLabel="Ingredient name"
+          />
+        </div>
+
+        {/* Delete button */}
+        <button
+          type="button"
+          onClick={() => removeIngredient(index)}
+          className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
+          aria-label="Remove Ingredient"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  };
 
   // Steps Helpers
   const handleStepChange = (index: number, instruction: string) => {
@@ -1221,131 +1489,37 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               {/* Ingredients List: standard flat list if no sections, or structured Section Cards if sections exist */}
               {!hasNamedSections ? (
                 <div className="space-y-2">
-                  {ingredients.map((ing, index) => {
-                    const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
-                    const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
-                    const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
-
-                    return (
-                      <div
-                        key={ing.id}
-                        className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
-                      >
-                        {/* Quantity Dropdown Menu */}
-                        <select
-                          value={currentQtyVal}
-                          onChange={(e) => handleQuantitySelect(index, e.target.value)}
-                          aria-label="Ingredient quantity"
-                          className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
-                        >
-                          {hasCustomQty && (
-                            <option value={currentQtyVal}>{currentQtyVal}</option>
-                          )}
-                          {qtyOptions.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                          <option value="__custom__">+ Custom Qty...</option>
-                        </select>
-
-                        {/* Unit Dropdown Menu with List of Measurements */}
-                        <select
-                          value={ing.unit || ''}
-                          onChange={(e) => handleUnitSelect(index, e.target.value)}
-                          className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
-                          aria-label="Measurement unit"
-                        >
-                          {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
-                            <option value={ing.unit}>{ing.unit} (custom)</option>
-                          )}
-
-                          {formUnitSystem === 'metric' ? (
-                            <>
-                              <optgroup label="Metric (g, ml, kg, l)">
-                                {METRIC_UNITS.map((u) => (
-                                  <option key={u.value} value={u.value}>
-                                    {u.label}
-                                  </option>
-                                ))}
-                              </optgroup>
-                              <optgroup label="US Customary (cups, spoons, oz)">
-                                {US_UNITS.map((u) => (
-                                  <option key={u.value} value={u.value}>
-                                    {u.label}
-                                  </option>
-                                ))}
-                              </optgroup>
-                            </>
-                          ) : (
-                            <>
-                              <optgroup label="US Customary (cups, spoons, oz)">
-                                {US_UNITS.map((u) => (
-                                  <option key={u.value} value={u.value}>
-                                    {u.label}
-                                  </option>
-                                ))}
-                              </optgroup>
-                              <optgroup label="Metric (g, ml, kg, l)">
-                                {METRIC_UNITS.map((u) => (
-                                  <option key={u.value} value={u.value}>
-                                    {u.label}
-                                  </option>
-                                ))}
-                              </optgroup>
-                            </>
-                          )}
-
-                          <optgroup label="Count & Portions">
-                            {COUNT_UNITS.map((u) => (
-                              <option key={u.value} value={u.value}>
-                                {u.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <option value="__custom__">+ Custom unit...</option>
-                        </select>
-
-                        {/* Ingredient Name Box */}
-                        <div className="flex-1 min-w-0">
-                          <AutocompleteInput
-                            value={ing.name}
-                            onChange={(val) => handleIngredientChange(index, 'name', val)}
-                            onSelect={(item) => {
-                              handleIngredientChange(index, 'name', item.name);
-                            }}
-                            items={grocerySuggestions}
-                            placeholder="Ingredient name (e.g. Flour)"
-                            className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
-                            ariaLabel="Ingredient name"
-                          />
-                        </div>
-
-                        {/* Delete button */}
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(index)}
-                          className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
-                          aria-label="Remove Ingredient"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
+                  {ingredients.map((ing, index) => renderIngredientRow(ing, index))}
                 </div>
               ) : (
                 <div className="space-y-3">
                   {ingredientGroups.map((group) => {
                     const isMain = !group.section;
+                    const isSecDragOver = dragOverSection === group.section;
 
                     return (
                       <div
                         key={group.section || 'main-section'}
+                        data-ing-section={group.section}
+                        onDragOver={(e) => {
+                          if (draggedIngIndex === null) return;
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                          if (dragOverSection !== group.section) {
+                            setDragOverSection(group.section);
+                            setDragOverIngIndex(null);
+                          }
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          handleIngDropOnSection(group.section);
+                        }}
                         className={`rounded-[20px] overflow-hidden border transition-all ${
-                          isMain
-                            ? 'bg-[#FFF8F6]/60 border-[#F3E5D8] p-2.5 space-y-2'
-                            : 'bg-[#FFF8F6]/80 border-[#F3E5D8] shadow-2xs'
+                          isSecDragOver
+                            ? 'ring-2 ring-[#E85D75] border-[#E85D75] bg-[#FFF0F3]/40'
+                            : isMain
+                              ? 'bg-[#FFF8F6]/60 border-[#F3E5D8] p-2.5 space-y-2'
+                              : 'bg-[#FFF8F6]/80 border-[#F3E5D8] shadow-2xs'
                         }`}
                       >
                         {/* Section Header */}
@@ -1402,118 +1576,7 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
                         {/* Ingredients Rows for this Group */}
                         <div className={isMain ? 'space-y-2' : 'p-2.5 space-y-2'}>
-                          {group.items.map(({ ing, originalIndex }) => {
-                            const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
-                            const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
-                            const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
-
-                            return (
-                              <div
-                                key={ing.id}
-                                className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
-                              >
-                                {/* Quantity Dropdown Menu */}
-                                <select
-                                  value={currentQtyVal}
-                                  onChange={(e) => handleQuantitySelect(originalIndex, e.target.value)}
-                                  aria-label="Ingredient quantity"
-                                  className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
-                                >
-                                  {hasCustomQty && (
-                                    <option value={currentQtyVal}>{currentQtyVal}</option>
-                                  )}
-                                  {qtyOptions.map((opt) => (
-                                    <option key={opt} value={opt}>
-                                      {opt}
-                                    </option>
-                                  ))}
-                                  <option value="__custom__">+ Custom Qty...</option>
-                                </select>
-
-                                {/* Unit Dropdown Menu */}
-                                <select
-                                  value={ing.unit || ''}
-                                  onChange={(e) => handleUnitSelect(originalIndex, e.target.value)}
-                                  className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
-                                  aria-label="Measurement unit"
-                                >
-                                  {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
-                                    <option value={ing.unit}>{ing.unit} (custom)</option>
-                                  )}
-
-                                  {formUnitSystem === 'metric' ? (
-                                    <>
-                                      <optgroup label="Metric (g, ml, kg, l)">
-                                        {METRIC_UNITS.map((u) => (
-                                          <option key={u.value} value={u.value}>
-                                            {u.label}
-                                          </option>
-                                        ))}
-                                      </optgroup>
-                                      <optgroup label="US Customary (cups, spoons, oz)">
-                                        {US_UNITS.map((u) => (
-                                          <option key={u.value} value={u.value}>
-                                            {u.label}
-                                          </option>
-                                        ))}
-                                      </optgroup>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <optgroup label="US Customary (cups, spoons, oz)">
-                                        {US_UNITS.map((u) => (
-                                          <option key={u.value} value={u.value}>
-                                            {u.label}
-                                          </option>
-                                        ))}
-                                      </optgroup>
-                                      <optgroup label="Metric (g, ml, kg, l)">
-                                        {METRIC_UNITS.map((u) => (
-                                          <option key={u.value} value={u.value}>
-                                            {u.label}
-                                          </option>
-                                        ))}
-                                      </optgroup>
-                                    </>
-                                  )}
-
-                                  <optgroup label="Count & Portions">
-                                    {COUNT_UNITS.map((u) => (
-                                      <option key={u.value} value={u.value}>
-                                        {u.label}
-                                      </option>
-                                    ))}
-                                  </optgroup>
-                                  <option value="__custom__">+ Custom unit...</option>
-                                </select>
-
-                                {/* Ingredient Name Box */}
-                                <div className="flex-1 min-w-0">
-                                  <AutocompleteInput
-                                    value={ing.name}
-                                    onChange={(val) => handleIngredientChange(originalIndex, 'name', val)}
-                                    onSelect={(item) => {
-                                      handleIngredientChange(originalIndex, 'name', item.name);
-                                    }}
-                                    items={grocerySuggestions}
-                                    placeholder="Ingredient name (e.g. Flour)"
-                                    className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
-                                    ariaLabel="Ingredient name"
-                                  />
-                                </div>
-
-                                {/* Delete button */}
-                                <button
-                                  type="button"
-                                  onClick={() => removeIngredient(originalIndex)}
-                                  className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
-                                  aria-label="Remove Ingredient"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            );
-                          })}
+                          {group.items.map(({ ing, originalIndex }) => renderIngredientRow(ing, originalIndex))}
                         </div>
                       </div>
                     );
@@ -1537,57 +1600,101 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               </div>
 
               <div className="space-y-2.5">
-                {steps.map((step, index) => (
-                  <div
-                    key={step.id}
-                    className="bg-[#FDECC8]/40 border border-[#F3E5D8] p-3.5 rounded-2xl shadow-xs space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#3D231D] font-brand">
-                        Step {step.stepNumber}
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          type="button"
-                          disabled={index === 0}
-                          onClick={() => moveStep(index, 'up')}
-                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
-                          title="Move Up"
-                          aria-label="Move step up"
-                        >
-                          <ArrowUp className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={index === steps.length - 1}
-                          onClick={() => moveStep(index, 'down')}
-                          className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
-                          title="Move Down"
-                          aria-label="Move step down"
-                        >
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeStep(index)}
-                          className="p-1.5 text-[#8C726B] hover:text-red-500 active:scale-95 ml-1 cursor-pointer rounded"
-                          title="Remove Step"
-                          aria-label="Remove step"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+                {steps.map((step, index) => {
+                  const isStepDragging = draggedStepIndex === index;
+                  const isStepDragOver = dragOverStepIndex === index && draggedStepIndex !== index;
 
-                    <textarea
-                      rows={2}
-                      value={step.instruction}
-                      onChange={(e) => handleStepChange(index, e.target.value)}
-                      placeholder="e.g. Warm the milk and whisk in yeast..."
-                      className="w-full px-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 resize-none"
-                    />
-                  </div>
-                ))}
+                  return (
+                    <div
+                      key={step.id}
+                      data-step-index={index}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', String(index));
+                        setDraggedStepIndex(index);
+                      }}
+                      onDragOver={(e) => {
+                        if (draggedStepIndex === null) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        if (dragOverStepIndex !== index) {
+                          setDragOverStepIndex(index);
+                        }
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        handleStepDrop(index);
+                      }}
+                      onDragEnd={resetStepDragState}
+                      className={`p-3.5 rounded-2xl shadow-xs space-y-2 border transition-all ${
+                        isStepDragging
+                          ? 'opacity-50 scale-[0.98] bg-[#FDECC8]/60 border-[#E85D75] ring-2 ring-[#E85D75]/30'
+                          : isStepDragOver
+                            ? 'bg-[#FFF0F3]/60 border-[#E85D75] ring-2 ring-[#E85D75]'
+                            : 'bg-[#FDECC8]/40 border-[#F3E5D8]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1.5">
+                          <button
+                            type="button"
+                            onTouchStart={() => setDraggedStepIndex(index)}
+                            onTouchMove={handleStepTouchMove}
+                            onTouchEnd={handleStepTouchEnd}
+                            className="p-1 -ml-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none rounded"
+                            aria-label={`Drag to reorder Step ${step.stepNumber}`}
+                            title="Drag to reorder step"
+                          >
+                            <GripVertical className="w-4 h-4" />
+                          </button>
+                          <span className="text-xs font-bold text-[#3D231D] font-brand">
+                            Step {step.stepNumber}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => moveStep(index, 'up')}
+                            className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
+                            title="Move Up"
+                            aria-label="Move step up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === steps.length - 1}
+                            onClick={() => moveStep(index, 'down')}
+                            className="p-1.5 text-[#8C726B] hover:text-[#3D231D] active:scale-95 disabled:opacity-30 cursor-pointer rounded"
+                            title="Move Down"
+                            aria-label="Move step down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeStep(index)}
+                            className="p-1.5 text-[#8C726B] hover:text-red-500 active:scale-95 ml-1 cursor-pointer rounded"
+                            title="Remove Step"
+                            aria-label="Remove step"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <textarea
+                        rows={2}
+                        value={step.instruction}
+                        onChange={(e) => handleStepChange(index, e.target.value)}
+                        placeholder="e.g. Warm the milk and whisk in yeast..."
+                        className="w-full px-3 py-2 bg-white border border-[#F3E5D8] rounded-[16px] text-xs text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:ring-2 focus:ring-[#E85D75]/40 resize-none"
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
