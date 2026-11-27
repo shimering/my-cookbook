@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   ChevronLeft,
   Camera,
@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Layers,
+  X,
 } from 'lucide-react';
 import type { Recipe, Ingredient, RecipeStep } from '../../types';
 import { compressImageToDataUrl } from '../../services/imageCompression';
@@ -518,6 +520,84 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     setIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Section State & Helpers
+  const [showAddSectionCard, setShowAddSectionCard] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState('');
+  const newSectionInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCreateSection = (name?: string) => {
+    const secName = (name !== undefined ? name : newSectionTitle).trim();
+    if (!secName) return;
+
+    setIngredients((prev) => [
+      ...prev,
+      {
+        id: `ing-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+        name: '',
+        amount: formUnitSystem === 'metric' ? 100 : 1,
+        unit: formUnitSystem === 'metric' ? 'g' : 'cup',
+        displayFraction: formUnitSystem === 'metric' ? '100' : '1',
+        section: secName,
+      },
+    ]);
+    setNewSectionTitle('');
+    setShowAddSectionCard(false);
+  };
+
+  const handleRenameSection = (oldName: string, newName: string) => {
+    setIngredients((prev) =>
+      prev.map((ing) =>
+        (ing.section || '').trim() === oldName.trim()
+          ? { ...ing, section: newName }
+          : ing
+      )
+    );
+  };
+
+  const handleDeleteSection = (sectionName: string) => {
+    const hasNamedItems = ingredients.some(
+      (ing) => (ing.section || '').trim() === sectionName.trim() && ing.name.trim().length > 0
+    );
+    if (hasNamedItems) {
+      if (
+        confirm(
+          `Remove the "${sectionName}" section header? Click OK to keep its ingredients in the main list, or Cancel to leave it as is.`
+        )
+      ) {
+        setIngredients((prev) =>
+          prev.map((ing) =>
+            (ing.section || '').trim() === sectionName.trim() ? { ...ing, section: '' } : ing
+          )
+        );
+      }
+    } else {
+      setIngredients((prev) =>
+        prev.filter((ing) => (ing.section || '').trim() !== sectionName.trim())
+      );
+    }
+  };
+
+  const ingredientGroups = useMemo(() => {
+    const groups: { section: string; items: { ing: Ingredient; originalIndex: number }[] }[] = [];
+    const map = new Map<string, { section: string; items: { ing: Ingredient; originalIndex: number }[] }>();
+
+    ingredients.forEach((ing, index) => {
+      const sec = ing.section?.trim() || '';
+      if (!map.has(sec)) {
+        const group = { section: sec, items: [] as { ing: Ingredient; originalIndex: number }[] };
+        map.set(sec, group);
+        groups.push(group);
+      }
+      map.get(sec)!.items.push({ ing, originalIndex: index });
+    });
+
+    return groups;
+  }, [ingredients]);
+
+  const hasNamedSections = useMemo(() => {
+    return ingredientGroups.some((g) => g.section !== '');
+  }, [ingredientGroups]);
+
   // Steps Helpers
   const handleStepChange = (index: number, instruction: string) => {
     const updated = [...steps];
@@ -1008,131 +1088,390 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      const sec = prompt('Enter section header (e.g. "For the Sauce"):');
-                      if (sec) addIngredient(sec);
+                      setShowAddSectionCard((prev) => !prev);
+                      setNewSectionTitle('');
                     }}
-                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FDECC8] hover:bg-[#F4A261] hover:text-white text-[#3D231D] text-xs font-bold rounded-full transition-colors border border-[#F3E5D8] cursor-pointer"
+                    aria-expanded={showAddSectionCard}
+                    className="inline-flex items-center space-x-1 px-3.5 py-1 bg-[#FDECC8] hover:bg-[#FCE3B0] text-[#3D231D] text-xs font-bold rounded-full transition-colors border border-[#F3E5D8] cursor-pointer shadow-xs"
+                    title="Add a grouped section (e.g. For the Sauce, For the Crust)"
                   >
+                    <Layers className="w-3.5 h-3.5 stroke-[2.2] text-[#E85D75]" />
                     <span>+ Section</span>
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                {ingredients.map((ing, index) => {
-                  const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
-                  const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
-                  const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
-
-                  return (
-                    <div
-                      key={ing.id}
-                      className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
+              {/* Inline Add Section Creator */}
+              {showAddSectionCard && (
+                <div className="mb-3 bg-[#FFF0F3]/80 border border-[#E85D75]/30 rounded-[20px] p-3.5 shadow-xs space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Layers className="w-4 h-4 text-[#E85D75]" />
+                      <span className="font-brand font-bold text-xs text-[#3D231D]">
+                        New Ingredient Section
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddSectionCard(false)}
+                      className="p-1 rounded-full text-[#8C726B] hover:text-[#3D231D] hover:bg-white/80 transition-colors cursor-pointer"
+                      aria-label="Close section creator"
                     >
-                      {/* Quantity Dropdown Menu (Butter Peach background, rounded) */}
-                      <select
-                        value={currentQtyVal}
-                        onChange={(e) => handleQuantitySelect(index, e.target.value)}
-                        aria-label="Ingredient quantity"
-                        className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-[#8C726B]">
+                    Group ingredients under a header like "For the Sauce", "For the Crust", or "Topping".
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={newSectionInputRef}
+                      type="text"
+                      autoFocus
+                      value={newSectionTitle}
+                      onChange={(e) => setNewSectionTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateSection();
+                        } else if (e.key === 'Escape') {
+                          setShowAddSectionCard(false);
+                        }
+                      }}
+                      placeholder='Section title (e.g. "For the Sauce", "For the Crust")...'
+                      className="flex-1 px-3 py-1.5 bg-white border border-[#F3E5D8] rounded-[12px] text-xs font-semibold text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleCreateSection()}
+                      disabled={!newSectionTitle.trim()}
+                      className="px-4 py-1.5 bg-[#E85D75] hover:bg-[#D94C65] disabled:opacity-40 text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs shrink-0"
+                    >
+                      Add Section
+                    </button>
+                  </div>
+
+                  {/* Quick suggestion chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    <span className="text-[10px] text-[#8C726B] font-medium">Suggestions:</span>
+                    {['For the Sauce', 'For the Crust', 'For the Filling', 'For the Glaze', 'Topping', 'Dressing'].map((sug) => (
+                      <button
+                        key={sug}
+                        type="button"
+                        onClick={() => handleCreateSection(sug)}
+                        className="px-2 py-0.5 bg-white hover:bg-[#FDE8EA] border border-[#F3E5D8] rounded-full text-[10px] font-medium text-[#3D231D] hover:text-[#E85D75] transition-colors cursor-pointer"
                       >
-                        {hasCustomQty && (
-                          <option value={currentQtyVal}>{currentQtyVal}</option>
-                        )}
-                        {qtyOptions.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                        <option value="__custom__">+ Custom Qty...</option>
-                      </select>
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                      {/* Unit Dropdown Menu with List of Measurements (Primary system first, other system accessible) */}
-                      <select
-                        value={ing.unit || ''}
-                        onChange={(e) => handleUnitSelect(index, e.target.value)}
-                        className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
-                        aria-label="Measurement unit"
+              {/* Ingredients List: standard flat list if no sections, or structured Section Cards if sections exist */}
+              {!hasNamedSections ? (
+                <div className="space-y-2">
+                  {ingredients.map((ing, index) => {
+                    const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
+                    const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
+                    const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
+
+                    return (
+                      <div
+                        key={ing.id}
+                        className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
                       >
-                        {/* Preserve custom unit if already set */}
-                        {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
-                          <option value={ing.unit}>{ing.unit} (custom)</option>
-                        )}
-
-                        {formUnitSystem === 'metric' ? (
-                          <>
-                            <optgroup label="Metric (g, ml, kg, l)">
-                              {METRIC_UNITS.map((u) => (
-                                <option key={u.value} value={u.value}>
-                                  {u.label}
-                                </option>
-                              ))}
-                            </optgroup>
-                            <optgroup label="US Customary (cups, spoons, oz)">
-                              {US_UNITS.map((u) => (
-                                <option key={u.value} value={u.value}>
-                                  {u.label}
-                                </option>
-                              ))}
-                            </optgroup>
-                          </>
-                        ) : (
-                          <>
-                            <optgroup label="US Customary (cups, spoons, oz)">
-                              {US_UNITS.map((u) => (
-                                <option key={u.value} value={u.value}>
-                                  {u.label}
-                                </option>
-                              ))}
-                            </optgroup>
-                            <optgroup label="Metric (g, ml, kg, l)">
-                              {METRIC_UNITS.map((u) => (
-                                <option key={u.value} value={u.value}>
-                                  {u.label}
-                                </option>
-                              ))}
-                            </optgroup>
-                          </>
-                        )}
-
-                        <optgroup label="Count & Portions">
-                          {COUNT_UNITS.map((u) => (
-                            <option key={u.value} value={u.value}>
-                              {u.label}
+                        {/* Quantity Dropdown Menu */}
+                        <select
+                          value={currentQtyVal}
+                          onChange={(e) => handleQuantitySelect(index, e.target.value)}
+                          aria-label="Ingredient quantity"
+                          className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                        >
+                          {hasCustomQty && (
+                            <option value={currentQtyVal}>{currentQtyVal}</option>
+                          )}
+                          {qtyOptions.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
                             </option>
                           ))}
-                        </optgroup>
-                        <option value="__custom__">+ Custom unit...</option>
-                      </select>
+                          <option value="__custom__">+ Custom Qty...</option>
+                        </select>
 
-                      {/* Ingredient Name Box with Suggestions appearing right after the box */}
-                      <div className="flex-1 min-w-0">
-                        <AutocompleteInput
-                          value={ing.name}
-                          onChange={(val) => handleIngredientChange(index, 'name', val)}
-                          onSelect={(item) => {
-                            handleIngredientChange(index, 'name', item.name);
-                          }}
-                          items={grocerySuggestions}
-                          placeholder={ing.section ? `[${ing.section}] Ingredient name` : 'Ingredient name (e.g. Flour)'}
-                          className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
-                          ariaLabel="Ingredient name"
-                        />
+                        {/* Unit Dropdown Menu with List of Measurements */}
+                        <select
+                          value={ing.unit || ''}
+                          onChange={(e) => handleUnitSelect(index, e.target.value)}
+                          className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                          aria-label="Measurement unit"
+                        >
+                          {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
+                            <option value={ing.unit}>{ing.unit} (custom)</option>
+                          )}
+
+                          {formUnitSystem === 'metric' ? (
+                            <>
+                              <optgroup label="Metric (g, ml, kg, l)">
+                                {METRIC_UNITS.map((u) => (
+                                  <option key={u.value} value={u.value}>
+                                    {u.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="US Customary (cups, spoons, oz)">
+                                {US_UNITS.map((u) => (
+                                  <option key={u.value} value={u.value}>
+                                    {u.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </>
+                          ) : (
+                            <>
+                              <optgroup label="US Customary (cups, spoons, oz)">
+                                {US_UNITS.map((u) => (
+                                  <option key={u.value} value={u.value}>
+                                    {u.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Metric (g, ml, kg, l)">
+                                {METRIC_UNITS.map((u) => (
+                                  <option key={u.value} value={u.value}>
+                                    {u.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </>
+                          )}
+
+                          <optgroup label="Count & Portions">
+                            {COUNT_UNITS.map((u) => (
+                              <option key={u.value} value={u.value}>
+                                {u.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                          <option value="__custom__">+ Custom unit...</option>
+                        </select>
+
+                        {/* Ingredient Name Box */}
+                        <div className="flex-1 min-w-0">
+                          <AutocompleteInput
+                            value={ing.name}
+                            onChange={(val) => handleIngredientChange(index, 'name', val)}
+                            onSelect={(item) => {
+                              handleIngredientChange(index, 'name', item.name);
+                            }}
+                            items={grocerySuggestions}
+                            placeholder="Ingredient name (e.g. Flour)"
+                            className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
+                            ariaLabel="Ingredient name"
+                          />
+                        </div>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          onClick={() => removeIngredient(index)}
+                          className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
+                          aria-label="Remove Ingredient"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {ingredientGroups.map((group) => {
+                    const isMain = !group.section;
 
-                      {/* Delete button */}
-                      <button
-                        type="button"
-                        onClick={() => removeIngredient(index)}
-                        className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
-                        aria-label="Remove Ingredient"
+                    return (
+                      <div
+                        key={group.section || 'main-section'}
+                        className={`rounded-[20px] overflow-hidden border transition-all ${
+                          isMain
+                            ? 'bg-[#FFF8F6]/60 border-[#F3E5D8] p-2.5 space-y-2'
+                            : 'bg-[#FFF8F6]/80 border-[#F3E5D8] shadow-2xs'
+                        }`}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+                        {/* Section Header */}
+                        <div
+                          className={`flex items-center justify-between gap-2 ${
+                            isMain
+                              ? 'pb-1 border-b border-[#F3E5D8]/80'
+                              : 'bg-[#FDECC8]/50 border-b border-[#F3E5D8] px-3.5 py-2'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2 flex-1 min-w-0">
+                            {!isMain && <Layers className="w-4 h-4 text-[#E85D75] shrink-0" />}
+                            {isMain ? (
+                              <span className="font-brand font-bold text-xs uppercase tracking-wider text-[#8C726B]">
+                                Main Ingredients
+                              </span>
+                            ) : (
+                              <input
+                                type="text"
+                                value={group.section}
+                                onChange={(e) => handleRenameSection(group.section, e.target.value)}
+                                placeholder="Section name (e.g. For the Sauce)"
+                                className="font-brand font-bold text-xs uppercase tracking-wider text-[#3D231D] bg-transparent border-b border-dashed border-[#E85D75]/40 hover:border-[#E85D75] focus:border-[#E85D75] focus:outline-none px-1 py-0.5 flex-1 min-w-0"
+                                title="Click to rename section"
+                                aria-label="Section title"
+                              />
+                            )}
+                          </div>
+
+                          <div className="flex items-center space-x-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => addIngredient(group.section)}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-[#FDE8EA] border border-[#F3E5D8] text-[#E85D75] text-[11px] font-bold rounded-full transition-colors shadow-2xs cursor-pointer"
+                              title={`Add ingredient to ${group.section || 'main'}`}
+                            >
+                              <Plus className="w-3 h-3 stroke-[2.5]" />
+                              <span>Add Line</span>
+                            </button>
+
+                            {!isMain && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSection(group.section)}
+                                className="p-1 text-[#8C726B] hover:text-red-500 rounded-full hover:bg-white transition-colors cursor-pointer"
+                                title="Remove section header"
+                                aria-label={`Remove ${group.section} section`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Ingredients Rows for this Group */}
+                        <div className={isMain ? 'space-y-2' : 'p-2.5 space-y-2'}>
+                          {group.items.map(({ ing, originalIndex }) => {
+                            const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
+                            const currentQtyVal = ing.displayFraction || (ing.amount ? ing.amount.toString() : '1');
+                            const hasCustomQty = currentQtyVal && !qtyOptions.includes(currentQtyVal);
+
+                            return (
+                              <div
+                                key={ing.id}
+                                className="flex items-center space-x-1.5 bg-white p-2 rounded-[16px] border border-[#F3E5D8] shadow-xs"
+                              >
+                                {/* Quantity Dropdown Menu */}
+                                <select
+                                  value={currentQtyVal}
+                                  onChange={(e) => handleQuantitySelect(originalIndex, e.target.value)}
+                                  aria-label="Ingredient quantity"
+                                  className="w-20 px-2 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-center text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                                >
+                                  {hasCustomQty && (
+                                    <option value={currentQtyVal}>{currentQtyVal}</option>
+                                  )}
+                                  {qtyOptions.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                      {opt}
+                                    </option>
+                                  ))}
+                                  <option value="__custom__">+ Custom Qty...</option>
+                                </select>
+
+                                {/* Unit Dropdown Menu */}
+                                <select
+                                  value={ing.unit || ''}
+                                  onChange={(e) => handleUnitSelect(originalIndex, e.target.value)}
+                                  className="w-24 sm:w-28 px-1.5 py-1.5 bg-[#FDECC8]/60 border border-[#F3E5D8] rounded-[10px] text-xs font-semibold text-[#3D231D] focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40 cursor-pointer shrink-0 truncate"
+                                  aria-label="Measurement unit"
+                                >
+                                  {ing.unit && !STANDARD_UNITS.includes(ing.unit.toLowerCase()) && (
+                                    <option value={ing.unit}>{ing.unit} (custom)</option>
+                                  )}
+
+                                  {formUnitSystem === 'metric' ? (
+                                    <>
+                                      <optgroup label="Metric (g, ml, kg, l)">
+                                        {METRIC_UNITS.map((u) => (
+                                          <option key={u.value} value={u.value}>
+                                            {u.label}
+                                          </option>
+                                        ))}
+                                      </optgroup>
+                                      <optgroup label="US Customary (cups, spoons, oz)">
+                                        {US_UNITS.map((u) => (
+                                          <option key={u.value} value={u.value}>
+                                            {u.label}
+                                          </option>
+                                        ))}
+                                      </optgroup>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <optgroup label="US Customary (cups, spoons, oz)">
+                                        {US_UNITS.map((u) => (
+                                          <option key={u.value} value={u.value}>
+                                            {u.label}
+                                          </option>
+                                        ))}
+                                      </optgroup>
+                                      <optgroup label="Metric (g, ml, kg, l)">
+                                        {METRIC_UNITS.map((u) => (
+                                          <option key={u.value} value={u.value}>
+                                            {u.label}
+                                          </option>
+                                        ))}
+                                      </optgroup>
+                                    </>
+                                  )}
+
+                                  <optgroup label="Count & Portions">
+                                    {COUNT_UNITS.map((u) => (
+                                      <option key={u.value} value={u.value}>
+                                        {u.label}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                  <option value="__custom__">+ Custom unit...</option>
+                                </select>
+
+                                {/* Ingredient Name Box */}
+                                <div className="flex-1 min-w-0">
+                                  <AutocompleteInput
+                                    value={ing.name}
+                                    onChange={(val) => handleIngredientChange(originalIndex, 'name', val)}
+                                    onSelect={(item) => {
+                                      handleIngredientChange(originalIndex, 'name', item.name);
+                                    }}
+                                    items={grocerySuggestions}
+                                    placeholder="Ingredient name (e.g. Flour)"
+                                    className="w-full px-2.5 py-1.5 bg-white border border-[#F3E5D8] rounded-[10px] text-xs font-medium text-[#3D231D] placeholder-[#8C726B]/50 focus:outline-none focus:border-[#E85D75] focus:ring-1 focus:ring-[#E85D75]/40"
+                                    ariaLabel="Ingredient name"
+                                  />
+                                </div>
+
+                                {/* Delete button */}
+                                <button
+                                  type="button"
+                                  onClick={() => removeIngredient(originalIndex)}
+                                  className="p-1.5 text-[#8C726B] hover:text-red-500 rounded-lg hover:bg-[#FDE8EA] transition-colors cursor-pointer shrink-0"
+                                  aria-label="Remove Ingredient"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Steps Section - Step cards with generous border-radius: 24px and Butter Peach */}
