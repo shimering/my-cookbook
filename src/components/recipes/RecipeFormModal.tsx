@@ -609,15 +609,17 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     return ingredientGroups.some((g) => g.section !== '');
   }, [ingredientGroups]);
 
-  // Drag & Drop State for Ingredients
+  // Drag & Drop State for Ingredients (supports both HTML5 DnD and unified Pointer Events for mouse/touch)
   const [draggedIngIndex, setDraggedIngIndex] = useState<number | null>(null);
   const [dragOverIngIndex, setDragOverIngIndex] = useState<number | null>(null);
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
+  const [isPointerDraggingIng, setIsPointerDraggingIng] = useState(false);
 
   const resetIngDragState = () => {
     setDraggedIngIndex(null);
     setDragOverIngIndex(null);
     setDragOverSection(null);
+    setIsPointerDraggingIng(false);
   };
 
   const handleIngDropOnItem = (targetIndex: number, targetSection?: string) => {
@@ -644,45 +646,57 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     resetIngDragState();
   };
 
-  const handleIngTouchMove = (e: React.TouchEvent) => {
-    if (draggedIngIndex === null || !e.touches[0]) return;
-    const { clientX, clientY } = e.touches[0];
-    const elements = document.elementsFromPoint(clientX, clientY);
-    const rowEl = elements.find((el) => (el as HTMLElement).dataset?.ingIndex !== undefined) as HTMLElement | undefined;
-    if (rowEl && rowEl.dataset.ingIndex !== undefined) {
-      const idx = parseInt(rowEl.dataset.ingIndex, 10);
-      if (!Number.isNaN(idx)) {
-        setDragOverIngIndex(idx);
-        setDragOverSection(null);
-        return;
+  useEffect(() => {
+    if (!isPointerDraggingIng || draggedIngIndex === null) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const elements = document.elementsFromPoint(e.clientX, e.clientY);
+      const rowEl = elements.find((el) => (el as HTMLElement).dataset?.ingIndex !== undefined) as HTMLElement | undefined;
+      if (rowEl && rowEl.dataset.ingIndex !== undefined) {
+        const idx = parseInt(rowEl.dataset.ingIndex, 10);
+        if (!Number.isNaN(idx)) {
+          setDragOverIngIndex(idx);
+          setDragOverSection(null);
+          return;
+        }
       }
-    }
-    const secEl = elements.find((el) => (el as HTMLElement).dataset?.ingSection !== undefined) as HTMLElement | undefined;
-    if (secEl && secEl.dataset.ingSection !== undefined) {
-      setDragOverSection(secEl.dataset.ingSection);
-      setDragOverIngIndex(null);
-    }
-  };
+      const secEl = elements.find((el) => (el as HTMLElement).dataset?.ingSection !== undefined) as HTMLElement | undefined;
+      if (secEl && secEl.dataset.ingSection !== undefined) {
+        setDragOverSection(secEl.dataset.ingSection);
+        setDragOverIngIndex(null);
+      }
+    };
 
-  const handleIngTouchEnd = () => {
-    if (draggedIngIndex === null) return;
-    if (dragOverIngIndex !== null) {
-      const targetSec = (ingredients[dragOverIngIndex]?.section || '').trim();
-      handleIngDropOnItem(dragOverIngIndex, targetSec);
-    } else if (dragOverSection !== null) {
-      handleIngDropOnSection(dragOverSection);
-    } else {
-      resetIngDragState();
-    }
-  };
+    const handlePointerUp = () => {
+      if (dragOverIngIndex !== null) {
+        const targetSec = (ingredients[dragOverIngIndex]?.section || '').trim();
+        handleIngDropOnItem(dragOverIngIndex, targetSec);
+      } else if (dragOverSection !== null) {
+        handleIngDropOnSection(dragOverSection);
+      } else {
+        resetIngDragState();
+      }
+    };
 
-  // Drag & Drop State for Steps
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  });
+
+  // Drag & Drop State for Steps (supports both HTML5 DnD and unified Pointer Events for mouse/touch)
   const [draggedStepIndex, setDraggedStepIndex] = useState<number | null>(null);
   const [dragOverStepIndex, setDragOverStepIndex] = useState<number | null>(null);
+  const [isPointerDraggingStep, setIsPointerDraggingStep] = useState(false);
 
   const resetStepDragState = () => {
     setDraggedStepIndex(null);
     setDragOverStepIndex(null);
+    setIsPointerDraggingStep(false);
   };
 
   const handleStepDrop = (targetIndex: number) => {
@@ -692,26 +706,37 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     resetStepDragState();
   };
 
-  const handleStepTouchMove = (e: React.TouchEvent) => {
-    if (draggedStepIndex === null || !e.touches[0]) return;
-    const { clientX, clientY } = e.touches[0];
-    const elements = document.elementsFromPoint(clientX, clientY);
-    const stepEl = elements.find((el) => (el as HTMLElement).dataset?.stepIndex !== undefined) as HTMLElement | undefined;
-    if (stepEl && stepEl.dataset.stepIndex !== undefined) {
-      const idx = parseInt(stepEl.dataset.stepIndex, 10);
-      if (!Number.isNaN(idx)) {
-        setDragOverStepIndex(idx);
-      }
-    }
-  };
+  useEffect(() => {
+    if (!isPointerDraggingStep || draggedStepIndex === null) return;
 
-  const handleStepTouchEnd = () => {
-    if (draggedStepIndex !== null && dragOverStepIndex !== null) {
-      handleStepDrop(dragOverStepIndex);
-    } else {
-      resetStepDragState();
-    }
-  };
+    const handlePointerMove = (e: PointerEvent) => {
+      const elements = document.elementsFromPoint(e.clientX, e.clientY);
+      const stepEl = elements.find((el) => (el as HTMLElement).dataset?.stepIndex !== undefined) as HTMLElement | undefined;
+      if (stepEl && stepEl.dataset.stepIndex !== undefined) {
+        const idx = parseInt(stepEl.dataset.stepIndex, 10);
+        if (!Number.isNaN(idx)) {
+          setDragOverStepIndex(idx);
+        }
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (dragOverStepIndex !== null) {
+        handleStepDrop(dragOverStepIndex);
+      } else {
+        resetStepDragState();
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  });
 
   const renderIngredientRow = (ing: Ingredient, index: number) => {
     const qtyOptions = getQtyOptions(formUnitSystem, ing.unit);
@@ -755,18 +780,22 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               : 'border-[#F3E5D8]'
         }`}
       >
-        {/* Drag Handle (works with both mouse and mobile touch) */}
-        <button
-          type="button"
-          onTouchStart={() => setDraggedIngIndex(index)}
-          onTouchMove={handleIngTouchMove}
-          onTouchEnd={handleIngTouchEnd}
-          className="p-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none shrink-0 rounded"
+        {/* Drag Handle (unified Pointer Events for mouse/pen/touch) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onPointerDown={(e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            e.preventDefault();
+            setDraggedIngIndex(index);
+            setIsPointerDraggingIng(true);
+          }}
+          className="p-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none select-none shrink-0 rounded"
           aria-label={`Drag to reorder ${ing.name || 'ingredient'}`}
           title="Drag to reorder or move between sections"
         >
           <GripVertical className="w-4 h-4" />
-        </button>
+        </div>
 
         {/* Quantity Dropdown Menu */}
         <select
@@ -1637,17 +1666,21 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1.5">
-                          <button
-                            type="button"
-                            onTouchStart={() => setDraggedStepIndex(index)}
-                            onTouchMove={handleStepTouchMove}
-                            onTouchEnd={handleStepTouchEnd}
-                            className="p-1 -ml-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none rounded"
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onPointerDown={(e) => {
+                              if (e.pointerType === 'mouse' && e.button !== 0) return;
+                              e.preventDefault();
+                              setDraggedStepIndex(index);
+                              setIsPointerDraggingStep(true);
+                            }}
+                            className="p-1 -ml-1 text-[#8C726B]/60 hover:text-[#E85D75] cursor-grab active:cursor-grabbing touch-none select-none rounded"
                             aria-label={`Drag to reorder Step ${step.stepNumber}`}
                             title="Drag to reorder step"
                           >
                             <GripVertical className="w-4 h-4" />
-                          </button>
+                          </div>
                           <span className="text-xs font-bold text-[#3D231D] font-brand">
                             Step {step.stepNumber}
                           </span>
