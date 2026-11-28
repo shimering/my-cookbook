@@ -614,12 +614,21 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const [dragOverIngIndex, setDragOverIngIndex] = useState<number | null>(null);
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
   const [isPointerDraggingIng, setIsPointerDraggingIng] = useState(false);
+  const [ingDragPreview, setIngDragPreview] = useState<{
+    x: number;
+    y: number;
+    width: number;
+  } | null>(null);
+  const ingDragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 16, offsetY: 20 });
+  const dragOverlayRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const resetIngDragState = () => {
     setDraggedIngIndex(null);
     setDragOverIngIndex(null);
     setDragOverSection(null);
     setIsPointerDraggingIng(false);
+    setIngDragPreview(null);
   };
 
   const handleIngDropOnItem = (targetIndex: number, targetSection?: string) => {
@@ -650,6 +659,23 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     if (!isPointerDraggingIng || draggedIngIndex === null) return;
 
     const handlePointerMove = (e: PointerEvent) => {
+      // Move the floating preview smoothly with the pointer/finger
+      if (dragOverlayRef.current) {
+        const tx = e.clientX - ingDragOffsetRef.current.offsetX;
+        const ty = e.clientY - ingDragOffsetRef.current.offsetY;
+        dragOverlayRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.02)`;
+      }
+
+      // Auto-scroll modal content if dragging near top/bottom edges
+      if (scrollContainerRef.current) {
+        const rect = scrollContainerRef.current.getBoundingClientRect();
+        if (e.clientY < rect.top + 48) {
+          scrollContainerRef.current.scrollTop -= 12;
+        } else if (e.clientY > rect.bottom - 48) {
+          scrollContainerRef.current.scrollTop += 12;
+        }
+      }
+
       const elements = document.elementsFromPoint(e.clientX, e.clientY);
       const rowEl = elements.find((el) => (el as HTMLElement).dataset?.ingIndex !== undefined) as HTMLElement | undefined;
       if (rowEl && rowEl.dataset.ingIndex !== undefined) {
@@ -692,11 +718,18 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   const [draggedStepIndex, setDraggedStepIndex] = useState<number | null>(null);
   const [dragOverStepIndex, setDragOverStepIndex] = useState<number | null>(null);
   const [isPointerDraggingStep, setIsPointerDraggingStep] = useState(false);
+  const [stepDragPreview, setStepDragPreview] = useState<{
+    x: number;
+    y: number;
+    width: number;
+  } | null>(null);
+  const stepDragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 16, offsetY: 20 });
 
   const resetStepDragState = () => {
     setDraggedStepIndex(null);
     setDragOverStepIndex(null);
     setIsPointerDraggingStep(false);
+    setStepDragPreview(null);
   };
 
   const handleStepDrop = (targetIndex: number) => {
@@ -710,6 +743,23 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
     if (!isPointerDraggingStep || draggedStepIndex === null) return;
 
     const handlePointerMove = (e: PointerEvent) => {
+      // Move the floating preview smoothly with the pointer/finger
+      if (dragOverlayRef.current) {
+        const tx = e.clientX - stepDragOffsetRef.current.offsetX;
+        const ty = e.clientY - stepDragOffsetRef.current.offsetY;
+        dragOverlayRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.02)`;
+      }
+
+      // Auto-scroll modal content if dragging near top/bottom edges
+      if (scrollContainerRef.current) {
+        const rect = scrollContainerRef.current.getBoundingClientRect();
+        if (e.clientY < rect.top + 48) {
+          scrollContainerRef.current.scrollTop -= 12;
+        } else if (e.clientY > rect.bottom - 48) {
+          scrollContainerRef.current.scrollTop += 12;
+        }
+      }
+
       const elements = document.elementsFromPoint(e.clientX, e.clientY);
       const stepEl = elements.find((el) => (el as HTMLElement).dataset?.stepIndex !== undefined) as HTMLElement | undefined;
       if (stepEl && stepEl.dataset.stepIndex !== undefined) {
@@ -787,6 +837,16 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
           onPointerDown={(e) => {
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.preventDefault();
+            const rowEl = e.currentTarget.closest('[data-ing-index]') as HTMLElement | null;
+            const rect = rowEl?.getBoundingClientRect();
+            const offsetX = rect ? e.clientX - rect.left : 16;
+            const offsetY = rect ? e.clientY - rect.top : 20;
+            ingDragOffsetRef.current = { offsetX, offsetY };
+            setIngDragPreview({
+              x: e.clientX - offsetX,
+              y: e.clientY - offsetY,
+              width: rect?.width || 320,
+            });
             setDraggedIngIndex(index);
             setIsPointerDraggingIng(true);
           }}
@@ -1031,7 +1091,10 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
         {/* Semantic Form with Scrollable Content and Sticky Save Footer */}
         <form id="recipe-form" onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable Form Content */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5 overscroll-contain">
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto px-5 py-5 space-y-5 overscroll-contain"
+          >
             {/* 🪄 Import from Recipe Link Card */}
             <div className="bg-[#FFF0F3]/70 border border-[#F3E5D8] rounded-[24px] p-4 shadow-2xs">
               <div className="flex items-center space-x-2.5 mb-2.5">
@@ -1672,6 +1735,16 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                             onPointerDown={(e) => {
                               if (e.pointerType === 'mouse' && e.button !== 0) return;
                               e.preventDefault();
+                              const stepEl = e.currentTarget.closest('[data-step-index]') as HTMLElement | null;
+                              const rect = stepEl?.getBoundingClientRect();
+                              const offsetX = rect ? e.clientX - rect.left : 16;
+                              const offsetY = rect ? e.clientY - rect.top : 20;
+                              stepDragOffsetRef.current = { offsetX, offsetY };
+                              setStepDragPreview({
+                                x: e.clientX - offsetX,
+                                y: e.clientY - offsetY,
+                                width: rect?.width || 360,
+                              });
                               setDraggedStepIndex(index);
                               setIsPointerDraggingStep(true);
                             }}
@@ -1822,6 +1895,49 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Floating Drag Preview for Ingredient (follows pointer/finger) */}
+        {isPointerDraggingIng && draggedIngIndex !== null && ingDragPreview && ingredients[draggedIngIndex] && (
+          <div
+            ref={dragOverlayRef}
+            style={{
+              width: ingDragPreview.width,
+              transform: `translate3d(${ingDragPreview.x}px, ${ingDragPreview.y}px, 0) scale(1.02)`,
+            }}
+            className="fixed top-0 left-0 z-100 pointer-events-none bg-white border-2 border-[#E85D75] rounded-[16px] p-2.5 shadow-cozy-lg flex items-center space-x-2"
+          >
+            <GripVertical className="w-4 h-4 text-[#E85D75] shrink-0" />
+            <span className="px-2 py-0.5 bg-[#FDECC8] rounded-[8px] text-xs font-bold text-[#3D231D] shrink-0">
+              {ingredients[draggedIngIndex].displayFraction || ingredients[draggedIngIndex].amount || '1'}{' '}
+              {ingredients[draggedIngIndex].unit}
+            </span>
+            <span className="text-xs font-semibold text-[#3D231D] truncate flex-1">
+              {ingredients[draggedIngIndex].name || 'Ingredient'}
+            </span>
+          </div>
+        )}
+
+        {/* Floating Drag Preview for Step (follows pointer/finger) */}
+        {isPointerDraggingStep && draggedStepIndex !== null && stepDragPreview && steps[draggedStepIndex] && (
+          <div
+            ref={dragOverlayRef}
+            style={{
+              width: stepDragPreview.width,
+              transform: `translate3d(${stepDragPreview.x}px, ${stepDragPreview.y}px, 0) scale(1.02)`,
+            }}
+            className="fixed top-0 left-0 z-100 pointer-events-none bg-[#FFF8F6] border-2 border-[#E85D75] rounded-2xl p-3.5 shadow-cozy-lg space-y-1.5"
+          >
+            <div className="flex items-center space-x-1.5">
+              <GripVertical className="w-4 h-4 text-[#E85D75] shrink-0" />
+              <span className="text-xs font-bold text-[#3D231D] font-brand">
+                Step {steps[draggedStepIndex].stepNumber}
+              </span>
+            </div>
+            <p className="text-xs text-[#8C726B] line-clamp-2">
+              {steps[draggedStepIndex].instruction || 'Step instruction...'}
+            </p>
           </div>
         )}
       </div>
