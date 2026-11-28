@@ -28,7 +28,7 @@ const InnerEditForm: React.FC<InnerFormProps> = ({ item, categories, onClose, on
     item.displayQuantity || (item.amount ? String(item.amount) : '1')
   );
   const [unit, setUnit] = useState(item.unit || '');
-  const [category, setCategory] = useState(item.category || categories[0] || 'Produce');
+  const [category, setCategory] = useState(item.category || 'Uncategorized');
   const [notes, setNotes] = useState(item.notes || '');
   const [icon, setIcon] = useState<string>(item.icon || '');
   const [isPickerOpen, setIsPickerOpen] = useState(false);

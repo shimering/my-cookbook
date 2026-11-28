@@ -44,6 +44,7 @@ describe('groceryCatalog', () => {
     expect(cats).toContain('Beverages');
     expect(cats).toContain('Frozen');
     expect(cats).toContain('Household & Other');
+    expect(cats).toContain('Uncategorized');
   });
 
   it('provides a rich library of default food grocery items', () => {

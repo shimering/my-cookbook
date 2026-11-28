@@ -73,11 +73,17 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
     return Array.from(map.values());
   }, [catalogItems, groceryItems]);
 
+  const availableCategories = React.useMemo(() => {
+    return categories.includes('Uncategorized')
+      ? categories
+      : [...categories, 'Uncategorized'];
+  }, [categories]);
+
   // Quick manual add form fields
   const [manualName, setManualName] = useState('');
   const [manualAmount, setManualAmount] = useState('1');
   const [manualUnit, setManualUnit] = useState('');
-  const [manualCategory, setManualCategory] = useState<string>(categories[0] || 'Produce');
+  const [manualCategory, setManualCategory] = useState<string>('Uncategorized');
   const [manualNotes, setManualNotes] = useState('');
   const [manualIcon, setManualIcon] = useState('');
   const [isManualIconPickerOpen, setIsManualIconPickerOpen] = useState(false);
@@ -97,18 +103,18 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
   // Group active items by category/aisle
   const activeByAisle = React.useMemo(() => {
     const map = new Map<string, GroceryItem[]>();
-    for (const aisle of categories) {
+    for (const aisle of availableCategories) {
       map.set(aisle, []);
     }
     for (const item of activeItems) {
-      const aisle = item.category || 'Household & Other';
+      const aisle = item.category || 'Uncategorized';
       if (!map.has(aisle)) {
         map.set(aisle, []);
       }
       map.get(aisle)!.push(item);
     }
     return map;
-  }, [activeItems, categories]);
+  }, [activeItems, availableCategories]);
 
   const handleToggle = (id: string) => {
     const item = groceryItems.find((i) => i.id === id);
@@ -171,6 +177,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
     setManualName('');
     setManualAmount('1');
     setManualUnit('');
+    setManualCategory('Uncategorized');
     setManualNotes('');
     setManualIcon('');
     setShowNotesInput(false);
@@ -297,9 +304,10 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
               <select
                 value={manualCategory}
                 onChange={(e) => setManualCategory(e.target.value)}
+                aria-label="Grocery item category"
                 className="px-2.5 py-2.5 bg-white border border-[#F3E5D8] rounded-xl text-xs font-semibold text-[#8C726B] focus:outline-none cursor-pointer max-w-[130px] truncate"
               >
-                {categories.map((c) => (
+                {availableCategories.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -394,7 +402,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       {/* Active Items Grouped by Category (Rounded 24px cards) */}
       {activeItems.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {categories.map((aisle) => {
+          {availableCategories.map((aisle) => {
             const items = activeByAisle.get(aisle) || [];
             if (items.length === 0) return null;
 
@@ -627,7 +635,7 @@ export const GroceryListView: React.FC<GroceryListViewProps> = ({
       {/* Edit Grocery Item Modal */}
       <GroceryItemEditModal
         item={editingItem}
-        categories={categories}
+        categories={availableCategories}
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}
         onSave={handleSaveItemEdit}

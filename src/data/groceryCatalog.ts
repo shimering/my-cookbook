@@ -10,6 +10,7 @@ export const DEFAULT_GROCERY_CATEGORIES: string[] = [
   'Beverages',
   'Frozen',
   'Household & Other',
+  'Uncategorized',
 ];
 
 export const DEFAULT_CATALOG_ITEMS: CatalogItem[] = [
